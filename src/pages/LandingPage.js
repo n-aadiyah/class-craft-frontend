@@ -66,34 +66,41 @@ const LandingPage = () => {
 
   return (
     <div className="relative min-h-screen w-full">
-      {/* HERO Section */}
-      <main className="relative h-screen flex items-center justify-center overflow-hidden">
-        {images.map((img, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-[1500ms] ease-in-out ${
-              index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
-            }`}
-            style={{ backgroundImage: `url(${img})` }}
-          >
-            <div className="absolute inset-0 bg-black/40"></div>
-          </div>
-        ))}
+  {/* HERO Section */}
+  <main className="relative h-screen flex items-center justify-center overflow-hidden">
+    {images.map((img, index) => (
+      <div
+        key={index}
+        className={`absolute inset-0 bg-center transition-opacity duration-[1500ms] ease-in-out ${
+          index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+        }`}
+        style={{
+          backgroundImage: `url(${img})`,
+          backgroundSize: "cover", // You can try 'contain' if images look stretched
+          backgroundRepeat: "no-repeat",
+          imageRendering: "crisp-edges", // Helps prevent blur
+          filter: "brightness(1.06) contrast(1.05)", // Enhance color quality slightly
+        }}
+      >
+        {/* Gradient overlay for better visibility */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40"></div>
+      </div>
+    ))}
 
-        <Navbar />
+    <Navbar />
 
-        <div className="relative z-20 text-center text-white px-6">
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter leading-tight drop-shadow-lg">
-            Welcome to the Academy of Excellence
-          </h1>
-          <p className="mt-6 max-w-2xl mx-auto text-lg text-gray-200">
-            Empowering students through innovation, creativity, and knowledge.
-          </p>
-          <button className="mt-8 bg-red-800 text-white font-bold py-3 px-8 rounded-lg hover:bg-red-700 transition-all duration-300 shadow-lg">
-            Enroll Now
-          </button>
-        </div>
-      </main>
+    <div className="relative z-20 text-center text-white px-6">
+      <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter leading-tight drop-shadow-xl">
+        Welcome to the Academy of Excellence
+      </h1>
+      <p className="mt-6 max-w-2xl mx-auto text-lg text-gray-100 drop-shadow-md">
+        Empowering students through innovation, creativity, and knowledge.
+      </p>
+      <button className="mt-8 bg-red-800 text-white font-bold py-3 px-8 rounded-lg hover:bg-red-700 transition-all duration-300 shadow-xl">
+        Enroll Now
+      </button>
+    </div>
+  </main>
 
       {/* ABOUT Section */}
       <section className="px-4 py-10 bg-white dark:bg-black">
@@ -111,7 +118,6 @@ const LandingPage = () => {
               Get Started
             </button>
           </div>
-
           <div className="relative md:w-1/2 flex items-center justify-center">
             <div className="w-full space-y-3">
               {["/classcraft1.jpg", "/classcraft6.png", "/classcraft4.jpg"].map(
@@ -127,7 +133,6 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
-
       {/* SUBJECTS Carousel */}
 <section
   className="relative w-full py-12 bg-gray-50 dark:bg-gray-900 overflow-hidden"
@@ -323,7 +328,7 @@ const LandingPage = () => {
 
     <div className="grid grid-cols-2 sm:grid-cols-3 col-span-1 md:col-span-3 gap-8">
       <div>
-        <h3 className="text-base font-bold text-primary dark:text-slate-50 mb-4">Our Campus</h3>
+        <h3 className="text-base font-bold text-red-800 dark:text-slate-50 mb-4">Our Campus</h3>
         <ul className="space-y-3">
           <li><a href="/academic" className="text-sm text-gray-700 dark:text-gray-300 hover:text-accent dark:hover:text-accent">Academic</a></li>
           <li><a href="/leadership" className="text-sm text-gray-700 dark:text-gray-300 hover:text-accent dark:hover:text-accent">Our Leadership</a></li>
@@ -333,7 +338,7 @@ const LandingPage = () => {
       </div>
 
       <div>
-        <h3 className="text-base font-bold text-primary dark:text-slate-50 mb-4">Our Courses</h3>
+        <h3 className="text-base font-bold text-red-800 dark:text-slate-50 mb-4">Our Courses</h3>
         <ul className="space-y-3">
           <li><a href="/courses/maths" className="text-sm text-gray-700 dark:text-gray-300 hover:text-accent dark:hover:text-accent">Maths</a></li>
           <li><a href="/courses/science" className="text-sm text-gray-700 dark:text-gray-300 hover:text-accent dark:hover:text-accent">Science</a></li>
@@ -343,7 +348,7 @@ const LandingPage = () => {
       </div>
 
       <div>
-        <h3 className="text-base font-bold text-primary dark:text-slate-50 mb-4">Contact</h3>
+        <h3 className="text-base font-bold text-red-800 dark:text-slate-50 mb-4">Contact</h3>
         <ul className="space-y-3">
           <li><button className="text-sm text-gray-700 dark:text-gray-300 hover:text-accent dark:hover:text-accent">Help</button></li>
           <li><button className="text-sm text-gray-700 dark:text-gray-300 hover:text-accent dark:hover:text-accent">Support</button></li>
