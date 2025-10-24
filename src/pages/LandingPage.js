@@ -1,7 +1,7 @@
 // src/pages/LandingPage.js
 import React, { useState, useEffect, useRef } from "react";
 import Navbar from "../components/Navbar";
-
+import "../pages/landing.css";
 const images = [
   "/classcraft5.jpg",
   "/classcraft2.png",
@@ -135,7 +135,7 @@ const LandingPage = () => {
   onTouchMove={handleTouchMove}
   onTouchEnd={handleTouchEnd}
 >
-  <h2 className="text-center text-3xl font-bold text-gray-800 dark:text-white mb-8">
+  <h2 className="text-center text-3xl font-bold text-blue-800 dark:text-white mb-8">
     Our Subjects
   </h2>
 
@@ -221,13 +221,13 @@ const LandingPage = () => {
 </button>
 <div>
 <div class="mt-16">
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-      <img alt="Students in a classroom" class="h-auto max-w-full rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZsU9NbGDxfhIBDCYB9_Y3eMSA0XJC8ZpaE05YQVPqhEThds0p4Ws4z81PN87Ir51ONkbLe9NoRB8gj2a9bm0I8xHyoUWZSpyn2rvUhDBzPFzQd0U06TXjDlWE6VhjzIuwbslMo1thKmsBPWdgs5GKXnldxv9W91yBnbdSySeUnX9_nqEl99T6GDSafZizDSEzVFLlrLQ1FODhE1mQWpGn0tN-LXN0ftdn-MX2SaYv34jWMwzhhNYx9svgqsQh_A7-w-lr9NGdAz4"/>
-      <img alt="Graduation ceremony" class="h-auto max-w-full rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyce9cFr0ZPJeMT_4C2EhFFAPTg3VwvPZQSmgtVHZ3aJ39hseuVC7wrTzIKj2YPFOn6foNyMi-9s7aIJZy5dca5pTxbcvJAUIP1y8bUpPRejTRtfV-II2m9g9fn_PymRvndyDVSoPUhuHmE0Ri3E88pTSECObL80G6LqN2OoTtQbmDBP6wDL1sZfN6Dde3h-Ds3V4pTbR0SW57ha1PvNjBJQScGARZOV0kv-9kblvLziM5NZ7r51vL4z3VLiyciBiSUnKZx2f3g9M"/>
-      <img alt="Students walking on campus" class="h-auto max-w-full rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuComCuX34M36xQL4XcUgoVIPgGfu5RGoXgEQa2GL8hALllSBmrqjTlDX5A8PpV7m7uD-Tn0VaJwrzbMmE7ltK65anLG1uyUgsv7K0mdnEP4LtkzCzkfVX48nU4GJiCRK7-XPAonsLYt1pBlBTXINwkpDLOZ2WYzdBDsgOqvvRUfkbcNV9HHqEZqUP-1vwxGOx46-rEb4zl1I3lVQKz3c38l1TwG07n5JP2ZwOkB-plZKhWAIgC7xYCPf80uTzQWiL-qo1pd7XVEfCM"/>
-      <img alt="Students studying together" class="h-auto max-w-full rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBc3ViKcagHpxzwV1rkvUZrrfzvrIOmw4RE7bwsO-H8m6fj-W22qs8itjWfv2kPeJ6eai3UH9IE90iOnOF9oQTV0Y5kFUey9WQgsoKwzOQg8ZNpi_6Qpb_nYRKLGvtbiaP3Ds34II6t-BzCPqMW0gd0cI7lmgL5prVFcBcMKy88m3r9Rk_SyXLNHIasf9fj-NuhDLkR31mOapxJmw25L4BPk7KFzhvMVba2m1TkuXPfTF43oFh22pu62lX-fhaBBg2mAej_yAefZZ0"/>
-      <img alt="Teacher helping a student" class="h-auto max-w-full rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4PXCazNfKsDkdAbp-NTDIj9csw6u39h4eAXWkLoWq_r-YJE0Yv0bTmTlnwmE81AKDXiIkV6-btdyjvcoqsiBqECkVVvRE-xW1q789WvUlDnmLIHaMV3va_bU4Wtasmk4txG7IBPUVZKF3IJHy_6qKdcdYSM7Bses0ISp7Fg54wEF5PpTnzYDflH6M35IJCKMFEwxAz5ex-ALsgbO8lWOA5mTbFqRrj132mIou2vB6spKioLS83YWp6J9bxH8qtroGVd45m4CDP2o"/>
-      <img alt="School library" class="h-auto max-w-full rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgQEUa4a-TpS_UVLwARgVzlPvCc9361se__Pa6S6JNxcN1LHS55aTmlN7ono5TWVqR7BC9m1HKaBHCYQPD_219HnfTMy4qWVFdqoDAnacRah7HbRsnr7aIbx4hFLwPkrrscOlt6Y4UkWKb1R1dyFZebQjLSzUzrESzA720zzI4f2VZ4XrIrP7OkCJhgUsF6yNupDrkY60NUrs5wXRvNR5Tz3E_n2Kbq9yAcUvi40B-0NxSFeazlnPv1lQ1E6IeD9kuojcVrzcfolQ"/>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-5">
+      <img alt="Students in a classroom" class="h-52 max-w-full rounded-lg object-cover" src="https://webapi.entab.info/api/image/LFSGV/public/Images/sld-2.jpg"/>
+      <img alt="Graduation ceremony" class="h-52 max-w-full rounded-lg object-cover" src="https://littleflowerkkd.ac.in/public/img/slider/slider20.webp"/>
+      <img alt="Students walking on campus" class="h-52 max-w-full rounded-lg object-cover" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHE_JytPfGbsCYwCuIyIyfHJ9zixNkAnUMgA&s"/>
+      <img alt="Students studying together" class="h-52 max-w-full rounded-lg object-cover" src="https://lfcsjhunjhunu.edu.in/images/slider/039A2106.jpg"/>
+      <img alt="Teacher helping a student" class="h-52 max-w-full rounded-lg object-cover" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-UoWQ6a2Ky2dIA1VCtazm9Sp01wRD8r6-VA&s"/>
+      <img alt="School library" class="h-52 max-w-full rounded-lg object-cover" src="https://lfvmnlg.com/assets/slider/main1.jpg"/>
     </div>
     </div>
   </div>
@@ -236,6 +236,124 @@ const LandingPage = () => {
     </div>
   </div>
 </section>
+{/* VIDEO SECTION WITH ANIMATED BACKGROUND */}
+<section className="relative py-20 px-6 overflow-hidden">
+  {/* Animated Bubble Background */}
+  <div className="absolute inset-0 z-0 flex items-center justify-center">
+    <div className="container relative">
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="bubble">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  {/* Foreground Content */}
+ <div className="relative z-10">
+    <h2 className="text-center text-3xl font-bold text-blue-800 dark:text-white mb-10">
+      Our Activities & Highlights
+    </h2>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      {[
+        "https://www.youtube.com/embed/GlQD8-lIOpM",
+        "https://www.youtube.com/embed/QM1TpWjur_Q",
+        "https://www.youtube.com/embed/Ccd6R9oSyOw",
+      ].map((src, i) => (
+        <div
+          key={i}
+          className="relative w-full pt-[56.25%] overflow-hidden rounded-xl shadow-lg"
+        >
+          <iframe
+            title={`video-${i}`}
+            src={src}
+            frameBorder="0"
+            allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            className="absolute top-0 left-0 w-full h-full"
+          ></iframe>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+<section>
+<div class="mt-16 bg-secondary dark:bg-background-dark p-8 rounded-lg">
+<h3 class="text-2xl font-bold text-blue-800 dark:text-slate-50 mb-4 font-serif">Subscribe to Us</h3>
+<p class="text-base font-normal leading-relaxed text-gray-800 dark:text-gray-300 mb-6">Stay updated with our latest news and events. Join our newsletter!</p>
+<div class="flex flex-col sm:flex-row gap-4">
+<input class="flex-grow w-full h-12 px-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-accent text-base text-gray-800 dark:text-slate-50 placeholder-gray-500 dark:placeholder-gray-400" placeholder="Your email address" type="email"/>
+<button class="flex min-w-[84px] max-w-full sm:max-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-red-800 text-slate-50 text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90">
+<span class="truncate">Send</span>
+</button>
+</div>
+</div>
+</section>
+<footer className="bg-secondary dark:bg-background-dark border-t border-slate-200 dark:border-slate-800 px-10 py-16">
+  <div className="max-w-[1280px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+    <div className="flex flex-col items-start gap-4">
+      <div className="flex items-center gap-4 text-primary dark:text-slate-50">
+        <div className="size-8">
+          <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <g clipPath="url(#clip0_6_319)">
+              <path
+                d="M8.57829 8.57829C5.52816 11.6284 3.451 15.5145 2.60947 19.7452C1.76794 23.9758 2.19984 28.361 3.85056 32.3462C5.50128 36.3314 8.29667 39.7376 11.8832 42.134C15.4698 44.5305 19.6865 45.8096 24 45.8096C28.3135 45.8096 32.5302 44.5305 36.1168 42.134C39.7033 39.7375 42.4987 36.3314 44.1494 32.3462C45.8002 28.361 46.2321 23.9758 45.3905 19.7452C44.549 15.5145 42.4718 11.6284 39.4217 8.57829L24 24L8.57829 8.57829Z"
+                fill="currentColor"
+              ></path>
+            </g>
+            <defs>
+              <clipPath id="clip0_6_319">
+                <rect fill="white" height="48" width="48"></rect>
+              </clipPath>
+            </defs>
+          </svg>
+        </div>
+        <h2 className="text-xl font-bold leading-tight tracking-[-0.015em] font-serif">Our School</h2>
+      </div>
+      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+        © 2025 Little Flower School. All rights reserved.
+      </p>
+    </div>
+
+    <div className="grid grid-cols-2 sm:grid-cols-3 col-span-1 md:col-span-3 gap-8">
+      <div>
+        <h3 className="text-base font-bold text-primary dark:text-slate-50 mb-4">Our Campus</h3>
+        <ul className="space-y-3">
+          <li><a href="/academic" className="text-sm text-gray-700 dark:text-gray-300 hover:text-accent dark:hover:text-accent">Academic</a></li>
+          <li><a href="/leadership" className="text-sm text-gray-700 dark:text-gray-300 hover:text-accent dark:hover:text-accent">Our Leadership</a></li>
+          <li><a href="/careers" className="text-sm text-gray-700 dark:text-gray-300 hover:text-accent dark:hover:text-accent">Careers</a></li>
+          <li><a href="/hr" className="text-sm text-gray-700 dark:text-gray-300 hover:text-accent dark:hover:text-accent">Human Resource</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 className="text-base font-bold text-primary dark:text-slate-50 mb-4">Our Courses</h3>
+        <ul className="space-y-3">
+          <li><a href="/courses/maths" className="text-sm text-gray-700 dark:text-gray-300 hover:text-accent dark:hover:text-accent">Maths</a></li>
+          <li><a href="/courses/science" className="text-sm text-gray-700 dark:text-gray-300 hover:text-accent dark:hover:text-accent">Science</a></li>
+          <li><a href="/courses/arts" className="text-sm text-gray-700 dark:text-gray-300 hover:text-accent dark:hover:text-accent">Arts</a></li>
+          <li><a href="/courses/economics" className="text-sm text-gray-700 dark:text-gray-300 hover:text-accent dark:hover:text-accent">Economics</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 className="text-base font-bold text-primary dark:text-slate-50 mb-4">Contact</h3>
+        <ul className="space-y-3">
+          <li><button className="text-sm text-gray-700 dark:text-gray-300 hover:text-accent dark:hover:text-accent">Help</button></li>
+          <li><button className="text-sm text-gray-700 dark:text-gray-300 hover:text-accent dark:hover:text-accent">Support</button></li>
+          <li><button className="text-sm text-gray-700 dark:text-gray-300 hover:text-accent dark:hover:text-accent">Press</button></li>
+          <li><button className="text-sm text-gray-700 dark:text-gray-300 hover:text-accent dark:hover:text-accent">Share Our Story</button></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</footer>
     </div>  
   );
 };
