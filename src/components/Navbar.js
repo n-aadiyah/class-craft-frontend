@@ -8,7 +8,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
         <button
           type="button"
-          className="text-white font-semibold rounded hover:bg-white/20 px-4 py-2 text-sm transition"
+          className="text-black font-semibold rounded hover:bg-white/20 px-4 py-2 text-sm transition"
         >
            portal Login
         </button>
