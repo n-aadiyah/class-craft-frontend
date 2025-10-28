@@ -2,12 +2,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import Navbar from "../components/Navbar";
 import "../pages/landing.css";
+
 const images = [
-  "/classcraft5.jpg",
-  "/classcraft2.png",
-  "/classcraft4.jpg",
-  "/classcraft1.jpg",
-  "/classcraft6.png",
+  "/classcraft7.jpg",
+  "/classcraft8.jpg",
+  "/classcraft9.jpg",
+  "/classcraft10.jpg",
+"/classcraft11.jpg",
 ];
 const subjectImages = [
   "/biology.jpeg",
@@ -65,7 +66,7 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full">
+    <div className="relative min-h-screen w-900 mx-auto bg-white dark:bg-black">
   {/* HERO Section */}
   <main className="relative h-screen flex items-center justify-center overflow-hidden">
     {images.map((img, index) => (
@@ -79,7 +80,7 @@ const LandingPage = () => {
           backgroundSize: "cover", // You can try 'contain' if images look stretched
           backgroundRepeat: "no-repeat",
           imageRendering: "crisp-edges", // Helps prevent blur
-          filter: "brightness(1.06) contrast(1.05)", // Enhance color quality slightly
+          filter: "brightness(0.8) contrast(1.00)", // Enhance color quality slightly
         }}
       >
         {/* Gradient overlay for better visibility */}
