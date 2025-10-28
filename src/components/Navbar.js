@@ -1,21 +1,25 @@
 // src/components/Navbar.js
 import React from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+   const navigate = useNavigate();
+
   return (
     <header className="absolute top-0 left-0 right-0 z-10 bg-transparent">
       <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
-        <button
-          type="button"
-          className="text-black font-semibold rounded hover:bg-white/20 px-4 py-2 text-sm transition"
-        >
-           portal Login
-        </button>
+         <button
+      type="button"
+      className="text-white font-semibold rounded hover:bg-white/20 px-4 py-2 text-sm transition"
+      onClick={() => navigate("/login")}
+    >
+      Portal Login
+    </button>
 
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-bold text-white">
-            LITTLE FLOWER SCHOOL
+            GAYATHRI CENTRAL  SCHOOL
           </h1>
         </div>
 
