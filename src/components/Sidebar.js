@@ -6,7 +6,7 @@ import {
   Award,
   Settings,
   LayoutDashboard,
-  X,
+  ClipboardList,
 } from "lucide-react";
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -15,6 +15,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const links = [
     { name: "Overview", path: "/teacher/dashboard", icon: <LayoutDashboard size={20} /> },
     { name: "Manage Classes", path: "/teacher/classes", icon: <BookOpen size={20} /> },
+    { name: "Attendance Register", path: "/teacher/attendance", icon: < ClipboardList size={20} /> },
     { name: "Manage Quests", path: "/teacher/quests", icon: <Map size={20} /> },
     { name: "Reward System", path: "/teacher/rewards", icon: <Award size={20} /> },
     { name: "Settings", path: "/teacher/settings", icon: <Settings size={20} /> },
@@ -24,10 +25,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     <>
       {/* Overlay (for mobile) */}
       {isOpen && (
-        <div
-          onClick={onClose}
-          className="fixed inset-0 bg-black bg-opacity-40 z-40 lg:hidden"
-        ></div>
+        <div onClick={onClose} className="fixed inset-0 bg-black bg-opacity-40 z-40 lg:hidden"></div>
       )}
 
       {/* Sidebar */}
@@ -37,9 +35,6 @@ const Sidebar = ({ isOpen, onClose }) => {
       >
         <div>
           <div className="flex justify-between items-center mb-20">
-            <button onClick={onClose} className="lg:hidden">
-              <X size={20} />
-            </button>
           </div>
 
           <nav className="space-y-2">
@@ -48,7 +43,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                 key={link.path}
                 to={link.path}
                 onClick={onClose}
-                className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-300 ${
+                className={`flex items-center gap-1 px-1 py-3 rounded-lg transition-all duration-200 ${
                   location.pathname === link.path
                     ? "bg-white text-red-800 shadow-md"
                     : "hover:bg-red-600 hover:translate-x-1"
