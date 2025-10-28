@@ -2,12 +2,10 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   BookOpen,
-  Users,
   Map,
   Award,
   Settings,
   LayoutDashboard,
-  Activity,
   X,
 } from "lucide-react";
 
@@ -17,10 +15,8 @@ const Sidebar = ({ isOpen, onClose }) => {
   const links = [
     { name: "Overview", path: "/teacher/dashboard", icon: <LayoutDashboard size={20} /> },
     { name: "Manage Classes", path: "/teacher/classes", icon: <BookOpen size={20} /> },
-    { name: "Manage Students", path: "/teacher/students", icon: <Users size={20} /> },
     { name: "Manage Quests", path: "/teacher/quests", icon: <Map size={20} /> },
     { name: "Reward System", path: "/teacher/rewards", icon: <Award size={20} /> },
-    { name: "Track Performance", path: "/teacher/performance", icon: <Activity size={20} /> },
     { name: "Settings", path: "/teacher/settings", icon: <Settings size={20} /> },
   ];
 
@@ -36,14 +32,13 @@ const Sidebar = ({ isOpen, onClose }) => {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-red-700 to-red-900 text-white p-5 shadow-lg flex flex-col justify-between z-50 transform transition-transform duration-300 
+        className={`fixed top-0 left-0 h-full w-60 bg-gradient-to-b from-red-700 to-red-900 text-white p-5 shadow-lg flex flex-col justify-between z-50 transform transition-transform duration-300 
         ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
       >
         <div>
-          <div className="flex justify-between items-center mb-10">
-            <h2 className="text-3xl font-extrabold tracking-wide">ClassCraft</h2>
+          <div className="flex justify-between items-center mb-12">
             <button onClick={onClose} className="lg:hidden">
-              <X size={24} />
+              <X size={20} />
             </button>
           </div>
 
