@@ -9,11 +9,8 @@ import RewardSystem from "./pages/Teacher/RewardSystem";
 import TeacherSettings from "./pages/Teacher/TeacherSettings";
 import TeacherDashboard from "./pages/Teacher/TeacherDashboard";
 import StudentProfile from "./pages/Student/Studentprofile";
-import AdminDashboard from "./pages/AdminDashboard";
-import StudentDashboard from "./pages/StudentDashboard";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import ProtectedRoute from "./components/ProtectedRoute";
+import AttendanceRegister from "./pages/Teacher/Attendence Register"; 
+
 function App() {
   return (
     <Routes>
@@ -43,6 +40,7 @@ function App() {
       <Route path="/teacher/quests" element={ <TeacherDashboardLayout><ManageQuests /></TeacherDashboardLayout>}/>
       <Route path="/teacher/rewards" element={ <TeacherDashboardLayout><RewardSystem /></TeacherDashboardLayout>}/>
       <Route path="/teacher/settings" element={ <TeacherDashboardLayout> <TeacherSettings /> </TeacherDashboardLayout>}/>
+      <Route path="/teacher/attendance" element={ <TeacherDashboardLayout><AttendanceRegister /></TeacherDashboardLayout>} />
 
       {/* Student Pages */}
       <Route path="/teacher/students/:id" element={<TeacherDashboardLayout><StudentProfile /></TeacherDashboardLayout>} />
