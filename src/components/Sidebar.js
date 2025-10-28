@@ -36,7 +36,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
       >
         <div>
-          <div className="flex justify-between items-center mb-12">
+          <div className="flex justify-between items-center mb-20">
             <button onClick={onClose} className="lg:hidden">
               <X size={20} />
             </button>
@@ -48,7 +48,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                 key={link.path}
                 to={link.path}
                 onClick={onClose}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 ${
+                className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-300 ${
                   location.pathname === link.path
                     ? "bg-white text-red-800 shadow-md"
                     : "hover:bg-red-600 hover:translate-x-1"
