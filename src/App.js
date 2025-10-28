@@ -15,7 +15,24 @@ function App() {
     <Routes>
       {/* Public Page */}
       <Route path="/" element={<LandingPage />} />
-
+ <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+         <Route
+          path="/AdminDashboard"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student-dashboard"
+          element={
+            <ProtectedRoute role="student">
+              <StudentDashboard />
+            </ProtectedRoute>
+          }
+        />
       {/* Teacher Dashboard Pages */}
       <Route path="/teacher/dashboard"element={<TeacherDashboardLayout><TeacherDashboard /></TeacherDashboardLayout>}/>
       <Route path="/teacher/classes"element={<TeacherDashboardLayout><ManageClasses /></TeacherDashboardLayout>}/>
