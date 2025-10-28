@@ -15,7 +15,7 @@ const Navbar = () => {
 
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-bold text-white">
-            LITTLE FLOWER SCHOOL
+            GAYATHRI CENTRAL  SCHOOL
           </h1>
         </div>
 

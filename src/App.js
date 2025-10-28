@@ -9,7 +9,11 @@ import RewardSystem from "./pages/Teacher/RewardSystem";
 import TeacherSettings from "./pages/Teacher/TeacherSettings";
 import TeacherDashboard from "./pages/Teacher/TeacherDashboard";
 import StudentProfile from "./pages/Student/Studentprofile";
-
+import AdminDashboard from "./pages/AdminDashboard";
+import StudentDashboard from "./pages/StudentDashboard";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import ProtectedRoute from "./components/ProtectedRoute";
 function App() {
   return (
     <Routes>
