@@ -1,11 +1,8 @@
 // src/pages/Login.js
 import React, { useState } from "react";
-import axios from "axios";
+import API from "../api/axiosInstance"; // ✅ Use centralized axios instance
 import { useNavigate } from "react-router-dom";
 import "../App.css";
-
-// ✅ Use live backend base URL (Render)
-const BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://class-craft-backend.onrender.com";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -26,10 +23,8 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // ✅ Use full backend URL
-      const res = await axios.post(`${BASE_URL}/api/auth/login`, formData, {
-        headers: { "Content-Type": "application/json" },
-      });
+      // ✅ Uses the axios instance base URL automatically
+      const res = await API.post("/auth/login", formData);
 
       const userRole = res.data.user.role;
 
@@ -38,7 +33,7 @@ const Login = () => {
       localStorage.setItem("role", userRole);
       alert("Login successful ✅");
 
-      // ✅ Redirect by role
+      // ✅ Redirect based on role
       if (userRole === "admin") {
         navigate("/admin/dashboard");
       } else if (userRole === "teacher") {
