@@ -1,7 +1,11 @@
+// src/pages/Login.js
 import React, { useState } from "react";
-import API from "../api/axiosInstance";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
+
+// ✅ Use live backend base URL (Render)
+const BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://class-craft-backend.onrender.com";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -22,14 +26,19 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await API.post("/auth/login", formData);
-          const userRole = res.data.user.role;
-          
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("role", res.data.user.role);
-      alert("Login successful");
+      // ✅ Use full backend URL
+      const res = await axios.post(`${BASE_URL}/api/auth/login`, formData, {
+        headers: { "Content-Type": "application/json" },
+      });
 
-       // ✅ Redirect based on user role
+      const userRole = res.data.user.role;
+
+      // ✅ Save login data
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("role", userRole);
+      alert("Login successful ✅");
+
+      // ✅ Redirect by role
       if (userRole === "admin") {
         navigate("/admin/dashboard");
       } else if (userRole === "teacher") {
@@ -37,10 +46,11 @@ const Login = () => {
       } else if (userRole === "student") {
         navigate("/student/dashboard");
       } else {
-        navigate("/"); // fallback (optional)
+        navigate("/");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      console.error("Login Error:", err);
+      setError(err.response?.data?.message || "Login failed. Try again.");
     } finally {
       setLoading(false);
     }
@@ -126,7 +136,10 @@ const Login = () => {
 
         <p className="text-center mt-4 mb-0">
           Don’t have an account?{" "}
-          <a href="/register" className="text-decoration-none fw-semibold text-primary">
+          <a
+            href="/register"
+            className="text-decoration-none fw-semibold text-primary"
+          >
             Register here
           </a>
         </p>
