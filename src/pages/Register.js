@@ -1,11 +1,8 @@
 // src/pages/Register.js
 import React, { useState } from "react";
-import axios from "axios";
+import API from "../api/axiosInstance"; // ✅ Use centralized axios instance
 import { useNavigate } from "react-router-dom";
 import "../App.css";
-
-// ✅ Render backend URL or environment variable
-const BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://class-craft-backend.onrender.com";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -27,15 +24,15 @@ const Register = () => {
     setLoading(true);
 
     try {
-    const res = await axios.post(`${BASE_URL}/api/auth/register`, formData, {
-  headers: { "Content-Type": "application/json" },
-});
-console.log(res.data); // 👈 use the response, warning will disappear
+      // ✅ Uses the centralized API base URL (local or live)
+      const res = await API.post("/auth/register", formData);
+
+      console.log("Register Response:", res.data);
       alert("Registration successful! 🎉");
       navigate("/login");
     } catch (err) {
       console.error("Register Error:", err);
-      setError(err.response?.data?.message || "Registration failed");
+      setError(err.response?.data?.message || "Registration failed. Try again.");
     } finally {
       setLoading(false);
     }
