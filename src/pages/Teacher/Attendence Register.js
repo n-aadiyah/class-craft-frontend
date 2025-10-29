@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ClipboardList, Eye, X, CheckCircle, XCircle } from "lucide-react";
+import API from "../../api/axiosInstance";
 
 const AttendanceRegister = () => {
   // Sample classes (same structure as ManageClasses)
@@ -55,14 +56,34 @@ const AttendanceRegister = () => {
     }));
   };
 
-  // Save Attendance (local only)
-  const handleSaveAttendance = () => {
-    alert(
-      `✅ Attendance saved for ${selectedClass.name}\n` +
-        JSON.stringify(attendance, null, 2)
-    );
+ const handleSaveAttendance = async () => {
+  if (!selectedClass) return;
+
+  // Convert attendance object → array
+  const records = selectedClass.studentList.map((stu) => ({
+    studentId: stu.id,
+    studentName: stu.name,
+    enrollNo: stu.enrollNo,
+    status: attendance[stu.id] || "Absent",
+  }));
+
+  try {
+    const res = await API.post("/attendance/save", {
+      className: selectedClass.name,
+      date: new Date(),
+      records,
+    });
+
+    alert(`✅ Attendance saved successfully for ${selectedClass.name}`);
+    console.log("Saved:", res.data);
+
     setShowModal(false);
-  };
+  } catch (error) {
+    console.error("❌ Error saving attendance:", error);
+    alert("Error saving attendance. Please try again.");
+  }
+};
+
 
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
