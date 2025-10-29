@@ -1,7 +1,11 @@
+// src/pages/Register.js
 import React, { useState } from "react";
-import API from "../api/axiosInstance";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
+
+// ✅ Render backend URL or environment variable
+const BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://class-craft-backend.onrender.com";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -23,10 +27,14 @@ const Register = () => {
     setLoading(true);
 
     try {
-      await API.post("/auth/register", formData);
-      alert("Registration successful!");
+    const res = await axios.post(`${BASE_URL}/api/auth/register`, formData, {
+  headers: { "Content-Type": "application/json" },
+});
+console.log(res.data); // 👈 use the response, warning will disappear
+      alert("Registration successful! 🎉");
       navigate("/login");
     } catch (err) {
+      console.error("Register Error:", err);
       setError(err.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
@@ -124,7 +132,10 @@ const Register = () => {
 
         <p className="text-center mt-4 mb-0">
           Already have an account?{" "}
-          <a href="/login" className="text-decoration-none fw-semibold text-primary">
+          <a
+            href="/login"
+            className="text-decoration-none fw-semibold text-primary"
+          >
             Login here
           </a>
         </p>
