@@ -10,8 +10,8 @@ import TeacherSettings from "./pages/Teacher/TeacherSettings";
 import TeacherDashboard from "./pages/Teacher/TeacherDashboard";
 import StudentProfile from "./pages/Student/Studentprofile";
 import AttendanceRegister from "./pages/Teacher/Attendence Register"; 
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import AuthPage from "./pages/AuthFlipPage";
+
 import AdminDashboard from "./pages/AdminDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -20,8 +20,7 @@ function App() {
     <Routes>
       {/* Public Page */}
       <Route path="/" element={<LandingPage />} />
- <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+ <Route path="/login" element={< AuthPage/>} />
          <Route
           path="/AdminDashboard"
           element={
