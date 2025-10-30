@@ -12,6 +12,9 @@ import StudentProfile from "./pages/Student/Studentprofile";
 import AttendanceRegister from "./pages/Teacher/Attendence Register"; 
 import AuthPage from "./pages/AuthFlipPage";
 
+import AdminDashboard from "./pages/AdminDashboard";
+import StudentDashboard from "./pages/StudentDashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 function App() {
   return (
     <Routes>
