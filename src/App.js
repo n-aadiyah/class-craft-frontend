@@ -10,14 +10,14 @@ import TeacherSettings from "./pages/Teacher/TeacherSettings";
 import TeacherDashboard from "./pages/Teacher/TeacherDashboard";
 import StudentProfile from "./pages/Student/Studentprofile";
 import AttendanceRegister from "./pages/Teacher/Attendence Register"; 
+import AuthPage from "./pages/AuthFlipPage";
 
 function App() {
   return (
     <Routes>
       {/* Public Page */}
       <Route path="/" element={<LandingPage />} />
- <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+ <Route path="/login" element={< AuthPage/>} />
          <Route
           path="/AdminDashboard"
           element={
