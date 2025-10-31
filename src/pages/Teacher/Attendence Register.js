@@ -98,7 +98,7 @@ const AttendanceRegister = () => {
             <tr>
               <th className="p-3 text-left">Class Name</th>
               <th className="p-3 text-left">Grade</th>
-              <th className="p-3 text-left">Student Limit</th>
+              <th className="p-3 text-left">Total students</th>
               <th className="p-3 text-left">Start Date</th>
               <th className="p-3 text-left">End Date</th>
               <th className="p-3 text-center">Actions</th>
