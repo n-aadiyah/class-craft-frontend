@@ -1,34 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react"; // already imported
+import axios from "axios";
 import { BookOpen, Plus, Eye, Trash2, X, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom"; // ✅ For navigation to student profile
 
 const grades = ["6", "7", "8", "9", "10", "11", "12"];
 
 const ManageClasses = () => {
-  const navigate = useNavigate(); // ✅ Initialize navigation hook
+  const navigate = useNavigate();
 
-  const [classes, setClasses] = useState([
-    {
-      id: 1,
-      name: "Grade 6A",
-      grade: "6",
-      students: 5,
-      startDate: "2025-10-01",
-      endDate: "2026-03-31",
-      studentList: [
-        { id: 1, name: "John Smith", enrollNo: "6A01", contact: "9876543210" },
-        { id: 2, name: "Emily Brown", enrollNo: "6A02", contact: "9876543211" },
-      ],
-    },
-  ]);
-
+  const [classes, setClasses] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showClassModal, setShowClassModal] = useState(false);
   const [selectedClass, setSelectedClass] = useState(null);
   const [showAddClassModal, setShowAddClassModal] = useState(false);
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [editStudent, setEditStudent] = useState(null);
-  const [editClass, setEditClass] = useState(null); // ✅ New: track class being edited
+  const [editClass, setEditClass] = useState(null);
 
   const [newClass, setNewClass] = useState({
     name: "",
@@ -44,12 +31,34 @@ const ManageClasses = () => {
     contact: "",
   });
 
+ const API_URL = "http://localhost:5000/api/classes";
+
   const filteredClasses = classes.filter((cls) =>
     cls.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+ // ✅ Fetch all classes from backend
 
-  // --- Add or Update Class ---
-  const handleAddOrUpdateClass = () => {
+ useEffect(() => {
+  fetchClasses();
+}, []);
+  const fetchClasses = async () => {
+    try {
+      const res = await axios.get(API_URL);
+      setClasses(
+        res.data.map((cls) => ({
+          ...cls,
+          id: cls._id,
+          students: cls.studentsLimit, // Match frontend field name
+          studentList: [], // Placeholder (no student model linked yet)
+        }))
+      );
+    } catch (err) {
+      console.error("Error fetching classes:", err);
+    }
+  };
+
+ // ✅ Add or Update Class (POST or PUT)
+  const handleAddOrUpdateClass = async () => {
     if (
       !newClass.name ||
       !newClass.grade ||
@@ -57,56 +66,77 @@ const ManageClasses = () => {
       !newClass.startDate ||
       !newClass.endDate
     )
-      return;
+      return alert("Please fill all fields");
 
-    if (editClass) {
-      // Update existing class
-      const updatedClasses = classes.map((cls) =>
-        cls.id === editClass.id ? { ...cls, ...newClass } : cls
-      );
-      setClasses(updatedClasses);
+    try {
+      if (editClass) {
+        // Update
+        const updatedClass = {
+          name: newClass.name,
+          grade: newClass.grade,
+          studentsLimit: newClass.students,
+          startDate: newClass.startDate,
+          endDate: newClass.endDate,
+        };
+        await axios.put(`${API_URL}/${editClass.id}`, updatedClass);
+      } else {
+        // Add new
+        const newClassData = {
+          name: newClass.name,
+          grade: newClass.grade,
+          studentsLimit: newClass.students,
+          startDate: newClass.startDate,
+          endDate: newClass.endDate,
+        };
+        await axios.post(API_URL, newClassData);
+      }
+
+      await fetchClasses();
+      setShowAddClassModal(false);
+      setNewClass({
+        name: "",
+        grade: "",
+        students: "",
+        startDate: "",
+        endDate: "",
+      });
       setEditClass(null);
-    } else {
-      // Add new class
-      setClasses([...classes, { ...newClass, id: Date.now(), studentList: [] }]);
+    } catch (err) {
+      console.error("Error saving class:", err);
     }
-
-    setNewClass({
-      name: "",
-      grade: "",
-      students: "",
-      startDate: "",
-      endDate: "",
-    });
-    setShowAddClassModal(false);
   };
 
-  // --- Open modal for editing class ---
+  // ✅ Edit class
   const handleEditClass = (cls) => {
     setEditClass(cls);
     setNewClass({
       name: cls.name,
       grade: cls.grade,
       students: cls.students,
-      startDate: cls.startDate,
-      endDate: cls.endDate,
+      startDate: cls.startDate.split("T")[0],
+      endDate: cls.endDate.split("T")[0],
     });
     setShowAddClassModal(true);
   };
 
-  // --- View Class (open Manage Students modal) ---
+  // ✅ Delete class
+  const handleDeleteClass = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this class?")) return;
+    try {
+      await axios.delete(`${API_URL}/${id}`);
+      setClasses(classes.filter((cls) => cls.id !== id));
+    } catch (err) {
+      console.error("Error deleting class:", err);
+    }
+  };
+
+  // --- View class students (still local, not backend linked) ---
   const handleViewClass = (cls) => {
     setSelectedClass(cls);
     setShowClassModal(true);
   };
 
-  // --- Delete Class ---
-  const handleDeleteClass = (id) => {
-    setClasses(classes.filter((cls) => cls.id !== id));
-    setShowClassModal(false);
-  };
-
-  // --- Add or Edit Student ---
+  // --- Student management (unchanged local logic) ---
   const handleSaveStudent = () => {
     if (!newStudent.name || !newStudent.enrollNo || !newStudent.contact) return;
 
@@ -142,7 +172,6 @@ const ManageClasses = () => {
     setClasses(classes.map((c) => (c.id === selectedClass.id ? updatedClass : c)));
   };
 
-  // ✅ NEW: Navigate to individual student profile
   const handleViewStudentProfile = (student) => {
     navigate(`/teacher/students/${student.id}`);
   };
@@ -197,21 +226,20 @@ const ManageClasses = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredClasses.map((cls) => (
+              {filteredClasses.map((cls) => (
               <tr key={cls.id} className="border-b hover:bg-gray-50">
                 <td className="p-3 font-medium text-gray-800">{cls.name}</td>
                 <td className="p-3">{cls.grade}</td>
                 <td className="p-3">{cls.students}</td>
-                <td className="p-3">{cls.startDate}</td>
-                <td className="p-3">{cls.endDate}</td>
+                <td className="p-3">{cls.startDate?.slice(0, 10)}</td>
+                <td className="p-3">{cls.endDate?.slice(0, 10)}</td>
                 <td className="p-2 text-center">
                   <div className="flex justify-center gap-2">
                     <button
                       className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
                       onClick={() => handleViewClass(cls)}
                       title="View Students"
-                    >
-                      <Eye size={18} />
+                    >                      <Eye size={18} />
                     </button>
                     <button
                       className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg"
