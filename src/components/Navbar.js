@@ -36,25 +36,25 @@ const Navbar = () => {
       <nav className="flex justify-center items-center gap-8 pt-4 flex-wrap">
         <Link
           to="/student"
-          className="text-primary font-bold border-b-2 border-primary pb-2 text-sm"
+          className="text-red-700 font-bold border-b-2 border-red-700 pb-2 text-sm"
         >
           Student
         </Link>
         <Link
           to="/curriculum"
-          className="text-white hover:text-primary pb-2 border-b-2 border-transparent hover:border-primary transition-colors duration-300 text-sm"
+          className="text-red-700 hover:text-red-800 pb-2 border-b-2 border-transparent hover:border-red-700 transition-colors duration-300 text-sm"
         >
           Curriculum
         </Link>
         <Link
           to="/leaderboard"
-          className="text-white hover:text-primary pb-2 border-b-2 border-transparent hover:border-primary transition-colors duration-300 text-sm"
+          className="text-red-700 hover:text-red-800 pb-2 border-b-2 border-transparent hover:border-red-700 transition-colors duration-300 text-sm"
         >
           Leaderboard
         </Link>
         <Link
           to="/about"
-          className="text-white hover:text-primary pb-2 border-b-2 border-transparent hover:border-primary transition-colors duration-300 text-sm"
+          className="text-red-700 hover:text-red-800 pb-2 border-b-2 border-transparent hover:border-red-700 transition-colors duration-300 text-sm"
         >
           About
         </Link>
