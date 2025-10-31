@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from "react"; // already imported
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { BookOpen, Plus, Eye, Trash2, X, Edit } from "lucide-react";
-import { useNavigate } from "react-router-dom"; // ✅ For navigation to student profile
+import { useNavigate } from "react-router-dom";
 
 const grades = ["6", "7", "8", "9", "10", "11", "12"];
 
 const ManageClasses = () => {
+  const API_URL = "http://localhost:5000/api/classes";
+  const STUDENT_API_URL = "http://localhost:5000/api/students";
+
   const navigate = useNavigate();
 
   const [classes, setClasses] = useState([]);
@@ -31,16 +34,11 @@ const ManageClasses = () => {
     contact: "",
   });
 
- const API_URL = "http://localhost:5000/api/classes";
+  // ✅ Fetch all classes from backend
+  useEffect(() => {
+    fetchClasses();
+  }, []);
 
-  const filteredClasses = classes.filter((cls) =>
-    cls.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
- // ✅ Fetch all classes from backend
-
- useEffect(() => {
-  fetchClasses();
-}, []);
   const fetchClasses = async () => {
     try {
       const res = await axios.get(API_URL);
@@ -48,8 +46,8 @@ const ManageClasses = () => {
         res.data.map((cls) => ({
           ...cls,
           id: cls._id,
-          students: cls.studentsLimit, // Match frontend field name
-          studentList: [], // Placeholder (no student model linked yet)
+          students: cls.studentsLimit,
+          studentList: [],
         }))
       );
     } catch (err) {
@@ -57,7 +55,7 @@ const ManageClasses = () => {
     }
   };
 
- // ✅ Add or Update Class (POST or PUT)
+  // ✅ Add or Update Class (POST or PUT)
   const handleAddOrUpdateClass = async () => {
     if (
       !newClass.name ||
@@ -69,41 +67,37 @@ const ManageClasses = () => {
       return alert("Please fill all fields");
 
     try {
+      const payload = {
+        name: newClass.name,
+        grade: newClass.grade,
+        studentsLimit: newClass.students,
+        startDate: newClass.startDate,
+        endDate: newClass.endDate,
+      };
+
       if (editClass) {
-        // Update
-        const updatedClass = {
-          name: newClass.name,
-          grade: newClass.grade,
-          studentsLimit: newClass.students,
-          startDate: newClass.startDate,
-          endDate: newClass.endDate,
-        };
-        await axios.put(`${API_URL}/${editClass.id}`, updatedClass);
+        await axios.put(`${API_URL}/${editClass.id}`, payload);
       } else {
-        // Add new
-        const newClassData = {
-          name: newClass.name,
-          grade: newClass.grade,
-          studentsLimit: newClass.students,
-          startDate: newClass.startDate,
-          endDate: newClass.endDate,
-        };
-        await axios.post(API_URL, newClassData);
+        await axios.post(API_URL, payload);
       }
 
       await fetchClasses();
-      setShowAddClassModal(false);
-      setNewClass({
-        name: "",
-        grade: "",
-        students: "",
-        startDate: "",
-        endDate: "",
-      });
-      setEditClass(null);
+      closeClassModal();
     } catch (err) {
       console.error("Error saving class:", err);
     }
+  };
+
+  const closeClassModal = () => {
+    setShowAddClassModal(false);
+    setEditClass(null);
+    setNewClass({
+      name: "",
+      grade: "",
+      students: "",
+      startDate: "",
+      endDate: "",
+    });
   };
 
   // ✅ Edit class
@@ -124,57 +118,90 @@ const ManageClasses = () => {
     if (!window.confirm("Are you sure you want to delete this class?")) return;
     try {
       await axios.delete(`${API_URL}/${id}`);
-      setClasses(classes.filter((cls) => cls.id !== id));
+      await fetchClasses();
     } catch (err) {
       console.error("Error deleting class:", err);
     }
   };
 
-  // --- View class students (still local, not backend linked) ---
-  const handleViewClass = (cls) => {
-    setSelectedClass(cls);
-    setShowClassModal(true);
+  // ✅ View class and its students
+  const handleViewClass = async (cls) => {
+    try {
+      const res = await axios.get(`${STUDENT_API_URL}/class/${cls._id}`);
+      const updatedClass = { ...cls, studentList: res.data };
+      setSelectedClass(updatedClass);
+      setShowClassModal(true);
+    } catch (err) {
+      console.error("Error fetching students:", err);
+    }
   };
 
-  // --- Student management (unchanged local logic) ---
-  const handleSaveStudent = () => {
-    if (!newStudent.name || !newStudent.enrollNo || !newStudent.contact) return;
-
-    const updatedStudents = editStudent
-      ? selectedClass.studentList.map((stu) =>
-          stu.id === editStudent.id ? { ...newStudent, id: stu.id } : stu
-        )
-      : [...selectedClass.studentList, { ...newStudent, id: Date.now() }];
-
-    if (updatedStudents.length > selectedClass.students) {
-      alert("❌ You have reached the maximum number of students for this class!");
-      return;
+  // ✅ Add or update student
+  const handleSaveStudent = async () => {
+    if (!newStudent.name || !newStudent.enrollNo || !newStudent.contact) {
+      return alert("Please fill all student fields");
     }
 
-    const updatedClass = { ...selectedClass, studentList: updatedStudents };
-    setSelectedClass(updatedClass);
-    setClasses(classes.map((c) => (c.id === selectedClass.id ? updatedClass : c)));
+    try {
+      const payload = {
+        ...newStudent,
+        classId: selectedClass._id,
+      };
+
+      if (editStudent) {
+        await axios.put(`${STUDENT_API_URL}/${editStudent._id}`, payload);
+      } else {
+        await axios.post(STUDENT_API_URL, payload);
+      }
+
+      // Refresh student list without closing modal
+      const res = await axios.get(`${STUDENT_API_URL}/class/${selectedClass._id}`);
+      setSelectedClass({ ...selectedClass, studentList: res.data });
+
+      closeStudentModal();
+    } catch (err) {
+      console.error("Error saving student:", err);
+      alert("Error saving student");
+    }
+  };
+
+  const closeStudentModal = () => {
     setShowStudentModal(false);
     setEditStudent(null);
     setNewStudent({ name: "", enrollNo: "", contact: "" });
   };
 
+  // ✅ Edit student
   const handleEditStudent = (stu) => {
     setEditStudent(stu);
-    setNewStudent({ name: stu.name, enrollNo: stu.enrollNo, contact: stu.contact });
+    setNewStudent({
+      name: stu.name,
+      enrollNo: stu.enrollNo,
+      contact: stu.contact,
+    });
     setShowStudentModal(true);
   };
 
-  const handleDeleteStudent = (id) => {
-    const updatedStudents = selectedClass.studentList.filter((stu) => stu.id !== id);
-    const updatedClass = { ...selectedClass, studentList: updatedStudents };
-    setSelectedClass(updatedClass);
-    setClasses(classes.map((c) => (c.id === selectedClass.id ? updatedClass : c)));
+  // ✅ Delete student
+  const handleDeleteStudent = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this student?")) return;
+    try {
+      await axios.delete(`${STUDENT_API_URL}/${id}`);
+      const res = await axios.get(`${STUDENT_API_URL}/class/${selectedClass._id}`);
+      setSelectedClass({ ...selectedClass, studentList: res.data });
+    } catch (err) {
+      console.error("Error deleting student:", err);
+    }
   };
 
+  // ✅ View student profile (placeholder)
   const handleViewStudentProfile = (student) => {
-    navigate(`/teacher/students/${student.id}`);
+    navigate(`/student/${student._id}`, { state: { student } });
   };
+
+  const filteredClasses = classes.filter((cls) =>
+    cls.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
@@ -184,7 +211,6 @@ const ManageClasses = () => {
           <BookOpen size={28} /> Manage Classes
         </h1>
 
-        {/* Search + Add Class */}
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <input
             type="text"
@@ -226,7 +252,7 @@ const ManageClasses = () => {
             </tr>
           </thead>
           <tbody>
-              {filteredClasses.map((cls) => (
+            {filteredClasses.map((cls) => (
               <tr key={cls.id} className="border-b hover:bg-gray-50">
                 <td className="p-3 font-medium text-gray-800">{cls.name}</td>
                 <td className="p-3">{cls.grade}</td>
@@ -239,7 +265,8 @@ const ManageClasses = () => {
                       className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
                       onClick={() => handleViewClass(cls)}
                       title="View Students"
-                    >                      <Eye size={18} />
+                    >
+                      <Eye size={18} />
                     </button>
                     <button
                       className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg"
@@ -270,7 +297,7 @@ const ManageClasses = () => {
         </table>
       </div>
 
-      {/* 📘 Manage Students Modal */}
+      {/* ✅ Class Modal (Student Management) */}
       {showClassModal && selectedClass && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50 p-4">
           <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-3xl relative">
@@ -305,16 +332,16 @@ const ManageClasses = () => {
             <table className="w-full border-collapse text-sm">
               <thead className="bg-red-100 text-red-800">
                 <tr>
-                  <th className="p-2 text-left w-1/12">SI No</th>
-                  <th className="p-2 text-left w-2/6">Student Name</th>
-                  <th className="p-2 text-left w-1/6">Enroll No</th>
-                  <th className="p-2 text-left w-1/6">Contact</th>
-                  <th className="p-2 text-center w-1/6">Actions</th>
+                  <th className="p-2 text-left">SI No</th>
+                  <th className="p-2 text-left">Student Name</th>
+                  <th className="p-2 text-left">Enroll No</th>
+                  <th className="p-2 text-left">Contact</th>
+                  <th className="p-2 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {selectedClass.studentList.map((stu, index) => (
-                  <tr key={stu.id} className="border-b hover:bg-gray-50">
+                  <tr key={stu._id} className="border-b hover:bg-gray-50">
                     <td className="p-2">{index + 1}</td>
                     <td className="p-2">{stu.name}</td>
                     <td className="p-2">{stu.enrollNo}</td>
@@ -322,7 +349,7 @@ const ManageClasses = () => {
                     <td className="p-2 text-center">
                       <div className="flex justify-center gap-2">
                         <button
-                          onClick={() => handleViewStudentProfile(stu)} // ✅ View Student Profile
+                          onClick={() => handleViewStudentProfile(stu)}
                           className="text-green-600 hover:bg-green-50 p-2 rounded-lg"
                           title="View Profile"
                         >
@@ -336,7 +363,7 @@ const ManageClasses = () => {
                           <Edit size={16} />
                         </button>
                         <button
-                          onClick={() => handleDeleteStudent(stu.id)}
+                          onClick={() => handleDeleteStudent(stu._id)}
                           className="text-red-600 hover:bg-red-50 p-2 rounded-lg"
                           title="Delete Student"
                         >
@@ -359,12 +386,12 @@ const ManageClasses = () => {
         </div>
       )}
 
-      {/* ➕ Add/Edit Student Modal */}
+      {/* Add/Edit Student Modal */}
       {showStudentModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
           <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md relative">
             <button
-              onClick={() => setShowStudentModal(false)}
+              onClick={closeStudentModal}
               className="absolute top-3 right-3 text-gray-500 hover:text-red-600"
             >
               <X size={20} />
@@ -405,7 +432,7 @@ const ManageClasses = () => {
 
             <div className="flex justify-end gap-3 mt-4">
               <button
-                onClick={() => setShowStudentModal(false)}
+                onClick={closeStudentModal}
                 className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
               >
                 Cancel
@@ -421,12 +448,12 @@ const ManageClasses = () => {
         </div>
       )}
 
-      {/* ➕ Add/Edit Class Modal */}
+      {/* Add/Edit Class Modal */}
       {showAddClassModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
           <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md relative">
             <button
-              onClick={() => setShowAddClassModal(false)}
+              onClick={closeClassModal}
               className="absolute top-3 right-3 text-gray-500 hover:text-red-600"
             >
               <X size={20} />
@@ -488,7 +515,7 @@ const ManageClasses = () => {
 
             <div className="flex justify-end gap-3 mt-4">
               <button
-                onClick={() => setShowAddClassModal(false)}
+                onClick={closeClassModal}
                 className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
               >
                 Cancel
