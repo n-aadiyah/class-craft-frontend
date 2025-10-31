@@ -36,3 +36,137 @@
     transform: rotate(360deg);
   }
 }
+
+/* 🔥 Centered 3D Flip Container */
+.flip-container {
+  perspective: 1500px;
+  width: 90%;
+  max-width: 950px;
+  height: 80vh;
+  position: fixed; /* Ensures full-screen centering */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: visible; /* prevents flicker/cropping during rotation */
+  z-index: 2;
+}
+
+/* ✅ Flipper Animation */
+.flipper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.9s cubic-bezier(0.4, 0.2, 0.2, 1);
+  transform-origin: center center; /* keeps rotation aligned */
+}
+
+.flipper.flipped {
+  transform: rotateY(180deg);
+}
+
+/* ✅ Each Face */
+.front-card,
+.back-card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  border-radius: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ✅ Hide backside when rotated */
+.back-card {
+  transform: rotateY(180deg);
+}
+
+/* ✅ Auth card styling */
+.auth-card {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.95);
+  border: 1px solid #f00;
+  border-radius: 1.5rem;
+  box-shadow: 0 0 25px #f00, inset 0 0 20px rgba(255, 0, 0, 0.3);
+  padding: 3rem;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(6px);
+  overflow: hidden;
+  z-index: 3;
+}
+
+/* ✅ Inputs + Buttons visual consistency */
+.auth-card input,
+.auth-card select {
+  background: #111;
+  color: white;
+  border: 1px solid #ff0033;
+  border-radius: 0.5rem;
+  padding: 0.6rem 0.8rem;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+.auth-card button {
+  background: linear-gradient(to right, #ff0033, #ff3333);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.7rem;
+  color: white;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.auth-card button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px #ff1a1a;
+}
+
+/* ✅ Floating character animation */
+.animate-glow-float {
+  animation: glowFloat 2s ease-in-out infinite;
+}
+
+@keyframes glowFloat {
+  0%, 100% {
+    transform: translateY(0);
+    filter: drop-shadow(0 0 10px #ff0033);
+  }
+  50% {
+    transform: translateY(-8px);
+    filter: drop-shadow(0 0 20px #ff1a1a);
+  }
+}
+
+/* ✅ Responsive tweak: hide image on small screens */
+@media (max-width: 768px) {
+  .flip-container {
+    width: 95%;
+    height: auto;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .auth-card {
+    flex-direction: column;
+    padding: 2rem;
+    height: auto;
+  }
+
+  .auth-card img {
+    display: none;
+  }
+}

@@ -73,11 +73,11 @@ const AuthPage = () => {
           {/* ---------- LOGIN FRONT ---------- */}
           <div className="front-card">
             <div className="auth-card">
-              <div className="hidden md:flex w-full md:w-1/2 justify-center mb-4 md:mb-0">
+              <div className="hidden md:flex w-full md:w-1/2 justify-center mb-3 md:mb-0">
                 <img
                   src="/girl.png"
                   alt="Anime Character"
-                  className="w-40 md:w-56 animate-glow-float drop-shadow-[0_0_15px_#ff0033]"
+                  className="w-30 md:w-50 animate-glow-float drop-shadow-[0_0_10px_#ff0033]"
                 />
               </div>
               <div className="w-full md:w-1/2">
@@ -148,11 +148,11 @@ const AuthPage = () => {
           {/* ---------- REGISTER BACK ---------- */}
           <div className="back-card">
             <div className="auth-card">
-              <div className="hidden md:flex w-full md:w-1/2 justify-center mb-4 md:mb-0">
+              <div className="hidden md:flex w-full md:w-1/2 justify-center mb-3 md:mb-0">
                 <img
                   src="/boy.png"
                   alt="Anime Character"
-                  className="w-40 md:w-56 animate-glow-float drop-shadow-[0_0_15px_#ff0033]"
+                  className="w-30 md:w-50 animate-glow-float drop-shadow-[0_0_15px_#ff0033]"
                 />
               </div>
               <div className="w-full md:w-1/2">
