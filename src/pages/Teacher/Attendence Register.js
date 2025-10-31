@@ -1,89 +1,85 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ClipboardList, Eye, X, CheckCircle, XCircle } from "lucide-react";
 import API from "../../api/axiosInstance";
 
 const AttendanceRegister = () => {
-  // Sample classes (same structure as ManageClasses)
-  const [classes] = useState([
-    {
-      id: 1,
-      name: "Grade 6A",
-      grade: "6",
-      students: 5,
-      startDate: "2025-10-01",
-      endDate: "2026-03-31",
-      studentList: [
-        { id: 1, name: "John Smith", enrollNo: "6A01", contact: "9876543210" },
-        { id: 2, name: "Emily Brown", enrollNo: "6A02", contact: "9876543211" },
-      ],
-    },
-    {
-      id: 2,
-      name: "Grade 7B",
-      grade: "7",
-      students: 4,
-      startDate: "2025-09-10",
-      endDate: "2026-03-30",
-      studentList: [
-        { id: 1, name: "Chris Evans", enrollNo: "7B01", contact: "9876543215" },
-        { id: 2, name: "Sophia Lee", enrollNo: "7B02", contact: "9876543216" },
-      ],
-    },
-  ]);
-
+  const [classes, setClasses] = useState([]);          // fetched from backend
   const [selectedClass, setSelectedClass] = useState(null);
+  const [students, setStudents] = useState([]);        // fetched students of selected class
+  const [attendance, setAttendance] = useState({});
   const [showModal, setShowModal] = useState(false);
 
-  // Attendance record for current class (maps studentId → "Present"/"Absent")
-  const [attendance, setAttendance] = useState({});
+  // ✅ Fetch all classes on load
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const res = await API.get("/classes");
+        setClasses(res.data);
+      } catch (error) {
+        console.error("❌ Error fetching classes:", error);
+      }
+    };
+    fetchClasses();
+  }, []);
 
-  // Open modal and initialize attendance
-  const handleViewClass = (cls) => {
+  // ✅ Fetch students for selected class
+  const handleViewClass = async (cls) => {
     setSelectedClass(cls);
-    const initial = {};
-    cls.studentList.forEach((stu) => {
-      initial[stu.id] = attendance[stu.id] || "Present";
-    });
-    setAttendance(initial);
-    setShowModal(true);
+
+    try {
+      const res = await API.get(`/students/class/${cls._id}`);
+      const studentList = res.data;
+
+      setStudents(studentList);
+
+      // Initialize attendance state (default = Present)
+      const initialAttendance = {};
+      studentList.forEach((stu) => {
+        initialAttendance[stu._id] = "Present";
+      });
+      setAttendance(initialAttendance);
+      setShowModal(true);
+    } catch (error) {
+      console.error("❌ Error fetching students:", error);
+      alert("Error loading students for this class.");
+    }
   };
 
-  // Toggle Present/Absent
-  const toggleAttendance = (id) => {
+  // ✅ Toggle Present / Absent
+  const toggleAttendance = (studentId) => {
     setAttendance((prev) => ({
       ...prev,
-      [id]: prev[id] === "Present" ? "Absent" : "Present",
+      [studentId]: prev[studentId] === "Present" ? "Absent" : "Present",
     }));
   };
 
- const handleSaveAttendance = async () => {
-  if (!selectedClass) return;
+  // ✅ Save Attendance to Backend
+  const handleSaveAttendance = async () => {
+    if (!selectedClass || students.length === 0) return;
 
-  // Convert attendance object → array
-  const records = selectedClass.studentList.map((stu) => ({
-    studentId: stu.id,
-    studentName: stu.name,
-    enrollNo: stu.enrollNo,
-    status: attendance[stu.id] || "Absent",
-  }));
+    const records = students.map((stu) => ({
+      studentId: stu._id,
+      studentName: stu.name,
+      enrollNo: stu.enrollNo,
+      status: attendance[stu._id] || "Absent",
+    }));
 
-  try {
-    const res = await API.post("/attendance/save", {
-      className: selectedClass.name,
-      date: new Date(),
-      records,
-    });
+    try {
+      const payload = {
+        className: selectedClass.name,
+        date: new Date(),
+        records,
+      };
 
-    alert(`✅ Attendance saved successfully for ${selectedClass.name}`);
-    console.log("Saved:", res.data);
-
-    setShowModal(false);
-  } catch (error) {
-    console.error("❌ Error saving attendance:", error);
-    alert("Error saving attendance. Please try again.");
-  }
-};
-
+      const res = await API.post("/attendance/save", payload);
+      alert(`✅ Attendance saved successfully for ${selectedClass.name}`);
+      console.log("Saved:", res.data);
+      setShowModal(false);
+    } catch (error) {
+      console.error("❌ Error saving attendance:", error);
+      alert("Error saving attendance. Please try again.");
+    }
+  };
 
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
@@ -102,7 +98,7 @@ const AttendanceRegister = () => {
             <tr>
               <th className="p-3 text-left">Class Name</th>
               <th className="p-3 text-left">Grade</th>
-              <th className="p-3 text-left">Students</th>
+              <th className="p-3 text-left">Student Limit</th>
               <th className="p-3 text-left">Start Date</th>
               <th className="p-3 text-left">End Date</th>
               <th className="p-3 text-center">Actions</th>
@@ -110,12 +106,12 @@ const AttendanceRegister = () => {
           </thead>
           <tbody>
             {classes.map((cls) => (
-              <tr key={cls.id} className="border-b hover:bg-gray-50">
+              <tr key={cls._id} className="border-b hover:bg-gray-50">
                 <td className="p-3 font-medium text-gray-800">{cls.name}</td>
                 <td className="p-3">{cls.grade}</td>
-                <td className="p-3">{cls.studentList.length}</td>
-                <td className="p-3">{cls.startDate}</td>
-                <td className="p-3">{cls.endDate}</td>
+                <td className="p-3">{cls.studentsLimit}</td>
+                <td className="p-3">{new Date(cls.startDate).toLocaleDateString()}</td>
+                <td className="p-3">{new Date(cls.endDate).toLocaleDateString()}</td>
                 <td className="p-3 text-center">
                   <button
                     onClick={() => handleViewClass(cls)}
@@ -129,10 +125,7 @@ const AttendanceRegister = () => {
             ))}
             {classes.length === 0 && (
               <tr>
-                <td
-                  colSpan="6"
-                  className="p-5 text-center text-gray-500 italic"
-                >
+                <td colSpan="6" className="p-5 text-center text-gray-500 italic">
                   No classes available
                 </td>
               </tr>
@@ -166,24 +159,21 @@ const AttendanceRegister = () => {
                 </tr>
               </thead>
               <tbody>
-                {selectedClass.studentList.map((stu, index) => (
-                  <tr
-                    key={stu.id}
-                    className="border-b hover:bg-gray-50 transition"
-                  >
+                {students.map((stu, index) => (
+                  <tr key={stu._id} className="border-b hover:bg-gray-50 transition">
                     <td className="p-2">{index + 1}</td>
                     <td className="p-2">{stu.name}</td>
                     <td className="p-2">{stu.enrollNo}</td>
                     <td className="p-2 text-center">
                       <button
-                        onClick={() => toggleAttendance(stu.id)}
+                        onClick={() => toggleAttendance(stu._id)}
                         className={`flex items-center justify-center gap-1 px-3 py-1 rounded-lg font-medium transition ${
-                          attendance[stu.id] === "Present"
+                          attendance[stu._id] === "Present"
                             ? "bg-green-100 text-green-700 hover:bg-green-200"
                             : "bg-red-100 text-red-700 hover:bg-red-200"
                         }`}
                       >
-                        {attendance[stu.id] === "Present" ? (
+                        {attendance[stu._id] === "Present" ? (
                           <>
                             <CheckCircle size={16} /> Present
                           </>
@@ -196,12 +186,9 @@ const AttendanceRegister = () => {
                     </td>
                   </tr>
                 ))}
-                {selectedClass.studentList.length === 0 && (
+                {students.length === 0 && (
                   <tr>
-                    <td
-                      colSpan="4"
-                      className="text-center text-gray-500 p-4 italic"
-                    >
+                    <td colSpan="4" className="text-center text-gray-500 p-4 italic">
                       No students found for this class.
                     </td>
                   </tr>
