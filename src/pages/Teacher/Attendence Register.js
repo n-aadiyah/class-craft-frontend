@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { ClipboardList, Eye, X, CheckCircle, XCircle } from "lucide-react";
+import { ClipboardList, Eye, X, CheckCircle, XCircle, History } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import API from "../../api/axiosInstance";
 
 const AttendanceRegister = () => {
-  const [classes, setClasses] = useState([]);          // fetched from backend
+  const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
-  const [students, setStudents] = useState([]);        // fetched students of selected class
+  const [students, setStudents] = useState([]);
   const [attendance, setAttendance] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate(); // ✅ navigation hook
 
   // ✅ Fetch all classes on load
   useEffect(() => {
@@ -32,7 +34,6 @@ const AttendanceRegister = () => {
 
       setStudents(studentList);
 
-      // Initialize attendance state (default = Present)
       const initialAttendance = {};
       studentList.forEach((stu) => {
         initialAttendance[stu._id] = "Present";
@@ -53,7 +54,7 @@ const AttendanceRegister = () => {
     }));
   };
 
-  // ✅ Save Attendance to Backend
+  // ✅ Save Attendance
   const handleSaveAttendance = async () => {
     if (!selectedClass || students.length === 0) return;
 
@@ -81,9 +82,13 @@ const AttendanceRegister = () => {
     }
   };
 
+  // ✅ Navigate to Attendance History
+  const handleViewHistory = (cls) => {
+    navigate("/teacher/attendance-history", { state: { class: cls } });
+  };
+
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
-      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h1 className="text-3xl font-bold text-red-700 flex items-center gap-2">
           <ClipboardList size={28} /> Attendance Register
@@ -91,7 +96,6 @@ const AttendanceRegister = () => {
         <p className="text-gray-600">Mark attendance for each class</p>
       </div>
 
-      {/* Class List Table */}
       <div className="bg-white shadow-md rounded-2xl overflow-x-auto">
         <table className="w-full border-collapse text-sm md:text-base">
           <thead className="bg-red-100 text-red-800">
@@ -186,29 +190,35 @@ const AttendanceRegister = () => {
                     </td>
                   </tr>
                 ))}
-                {students.length === 0 && (
-                  <tr>
-                    <td colSpan="4" className="text-center text-gray-500 p-4 italic">
-                      No students found for this class.
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
 
-            <div className="flex justify-end mt-5 gap-3">
+            {/* ✅ Buttons Section */}
+            <div className="flex justify-between items-center mt-5 flex-wrap gap-3">
               <button
-                onClick={() => setShowModal(false)}
-                className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300"
+                onClick={() => {
+                  setShowModal(false);
+                  handleViewHistory(selectedClass);
+                }}
+                className="flex items-center gap-2 bg-red-100 text-red-700 font-semibold px-4 py-2 rounded-lg hover:bg-red-200 transition"
               >
-                Cancel
+                <History size={18} /> View History
               </button>
-              <button
-                onClick={handleSaveAttendance}
-                className="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-800"
-              >
-                Save Attendance
-              </button>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveAttendance}
+                  className="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-800"
+                >
+                  Save Attendance
+                </button>
+              </div>
             </div>
           </div>
         </div>
