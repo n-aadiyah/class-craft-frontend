@@ -11,6 +11,7 @@ import TeacherDashboard from "./pages/Teacher/TeacherDashboard";
 import StudentProfile from "./pages/Student/Studentprofile";
 import AttendanceRegister from "./pages/Teacher/Attendence Register"; 
 import AuthPage from "./pages/AuthFlipPage";
+import AttendanceHistory from "./pages/Teacher/AttendanceHistory";  
 
 import AdminDashboard from "./pages/AdminDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
@@ -44,6 +45,7 @@ function App() {
       <Route path="/teacher/rewards" element={ <TeacherDashboardLayout><RewardSystem /></TeacherDashboardLayout>}/>
       <Route path="/teacher/settings" element={ <TeacherDashboardLayout> <TeacherSettings /> </TeacherDashboardLayout>}/>
       <Route path="/teacher/attendance" element={ <TeacherDashboardLayout><AttendanceRegister /></TeacherDashboardLayout>} />
+      <Route path="/teacher/attendance-history" element={ <AttendanceHistory />} />
 
       {/* Student Pages */}
       <Route path="/teacher/students/:id" element={<TeacherDashboardLayout><StudentProfile /></TeacherDashboardLayout>} />
