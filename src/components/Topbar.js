@@ -10,7 +10,7 @@ const Topbar = ({ onMenuClick }) => {
           <Menu size={24} />
         </button>
 
-        <h1 className="text-xl sm:text-2xl font-bold text-red-700 tracking-wide">
+        <h1 className="text-xl sm:text-2xl font-bold font-serif text-red-700 tracking-wide">
           Dashboard
         </h1>
       </div>

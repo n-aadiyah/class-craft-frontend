@@ -90,15 +90,15 @@ const AttendanceRegister = () => {
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h1 className="text-3xl font-bold text-red-700 flex items-center gap-2">
+        <h1 className="text-3xl font-bold text-red-700 flex items-center gap-2 font-serif">
           <ClipboardList size={28} /> Attendance Register
         </h1>
-        <p className="text-gray-600">Mark attendance for each class</p>
+        <p className="text-gray-600 font-serif">Mark attendance for each class</p>
       </div>
 
       <div className="bg-white shadow-md rounded-2xl overflow-x-auto">
         <table className="w-full border-collapse text-sm md:text-base">
-          <thead className="bg-red-100 text-red-800">
+          <thead className="bg-red-100 text-red-800 font-serif">
             <tr>
               <th className="p-3 text-left">Class Name</th>
               <th className="p-3 text-left">Grade</th>
@@ -110,13 +110,13 @@ const AttendanceRegister = () => {
           </thead>
           <tbody>
             {classes.map((cls) => (
-              <tr key={cls._id} className="border-b hover:bg-gray-50">
-                <td className="p-3 font-medium text-gray-800">{cls.name}</td>
-                <td className="p-3">{cls.grade}</td>
-                <td className="p-3">{cls.studentsLimit}</td>
-                <td className="p-3">{new Date(cls.startDate).toLocaleDateString()}</td>
-                <td className="p-3">{new Date(cls.endDate).toLocaleDateString()}</td>
-                <td className="p-3 text-center">
+              <tr key={cls._id} className="border-b hover:bg-gray-50 text-center">
+                <td className="p-2 font-medium text-gray-800">{cls.name}</td>
+                <td className="p-2">{cls.grade}</td>
+                <td className="p-2">{cls.studentsLimit}</td>
+                <td className="p-2">{new Date(cls.startDate).toLocaleDateString()}</td>
+                <td className="p-2">{new Date(cls.endDate).toLocaleDateString()}</td>
+                <td className="p-2 text-center">
                   <button
                     onClick={() => handleViewClass(cls)}
                     className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg"
@@ -154,24 +154,24 @@ const AttendanceRegister = () => {
             </h2>
 
             <table className="w-full border-collapse text-sm md:text-base">
-              <thead className="bg-red-100 text-red-800">
+              <thead className="bg-red-100 text-red-800 text-center font-serif">
                 <tr>
-                  <th className="p-2 text-left w-1/12">#</th>
-                  <th className="p-2 text-left w-2/6">Student Name</th>
-                  <th className="p-2 text-left w-1/6">Enroll No</th>
+                  <th className="p-2 text-center w-1/12">#</th>
+                  <th className="p-2 text-center w-1/6">Student Name</th>
+                  <th className="p-2 text-center w-1/6">Enroll No</th>
                   <th className="p-2 text-center w-1/6">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {students.map((stu, index) => (
-                  <tr key={stu._id} className="border-b hover:bg-gray-50 transition">
+                  <tr key={stu._id} className="border-b hover:bg-gray-50 transition text-center">
                     <td className="p-2">{index + 1}</td>
                     <td className="p-2">{stu.name}</td>
                     <td className="p-2">{stu.enrollNo}</td>
-                    <td className="p-2 text-center">
+                    <td className="p-2 px-5text-center">
                       <button
                         onClick={() => toggleAttendance(stu._id)}
-                        className={`flex items-center justify-center gap-1 px-3 py-1 rounded-lg font-medium transition ${
+                        className={`flex items-center justify-center gap-1 px-5 py-1 rounded-lg font-medium transition ${
                           attendance[stu._id] === "Present"
                             ? "bg-green-100 text-green-700 hover:bg-green-200"
                             : "bg-red-100 text-red-700 hover:bg-red-200"

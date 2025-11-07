@@ -42,7 +42,7 @@ const TeacherDashboard = () => {
     <div className="p-3 sm:p-6 md:p-8 bg-gray-50 min-h-screen max-w-7xl mx-auto">
       {/* Header Section */}
       <div className="mb-6 sm:mb-8 text-center sm:text-left">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-red-700">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-serif text-red-700">
           Teacher Dashboard
         </h1>
         <p className="text-gray-600 text-sm sm:text-base md:text-lg mt-1">
