@@ -243,22 +243,22 @@ const ManageClasses = () => {
         <table className="w-full border-collapse text-sm md:text-base table-auto">
           <thead className="bg-red-100 text-red-800">
             <tr>
-              <th className="p-3 text-left">Class Name</th>
-              <th className="p-3 text-left">Grade</th>
-              <th className="p-3 text-left">Total Students</th>
-              <th className="p-3 text-left">Start Date</th>
-              <th className="p-3 text-left">End Date</th>
+              <th className="p-3 text-center">Class Name</th>
+              <th className="p-3 text-center">Grade</th>
+              <th className="p-3 text-center">Total Students</th>
+              <th className="p-3 text-center">Start Date</th>
+              <th className="p-3 text-center">End Date</th>
               <th className="p-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredClasses.map((cls) => (
-              <tr key={cls.id} className="border-b hover:bg-gray-50">
-                <td className="p-3 font-medium text-gray-800">{cls.name}</td>
-                <td className="p-3">{cls.grade}</td>
-                <td className="p-3">{cls.students}</td>
-                <td className="p-3">{cls.startDate?.slice(0, 10)}</td>
-                <td className="p-3">{cls.endDate?.slice(0, 10)}</td>
+              <tr key={cls.id} className="border-b hover:bg-gray-50 text-center">
+                <td className="p-1 font-medium text-gray-800">{cls.name}</td>
+                <td className="p-1">{cls.grade}</td>
+                <td className="p-2">{cls.students}</td>
+                <td className="p-2">{cls.startDate?.slice(0, 10)}</td>
+                <td className="p-2">{cls.endDate?.slice(0, 10)}</td>
                 <td className="p-2 text-center">
                   <div className="flex justify-center gap-2">
                     <button
@@ -332,21 +332,21 @@ const ManageClasses = () => {
             <table className="w-full border-collapse text-sm">
               <thead className="bg-red-100 text-red-800">
                 <tr>
-                  <th className="p-2 text-left">SI No</th>
-                  <th className="p-2 text-left">Student Name</th>
-                  <th className="p-2 text-left">Enroll No</th>
-                  <th className="p-2 text-left">Contact</th>
-                  <th className="p-2 text-center">Actions</th>
+                  <th className="p-1 text-center">SI No</th>
+                  <th className="p-1 text-center">Student Name</th>
+                  <th className="p-1 text-center">Enroll No</th>
+                  <th className="p-1 text-center">Contact</th>
+                  <th className="p-1 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {selectedClass.studentList.map((stu, index) => (
-                  <tr key={stu._id} className="border-b hover:bg-gray-50">
-                    <td className="p-2">{index + 1}</td>
-                    <td className="p-2">{stu.name}</td>
-                    <td className="p-2">{stu.enrollNo}</td>
-                    <td className="p-2">{stu.contact}</td>
-                    <td className="p-2 text-center">
+                  <tr key={stu._id} className="border-b hover:bg-gray-50 text-center">
+                    <td className="p-1">{index + 1}</td>
+                    <td className="p-1">{stu.name}</td>
+                    <td className="p-1">{stu.enrollNo}</td>
+                    <td className="p-1">{stu.contact}</td>
+                    <td className="p-1 px-4 text-center">
                       <div className="flex justify-center gap-2">
                         <button
                           onClick={() => handleViewStudentProfile(stu)}
