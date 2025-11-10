@@ -1,37 +1,71 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import API from "../../api/axiosInstance";
 
 const AttendanceHistory = () => {
-  const [selectedClass, setSelectedClass] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
   const navigate = useNavigate();
 
-  // Mock attendance data (class-wise)
-  const attendanceRecords = {
-    "Grade 8 - A": [
-      { id: 1, name: "John Paul", EnrollNo: "G8A001", status: "Present" },
-      { id: 2, name: "Mary Thomas", EnrollNo: "G8A002", status: "Absent" },
-      { id: 3, name: "Rahul Nair", EnrollNo: "G8A003", status: "Present" },
-      { id: 4, name: "Ananya Das", EnrollNo: "G8A004", status: "Present" },
-    ],
-    "Grade 9 - B": [
-      { id: 1, name: "Vivek Sharma", EnrollNo: "G9B001", status: "Present" },
-      { id: 2, name: "Sneha Gupta", EnrollNo: "G9B002", status: "Absent" },
-      { id: 3, name: "Arjun Patel", EnrollNo: "G9B003", status: "Absent" },
-      { id: 4, name: "Riya Mehta", EnrollNo: "G9B004", status: "Present" },
-    ],
-    "Grade 10 - A": [
-      { id: 1, name: "Aditya Rao", EnrollNo: "G10A001", status: "Present" },
-      { id: 2, name: "Priya Singh", EnrollNo: "G10A002", status: "Present" },
-      { id: 3, name: "Karan Das", EnrollNo: "G10A003", status: "Present" },
-      { id: 4, name: "Meera Iyer", EnrollNo: "G10A004", status: "Absent" },
-    ],
-  };
+  // Filters
+  const [selectedClass, setSelectedClass] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
 
-  const selectedRecords = selectedClass
-    ? attendanceRecords[selectedClass] || []
-    : [];
+  // Data
+  const [classes, setClasses] = useState([]);              // [{_id, name, grade, ...}]
+  const [selectedRecords, setSelectedRecords] = useState([]); // [{id, name, enrollNo, status}]
+  const [summary, setSummary] = useState({ total: 0, present: 0, absent: 0 });
+
+  // Status
+  const [loadingClasses, setLoadingClasses] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  // Load class list once
+  useEffect(() => {
+    const loadClasses = async () => {
+      try {
+        setLoadingClasses(true);
+        const res = await API.get("/classes");
+        setClasses(res.data || []);
+      } catch (e) {
+        console.error("Error fetching classes:", e);
+      } finally {
+        setLoadingClasses(false);
+      }
+    };
+    loadClasses();
+  }, []);
+
+  // Load history whenever filters change
+  useEffect(() => {
+    const fetchHistory = async () => {
+      if (!selectedClass) {
+        setSelectedRecords([]);
+        setSummary({ total: 0, present: 0, absent: 0 });
+        return;
+      }
+      try {
+        setLoadingHistory(true);
+        const params = new URLSearchParams({ className: selectedClass });
+        if (selectedDate) params.append("date", selectedDate);
+
+        const res = await API.get(`/attendance/history?${params.toString()}`);
+        const data = res.data || {};
+        setSelectedRecords(data.records || []);
+        setSummary({
+          total: data.total || 0,
+          present: data.present || 0,
+          absent: data.absent || 0,
+        });
+      } catch (e) {
+        console.error("Error fetching attendance history:", e);
+        setSelectedRecords([]);
+        setSummary({ total: 0, present: 0, absent: 0 });
+      } finally {
+        setLoadingHistory(false);
+      }
+    };
+    fetchHistory();
+  }, [selectedClass, selectedDate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-red-50 dark:from-gray-900 dark:to-gray-800 p-6 md:p-10 transition-all duration-500">
@@ -52,15 +86,19 @@ const AttendanceHistory = () => {
 
         {/* Filters */}
         <div className="flex flex-col md:flex-row justify-between gap-4 mb-10">
+          {/* Class select uses real classes (value is className) */}
           <select
             className="border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-red-700 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800"
             value={selectedClass}
             onChange={(e) => setSelectedClass(e.target.value)}
+            disabled={loadingClasses}
           >
-            <option value="">Select Class</option>
-            <option value="Grade 8 - A">Grade 8 - A</option>
-            <option value="Grade 9 - B">Grade 9 - B</option>
-            <option value="Grade 10 - A">Grade 10 - A</option>
+            <option value="">{loadingClasses ? "Loading classes..." : "Select Class"}</option>
+            {classes.map((c) => (
+              <option key={c._id} value={c.name}>
+                {c.name} {c.grade ? `(${c.grade})` : ""}
+              </option>
+            ))}
           </select>
 
           <input
@@ -74,6 +112,8 @@ const AttendanceHistory = () => {
             onClick={() => {
               setSelectedClass("");
               setSelectedDate("");
+              setSelectedRecords([]);
+              setSummary({ total: 0, present: 0, absent: 0 });
             }}
             className="w-full md:w-1/4 bg-red-800 hover:bg-red-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition-all duration-300"
           >
@@ -101,7 +141,13 @@ const AttendanceHistory = () => {
               </tr>
             </thead>
             <tbody>
-              {selectedRecords.length > 0 ? (
+              {loadingHistory ? (
+                <tr>
+                  <td colSpan="4" className="text-center py-6 text-gray-500 dark:text-gray-400">
+                    Loading attendance...
+                  </td>
+                </tr>
+              ) : selectedRecords.length > 0 ? (
                 selectedRecords.map((student, index) => (
                   <tr
                     key={index}
@@ -114,7 +160,7 @@ const AttendanceHistory = () => {
                       {student.name}
                     </td>
                     <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
-                      {student.enroll}
+                      {student.enrollNo /* <-- from backend */}
                     </td>
                     <td
                       className={`px-6 py-4 font-semibold ${
@@ -150,12 +196,7 @@ const AttendanceHistory = () => {
           </h2>
           {selectedClass ? (
             <p className="text-gray-700 dark:text-gray-300">
-              Total Students: {selectedRecords.length} | Present:{" "}
-              {
-                selectedRecords.filter((s) => s.status === "Present").length
-              }{" "}
-              | Absent:{" "}
-              {selectedRecords.filter((s) => s.status === "Absent").length}
+              Total Students: {summary.total} | Present: {summary.present} | Absent: {summary.absent}
             </p>
           ) : (
             <p className="text-gray-700 dark:text-gray-300">
