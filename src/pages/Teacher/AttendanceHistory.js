@@ -11,29 +11,11 @@ const AttendanceHistory = () => {
   const [selectedDate, setSelectedDate] = useState("");
 
   // Data
-  const [classes, setClasses] = useState([]);              // [{_id, name, grade, ...}]
   const [selectedRecords, setSelectedRecords] = useState([]); // [{id, name, enrollNo, status}]
   const [summary, setSummary] = useState({ total: 0, present: 0, absent: 0 });
 
   // Status
-  const [loadingClasses, setLoadingClasses] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
-
-  // Load class list once
-  useEffect(() => {
-    const loadClasses = async () => {
-      try {
-        setLoadingClasses(true);
-        const res = await API.get("/classes");
-        setClasses(res.data || []);
-      } catch (e) {
-        console.error("Error fetching classes:", e);
-      } finally {
-        setLoadingClasses(false);
-      }
-    };
-    loadClasses();
-  }, []);
 
   // Load history whenever filters change
   useEffect(() => {
@@ -86,21 +68,6 @@ const AttendanceHistory = () => {
 
         {/* Filters */}
         <div className="flex flex-col md:flex-row justify-between gap-4 mb-10">
-          {/* Class select uses real classes (value is className) */}
-          <select
-            className="border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-red-700 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800"
-            value={selectedClass}
-            onChange={(e) => setSelectedClass(e.target.value)}
-            disabled={loadingClasses}
-          >
-            <option value="">{loadingClasses ? "Loading classes..." : "Select Class"}</option>
-            {classes.map((c) => (
-              <option key={c._id} value={c.name}>
-                {c.name} {c.grade ? `(${c.grade})` : ""}
-              </option>
-            ))}
-          </select>
-
           <input
             type="date"
             className="border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-red-700 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800"
@@ -130,10 +97,10 @@ const AttendanceHistory = () => {
                   SI No
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold uppercase">
-                  Student Name
+                  Enrollment No
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold uppercase">
-                  Enrollment No
+                  Student Name
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold uppercase">
                   Status
@@ -143,7 +110,10 @@ const AttendanceHistory = () => {
             <tbody>
               {loadingHistory ? (
                 <tr>
-                  <td colSpan="4" className="text-center py-6 text-gray-500 dark:text-gray-400">
+                  <td
+                    colSpan="4"
+                    className="text-center py-6 text-gray-500 dark:text-gray-400"
+                  >
                     Loading attendance...
                   </td>
                 </tr>
@@ -154,13 +124,13 @@ const AttendanceHistory = () => {
                     className="hover:bg-red-50 dark:hover:bg-gray-800 transition duration-300"
                   >
                     <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
-                      {student.id}
+                      {index + 1}
+                    </td>
+                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
+                      {student.enrollNo}
                     </td>
                     <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
                       {student.name}
-                    </td>
-                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
-                      {student.enrollNo /* <-- from backend */}
                     </td>
                     <td
                       className={`px-6 py-4 font-semibold ${
@@ -196,7 +166,8 @@ const AttendanceHistory = () => {
           </h2>
           {selectedClass ? (
             <p className="text-gray-700 dark:text-gray-300">
-              Total Students: {summary.total} | Present: {summary.present} | Absent: {summary.absent}
+              Total Students: {summary.total} | Present: {summary.present} | Absent:{" "}
+              {summary.absent}
             </p>
           ) : (
             <p className="text-gray-700 dark:text-gray-300">
