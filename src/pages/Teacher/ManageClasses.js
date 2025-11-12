@@ -34,7 +34,6 @@ const ManageClasses = () => {
     contact: "",
   });
 
-  // ✅ Fetch all classes from backend
   useEffect(() => {
     fetchClasses();
   }, []);
@@ -55,7 +54,6 @@ const ManageClasses = () => {
     }
   };
 
-  // ✅ Add or Update Class (POST or PUT)
   const handleAddOrUpdateClass = async () => {
     if (
       !newClass.name ||
@@ -100,7 +98,6 @@ const ManageClasses = () => {
     });
   };
 
-  // ✅ Edit class
   const handleEditClass = (cls) => {
     setEditClass(cls);
     setNewClass({
@@ -113,7 +110,6 @@ const ManageClasses = () => {
     setShowAddClassModal(true);
   };
 
-  // ✅ Delete class
   const handleDeleteClass = async (id) => {
     if (!window.confirm("Are you sure you want to delete this class?")) return;
     try {
@@ -124,7 +120,6 @@ const ManageClasses = () => {
     }
   };
 
-  // ✅ View class and its students
   const handleViewClass = async (cls) => {
     try {
       const res = await axios.get(`${STUDENT_API_URL}/class/${cls._id}`);
@@ -136,7 +131,6 @@ const ManageClasses = () => {
     }
   };
 
-  // ✅ Add or update student
   const handleSaveStudent = async () => {
     if (!newStudent.name || !newStudent.enrollNo || !newStudent.contact) {
       return alert("Please fill all student fields");
@@ -154,7 +148,6 @@ const ManageClasses = () => {
         await axios.post(STUDENT_API_URL, payload);
       }
 
-      // Refresh student list without closing modal
       const res = await axios.get(`${STUDENT_API_URL}/class/${selectedClass._id}`);
       setSelectedClass({ ...selectedClass, studentList: res.data });
 
@@ -171,7 +164,6 @@ const ManageClasses = () => {
     setNewStudent({ name: "", enrollNo: "", contact: "" });
   };
 
-  // ✅ Edit student
   const handleEditStudent = (stu) => {
     setEditStudent(stu);
     setNewStudent({
@@ -182,7 +174,6 @@ const ManageClasses = () => {
     setShowStudentModal(true);
   };
 
-  // ✅ Delete student
   const handleDeleteStudent = async (id) => {
     if (!window.confirm("Are you sure you want to delete this student?")) return;
     try {
@@ -194,7 +185,6 @@ const ManageClasses = () => {
     }
   };
 
-  // ✅ View student profile (placeholder)
   const handleViewStudentProfile = (student) => {
     navigate(`/student/${student._id}`, { state: { student } });
   };
@@ -246,8 +236,8 @@ const ManageClasses = () => {
               <th className="p-3 text-center">Class Name</th>
               <th className="p-3 text-center">Grade</th>
               <th className="p-3 text-center">Total Students</th>
-              <th className="p-3 text-center">Start Date</th>
-              <th className="p-3 text-center">End Date</th>
+              <th className="p-3 text-center hidden md:table-cell">Start Date</th>
+              <th className="p-3 text-center hidden md:table-cell">End Date</th>
               <th className="p-3 text-center">Actions</th>
             </tr>
           </thead>
@@ -257,8 +247,8 @@ const ManageClasses = () => {
                 <td className="p-1 font-medium text-gray-800">{cls.name}</td>
                 <td className="p-1">{cls.grade}</td>
                 <td className="p-2">{cls.students}</td>
-                <td className="p-2">{cls.startDate?.slice(0, 10)}</td>
-                <td className="p-2">{cls.endDate?.slice(0, 10)}</td>
+                <td className="p-2 hidden md:table-cell">{cls.startDate?.slice(0, 10)}</td>
+                <td className="p-2 hidden md:table-cell">{cls.endDate?.slice(0, 10)}</td>
                 <td className="p-2 text-center">
                   <div className="flex justify-center gap-2">
                     <button
@@ -297,10 +287,10 @@ const ManageClasses = () => {
         </table>
       </div>
 
-      {/* ✅ Class Modal (Student Management) */}
+      {/* ✅ Scrollable Class Modal */}
       {showClassModal && selectedClass && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-3xl relative">
+          <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-3xl relative overflow-y-auto max-h-[80vh] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
             <button
               onClick={() => setShowClassModal(false)}
               className="absolute top-3 right-3 text-gray-500 hover:text-red-600"
@@ -312,8 +302,8 @@ const ManageClasses = () => {
               {selectedClass.name} — Manage Students
             </h2>
 
-            <div className="flex justify-between items-center mb-4">
-              <p className="text-gray-600">
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
+              <p className="text-gray-600 text-sm sm:text-base">
                 Total Allowed: <b>{selectedClass.students}</b> | Added:{" "}
                 <b>{selectedClass.studentList.length}</b>
               </p>
@@ -330,12 +320,12 @@ const ManageClasses = () => {
             </div>
 
             <table className="w-full border-collapse text-sm">
-              <thead className="bg-red-100 text-red-800">
+              <thead className="bg-red-100 text-red-800 sticky top-0">
                 <tr>
                   <th className="p-1 text-center">SI No</th>
                   <th className="p-1 text-center">Student Name</th>
                   <th className="p-1 text-center">Enroll No</th>
-                  <th className="p-1 text-center">Contact</th>
+                  <th className="p-1 text-center hidden sm:table-cell">Contact</th>
                   <th className="p-1 text-center">Actions</th>
                 </tr>
               </thead>
@@ -345,7 +335,7 @@ const ManageClasses = () => {
                     <td className="p-1">{index + 1}</td>
                     <td className="p-1">{stu.name}</td>
                     <td className="p-1">{stu.enrollNo}</td>
-                    <td className="p-1">{stu.contact}</td>
+                    <td className="p-1 hidden sm:table-cell">{stu.contact}</td>
                     <td className="p-1 px-4 text-center">
                       <div className="flex justify-center gap-2">
                         <button
@@ -386,10 +376,10 @@ const ManageClasses = () => {
         </div>
       )}
 
-      {/* Add/Edit Student Modal */}
+      {/* ✅ Scrollable Student Modal */}
       {showStudentModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md relative">
+          <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md relative overflow-y-auto max-h-[80vh] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
             <button
               onClick={closeStudentModal}
               className="absolute top-3 right-3 text-gray-500 hover:text-red-600"
@@ -448,10 +438,10 @@ const ManageClasses = () => {
         </div>
       )}
 
-      {/* Add/Edit Class Modal */}
+      {/* ✅ Scrollable Add/Edit Class Modal */}
       {showAddClassModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md relative">
+          <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md relative overflow-y-auto max-h-[80vh] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
             <button
               onClick={closeClassModal}
               className="absolute top-3 right-3 text-gray-500 hover:text-red-600"
@@ -493,14 +483,14 @@ const ManageClasses = () => {
                 }
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-600"
               />
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="date"
                   value={newClass.startDate}
                   onChange={(e) =>
                     setNewClass({ ...newClass, startDate: e.target.value })
                   }
-                  className="w-1/2 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-600"
+                  className="w-full sm:w-1/2 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-600"
                 />
                 <input
                   type="date"
@@ -508,7 +498,7 @@ const ManageClasses = () => {
                   onChange={(e) =>
                     setNewClass({ ...newClass, endDate: e.target.value })
                   }
-                  className="w-1/2 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-600"
+                  className="w-full sm:w-1/2 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-600"
                 />
               </div>
             </div>
