@@ -3,7 +3,7 @@ import axios from "axios";
 import { BookOpen, Plus, Eye, Trash2, X, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const grades = ["6", "7", "8", "9", "10", "11", "12"];
+const grades = ["1","2","3","4","5","6", "7", "8", "9", "10", "11", "12"];
 
 const ManageClasses = () => {
   const API_URL = "http://localhost:5000/api/classes";
@@ -45,8 +45,9 @@ const ManageClasses = () => {
         res.data.map((cls) => ({
           ...cls,
           id: cls._id,
-          students: cls.studentsLimit,
-          studentList: [],
+          // ensure numeric
+          students: Number(cls.studentsLimit) || 0,
+          studentList: [], // loaded when clicking view
         }))
       );
     } catch (err) {
@@ -68,7 +69,7 @@ const ManageClasses = () => {
       const payload = {
         name: newClass.name,
         grade: newClass.grade,
-        studentsLimit: newClass.students,
+        studentsLimit: Number(newClass.students),
         startDate: newClass.startDate,
         endDate: newClass.endDate,
       };
@@ -83,6 +84,7 @@ const ManageClasses = () => {
       closeClassModal();
     } catch (err) {
       console.error("Error saving class:", err);
+      alert("Error saving class. See console for details.");
     }
   };
 
@@ -104,8 +106,8 @@ const ManageClasses = () => {
       name: cls.name,
       grade: cls.grade,
       students: cls.students,
-      startDate: cls.startDate.split("T")[0],
-      endDate: cls.endDate.split("T")[0],
+      startDate: cls.startDate?.split("T")[0] || "",
+      endDate: cls.endDate?.split("T")[0] || "",
     });
     setShowAddClassModal(true);
   };
@@ -117,23 +119,46 @@ const ManageClasses = () => {
       await fetchClasses();
     } catch (err) {
       console.error("Error deleting class:", err);
+      alert("Failed to delete class.");
     }
   };
 
   const handleViewClass = async (cls) => {
     try {
       const res = await axios.get(`${STUDENT_API_URL}/class/${cls._id}`);
-      const updatedClass = { ...cls, studentList: res.data };
+      // ensure ordering and consistent fields
+      const studentsList = Array.isArray(res.data) ? res.data : [];
+      // Sort alphabetically by name (optional; you requested alphabetical earlier)
+      studentsList.sort((a, b) => a.name.localeCompare(b.name));
+      const updatedClass = { ...cls, studentList: studentsList };
       setSelectedClass(updatedClass);
       setShowClassModal(true);
     } catch (err) {
       console.error("Error fetching students:", err);
+      alert("Error loading students for this class.");
     }
   };
 
+  // ✅ Add or update student (client-side limit check added)
   const handleSaveStudent = async () => {
     if (!newStudent.name || !newStudent.enrollNo || !newStudent.contact) {
       return alert("Please fill all student fields");
+    }
+
+    // Defensive: ensure selectedClass exists
+    if (!selectedClass || !selectedClass._id) {
+      return alert("No class selected. Please open the class first.");
+    }
+
+    // convert limit to number
+    const limit = Number(selectedClass.students) || 0;
+    const currentCount = Array.isArray(selectedClass.studentList)
+      ? selectedClass.studentList.length
+      : 0;
+
+    // If adding (not editing) then enforce limit on client-side
+    if (!editStudent && limit > 0 && currentCount >= limit) {
+      return alert(`Cannot add student — class limit reached (${limit}).`);
     }
 
     try {
@@ -143,18 +168,34 @@ const ManageClasses = () => {
       };
 
       if (editStudent) {
+        // update student
         await axios.put(`${STUDENT_API_URL}/${editStudent._id}`, payload);
       } else {
-        await axios.post(STUDENT_API_URL, payload);
+        // create student
+        const res = await axios.post(STUDENT_API_URL, payload);
+        // server might reject when limit reached; handle it below
+        if (res.status !== 201 && res.status !== 200) {
+          throw new Error("Unexpected response from server");
+        }
       }
 
       const res = await axios.get(`${STUDENT_API_URL}/class/${selectedClass._id}`);
       setSelectedClass({ ...selectedClass, studentList: res.data });
+      // Refresh student list after create/update
+      const res2 = await axios.get(`${STUDENT_API_URL}/class/${selectedClass._id}`);
+      const studentsList = Array.isArray(res2.data) ? res2.data : [];
+      studentsList.sort((a, b) => a.name.localeCompare(b.name)); // alphabetical
+      setSelectedClass({ ...selectedClass, studentList: studentsList });
 
       closeStudentModal();
     } catch (err) {
       console.error("Error saving student:", err);
-      alert("Error saving student");
+      // if backend returns JSON error message, show that
+      const msg =
+        err?.response?.data?.message ??
+        err?.message ??
+        "Error saving student. Please try again.";
+      alert(msg);
     }
   };
 
@@ -179,9 +220,12 @@ const ManageClasses = () => {
     try {
       await axios.delete(`${STUDENT_API_URL}/${id}`);
       const res = await axios.get(`${STUDENT_API_URL}/class/${selectedClass._id}`);
-      setSelectedClass({ ...selectedClass, studentList: res.data });
+      const studentsList = Array.isArray(res.data) ? res.data : [];
+      studentsList.sort((a, b) => a.name.localeCompare(b.name));
+      setSelectedClass({ ...selectedClass, studentList: studentsList });
     } catch (err) {
       console.error("Error deleting student:", err);
+      alert("Error deleting student.");
     }
   };
 
@@ -288,6 +332,7 @@ const ManageClasses = () => {
       </div>
 
       {/* ✅ Scrollable Class Modal */}
+      {/* Class Modal (Student Management) */}
       {showClassModal && selectedClass && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50 p-4">
           <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-3xl relative overflow-y-auto max-h-[80vh] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
@@ -322,7 +367,7 @@ const ManageClasses = () => {
             <table className="w-full border-collapse text-sm">
               <thead className="bg-red-100 text-red-800 sticky top-0">
                 <tr>
-                  <th className="p-1 text-center">SI No</th>
+                  <th className="p-1 text-center">Roll No</th>
                   <th className="p-1 text-center">Student Name</th>
                   <th className="p-1 text-center">Enroll No</th>
                   <th className="p-1 text-center hidden sm:table-cell">Contact</th>
@@ -332,7 +377,7 @@ const ManageClasses = () => {
               <tbody>
                 {selectedClass.studentList.map((stu, index) => (
                   <tr key={stu._id} className="border-b hover:bg-gray-50 text-center">
-                    <td className="p-1">{index + 1}</td>
+                    <td className="p-1">{stu.enrollNo || `#${index + 1}`}</td>
                     <td className="p-1">{stu.name}</td>
                     <td className="p-1">{stu.enrollNo}</td>
                     <td className="p-1 hidden sm:table-cell">{stu.contact}</td>
