@@ -197,7 +197,7 @@ const AttendanceHistory = () => {
           <table className="min-w-full border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
             <thead className="bg-red-800 text-white">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold uppercase">SI No</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold uppercase">Roll No</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold uppercase">Student Name</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold uppercase">Enrollment No</th>
                 {matrixDays.map((d) => (

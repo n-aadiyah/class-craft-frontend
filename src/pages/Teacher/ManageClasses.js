@@ -3,7 +3,7 @@ import axios from "axios";
 import { BookOpen, Plus, Eye, Trash2, X, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const grades = ["6", "7", "8", "9", "10", "11", "12"];
+const grades = ["1","2","3","4","5","6", "7", "8", "9", "10", "11", "12"];
 
 const ManageClasses = () => {
   const API_URL = "http://localhost:5000/api/classes";
@@ -332,7 +332,7 @@ const ManageClasses = () => {
             <table className="w-full border-collapse text-sm">
               <thead className="bg-red-100 text-red-800">
                 <tr>
-                  <th className="p-1 text-center">SI No</th>
+                  <th className="p-1 text-center">Roll No</th>
                   <th className="p-1 text-center">Student Name</th>
                   <th className="p-1 text-center">Enroll No</th>
                   <th className="p-1 text-center">Contact</th>
