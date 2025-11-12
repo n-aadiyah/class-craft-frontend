@@ -156,7 +156,7 @@ const AttendanceRegister = () => {
             <table className="w-full border-collapse text-sm md:text-base">
               <thead className="bg-red-100 text-red-800 text-center font-serif">
                 <tr>
-                  <th className="p-2 text-center w-1/12">#</th>
+                  <th className="p-2 text-center w-1/12">Roll No</th>
                   <th className="p-2 text-center w-1/6">Student Name</th>
                   <th className="p-2 text-center w-1/6">Enroll No</th>
                   <th className="p-2 text-center w-1/6">Status</th>

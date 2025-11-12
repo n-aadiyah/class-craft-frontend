@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import API from "../../api/axiosInstance";
 
 const AttendanceHistory = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Preselect current month/year
   const now = new Date();
@@ -26,25 +27,80 @@ const AttendanceHistory = () => {
   // Guard for out-of-order responses
   const latestReqId = useRef(0);
 
-  // 1) Load classes once
+  // store the passed-in className from location.state (if any)
+  const passedClassRef = useRef(null);
+
+  // 0) Read location.state once and store passed className (support multiple keys)
   useEffect(() => {
+    try {
+      const st = location?.state || {};
+      // support multiple shapes: { class: cls }, { cls: cls }, { className: '...' }
+      const clsObj = st.class || st.cls || null;
+      const clsNameFromObj = clsObj?.name;
+      const clsNameFromParam = st.className || null;
+
+      const chosen = clsNameFromObj || clsNameFromParam || null;
+      if (chosen) {
+        passedClassRef.current = String(chosen).trim();
+        console.log("[AttendanceHistory] passed class from location.state:", passedClassRef.current);
+        // set it eagerly so UI reflects the clicked class quickly
+        setSelectedClass(passedClassRef.current);
+      }
+      // Also accept query param className in URL ?className=...
+      const qParam = new URLSearchParams(location.search).get("className");
+      if (!passedClassRef.current && qParam) {
+        passedClassRef.current = String(qParam).trim();
+        setSelectedClass(passedClassRef.current);
+        console.log("[AttendanceHistory] passed class from query param:", passedClassRef.current);
+      }
+    } catch (e) {
+      console.warn("Error reading location.state in AttendanceHistory:", e);
+    }
+    // only run when location changes
+  }, [location]);
+
+  // 1) Load classes once. Do not overwrite selectedClass if already set by location.state.
+  useEffect(() => {
+    let mounted = true;
     const loadClasses = async () => {
       try {
         setLoadingClasses(true);
-        const res = await API.get("/classes");
+        const res = await API.get("/classes", { headers: { "Cache-Control": "no-cache" } });
         const list = Array.isArray(res.data) ? res.data : [];
+        // alphabetical for UX
+        list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+        if (!mounted) return;
         setClasses(list);
-        // Auto-select first class if none chosen
-        if (list.length && !selectedClass) {
+
+        // if we already have a selected class (passed from location/state), prefer it
+        if (passedClassRef.current) {
+          // ensure it exists in the fetched list
+          const found = list.find((c) => String(c.name).trim() === String(passedClassRef.current).trim());
+          if (found) {
+            setSelectedClass(found.name);
+            console.log("[AttendanceHistory] selectedClass set from passedClassRef:", found.name);
+            return;
+          } else {
+            // passed class not found — still set (backend may accept string), but log it
+            console.warn("[AttendanceHistory] passed class not found in classes list:", passedClassRef.current);
+            setSelectedClass(passedClassRef.current);
+            return;
+          }
+        }
+
+        // otherwise, if no selectedClass set and we have classes, auto-select first
+        if (!selectedClass && list.length) {
           setSelectedClass(list[0].name);
+          console.log("[AttendanceHistory] auto-selected first class:", list[0].name);
         }
       } catch (e) {
         console.error("Error fetching classes:", e);
       } finally {
-        setLoadingClasses(false);
+        if (mounted) setLoadingClasses(false);
       }
     };
     loadClasses();
+    return () => { mounted = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -59,17 +115,22 @@ const AttendanceHistory = () => {
         setMatrixRows([]);
         return;
       }
+
       try {
         setLoadingMonthly(true);
-        // Normalize className (trim to avoid trailing spaces), add cache-buster
+
+        // normalize and trim
+        const classNameTrim = String(selectedClass).trim();
         const params = new URLSearchParams({
-          className: selectedClass.trim(),
+          className: classNameTrim,
           month: String(month),
           year: String(year),
-          _t: Date.now().toString(), // cache buster to avoid 304+stale body issues
+          _t: Date.now().toString(), // cache buster
         });
 
         const url = `/attendance/monthly?${params.toString()}`;
+        console.log("[AttendanceHistory] fetching monthly for:", { url, className: classNameTrim });
+
         const res = await API.get(url, {
           signal: controller.signal,
           headers: {
@@ -78,13 +139,14 @@ const AttendanceHistory = () => {
           },
         });
 
-        // Ignore out-of-order responses
-        if (reqId !== latestReqId.current) return;
+        if (reqId !== latestReqId.current) {
+          console.log("[AttendanceHistory] ignoring out-of-order response", reqId);
+          return;
+        }
 
         setMatrixDays(res.data?.days || []);
-        setMatrixRows(res.data?.students || []);
+        setMatrixRows(Array.isArray(res.data?.students) ? res.data.students : []);
       } catch (e) {
-        // Ignore abort errors
         if (e.name === "CanceledError" || e.code === "ERR_CANCELED") return;
         console.error("Error fetching monthly attendance:", e);
         setMatrixDays([]);
@@ -145,7 +207,7 @@ const AttendanceHistory = () => {
             </option>
             {classes.map((c) => (
               <option key={c._id} value={c.name}>
-                {c.name}{c.grade ? ` (${c.grade})` : ""}
+                {c.name}{c.grade ? ` ` : ""}
               </option>
             ))}
           </select>
@@ -197,7 +259,7 @@ const AttendanceHistory = () => {
           <table className="min-w-full border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
             <thead className="bg-red-800 text-white">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold uppercase">SI No</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold uppercase">Roll No</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold uppercase">Student Name</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold uppercase">Enrollment No</th>
                 {matrixDays.map((d) => (
