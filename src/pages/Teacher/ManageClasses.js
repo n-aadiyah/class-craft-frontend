@@ -1,14 +1,15 @@
+// src/pages/ManageClasses.js
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+// switched to API instance (must export axios instance that sets Authorization header)
+import API from "../../api/axiosInstance";
 import { BookOpen, Plus, Eye, Trash2, X, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const grades = ["1","2","3","4","5","6", "7", "8", "9", "10", "11", "12"];
 
 const ManageClasses = () => {
-  const API_URL = "http://localhost:5000/api/classes";
-  const STUDENT_API_URL = "http://localhost:5000/api/students";
-
+  // NOTE: API should have baseURL set (eg: http://localhost:5000/api) and attach Authorization header
+  // e.g. API.get("/classes/my-classes") -> hits http://localhost:5000/api/classes/my-classes
   const navigate = useNavigate();
 
   const [classes, setClasses] = useState([]);
@@ -38,20 +39,23 @@ const ManageClasses = () => {
     fetchClasses();
   }, []);
 
+  // Fetch classes owned by logged-in teacher (backend: GET /classes/my-classes)
   const fetchClasses = async () => {
     try {
-      const res = await axios.get(API_URL);
+      const res = await API.get("/classes/my-classes");
+      const data = Array.isArray(res.data) ? res.data : [];
       setClasses(
-        res.data.map((cls) => ({
+        data.map((cls) => ({
           ...cls,
           id: cls._id,
-          // ensure numeric
           students: Number(cls.studentsLimit) || 0,
-          studentList: [], // loaded when clicking view
+          studentList: [], // lazy load
         }))
       );
     } catch (err) {
       console.error("Error fetching classes:", err);
+      const msg = err?.response?.data?.message || err.message || "Failed to fetch classes";
+      alert(msg);
     }
   };
 
@@ -62,8 +66,7 @@ const ManageClasses = () => {
       !newClass.students ||
       !newClass.startDate ||
       !newClass.endDate
-    )
-      return alert("Please fill all fields");
+    ) return alert("Please fill all fields");
 
     try {
       const payload = {
@@ -75,16 +78,17 @@ const ManageClasses = () => {
       };
 
       if (editClass) {
-        await axios.put(`${API_URL}/${editClass.id}`, payload);
+        await API.put(`/classes/${editClass.id}`, payload);
       } else {
-        await axios.post(API_URL, payload);
+        await API.post("/classes", payload);
       }
 
       await fetchClasses();
       closeClassModal();
     } catch (err) {
       console.error("Error saving class:", err);
-      alert("Error saving class. See console for details.");
+      const msg = err?.response?.data?.message || "Error saving class";
+      alert(msg);
     }
   };
 
@@ -115,48 +119,46 @@ const ManageClasses = () => {
   const handleDeleteClass = async (id) => {
     if (!window.confirm("Are you sure you want to delete this class?")) return;
     try {
-      await axios.delete(`${API_URL}/${id}`);
+      await API.delete(`/classes/${id}`);
       await fetchClasses();
     } catch (err) {
       console.error("Error deleting class:", err);
-      alert("Failed to delete class.");
+      const msg = err?.response?.data?.message || "Failed to delete class";
+      alert(msg);
     }
   };
 
+  // View students for class — uses auth and ownership check on backend (GET /students/class/:classId)
   const handleViewClass = async (cls) => {
     try {
-      const res = await axios.get(`${STUDENT_API_URL}/class/${cls._id}`);
-      // ensure ordering and consistent fields
+      const res = await API.get(`/students/class/${cls._id}`);
       const studentsList = Array.isArray(res.data) ? res.data : [];
-      // Sort alphabetically by name (optional; you requested alphabetical earlier)
       studentsList.sort((a, b) => a.name.localeCompare(b.name));
       const updatedClass = { ...cls, studentList: studentsList };
       setSelectedClass(updatedClass);
       setShowClassModal(true);
     } catch (err) {
       console.error("Error fetching students:", err);
-      alert("Error loading students for this class.");
+      const status = err?.response?.status;
+      if (status === 403) return alert("You don't have permission to view students for this class.");
+      const msg = err?.response?.data?.message || "Error loading students for this class.";
+      alert(msg);
     }
   };
 
-  // ✅ Add or update student (client-side limit check added)
+  // Add / update student (server enforces class ownership & limit)
   const handleSaveStudent = async () => {
-    if (!newStudent.name || !newStudent.enrollNo || !newStudent.contact) {
+    if (!newStudent.name || !newStudent.contact) {
       return alert("Please fill all student fields");
     }
 
-    // Defensive: ensure selectedClass exists
     if (!selectedClass || !selectedClass._id) {
-      return alert("No class selected. Please open the class first.");
+      return alert("No class selected. Open a class first.");
     }
 
-    // convert limit to number
     const limit = Number(selectedClass.students) || 0;
-    const currentCount = Array.isArray(selectedClass.studentList)
-      ? selectedClass.studentList.length
-      : 0;
+    const currentCount = Array.isArray(selectedClass.studentList) ? selectedClass.studentList.length : 0;
 
-    // If adding (not editing) then enforce limit on client-side
     if (!editStudent && limit > 0 && currentCount >= limit) {
       return alert(`Cannot add student — class limit reached (${limit}).`);
     }
@@ -168,33 +170,22 @@ const ManageClasses = () => {
       };
 
       if (editStudent) {
-        // update student
-        await axios.put(`${STUDENT_API_URL}/${editStudent._id}`, payload);
+        await API.put(`/students/${editStudent._id}`, payload);
       } else {
-        // create student
-        const res = await axios.post(STUDENT_API_URL, payload);
-        // server might reject when limit reached; handle it below
-        if (res.status !== 201 && res.status !== 200) {
-          throw new Error("Unexpected response from server");
-        }
+        await API.post("/students", payload);
       }
 
-      const res = await axios.get(`${STUDENT_API_URL}/class/${selectedClass._id}`);
-      setSelectedClass({ ...selectedClass, studentList: res.data });
-      // Refresh student list after create/update
-      const res2 = await axios.get(`${STUDENT_API_URL}/class/${selectedClass._id}`);
+      // refresh students
+      const res2 = await API.get(`/students/class/${selectedClass._id}`);
       const studentsList = Array.isArray(res2.data) ? res2.data : [];
-      studentsList.sort((a, b) => a.name.localeCompare(b.name)); // alphabetical
+      studentsList.sort((a, b) => a.name.localeCompare(b.name));
       setSelectedClass({ ...selectedClass, studentList: studentsList });
 
       closeStudentModal();
     } catch (err) {
       console.error("Error saving student:", err);
-      // if backend returns JSON error message, show that
-      const msg =
-        err?.response?.data?.message ??
-        err?.message ??
-        "Error saving student. Please try again.";
+      // If backend returned duplicate/enroll limit error, show message
+      const msg = err?.response?.data?.message || err.message || "Error saving student";
       alert(msg);
     }
   };
@@ -218,14 +209,15 @@ const ManageClasses = () => {
   const handleDeleteStudent = async (id) => {
     if (!window.confirm("Are you sure you want to delete this student?")) return;
     try {
-      await axios.delete(`${STUDENT_API_URL}/${id}`);
-      const res = await axios.get(`${STUDENT_API_URL}/class/${selectedClass._id}`);
+      await API.delete(`/students/${id}`);
+      const res = await API.get(`/students/class/${selectedClass._id}`);
       const studentsList = Array.isArray(res.data) ? res.data : [];
       studentsList.sort((a, b) => a.name.localeCompare(b.name));
       setSelectedClass({ ...selectedClass, studentList: studentsList });
     } catch (err) {
       console.error("Error deleting student:", err);
-      alert("Error deleting student.");
+      const msg = err?.response?.data?.message || "Error deleting student";
+      alert(msg);
     }
   };
 
@@ -331,11 +323,10 @@ const ManageClasses = () => {
         </table>
       </div>
 
-      {/* ✅ Scrollable Class Modal */}
       {/* Class Modal (Student Management) */}
       {showClassModal && selectedClass && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-3xl relative overflow-y-auto max-h-[80vh] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+          <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-3xl relative overflow-y-auto max-h-[80vh]">
             <button
               onClick={() => setShowClassModal(false)}
               className="absolute top-3 right-3 text-gray-500 hover:text-red-600"
@@ -377,7 +368,7 @@ const ManageClasses = () => {
               <tbody>
                 {selectedClass.studentList.map((stu, index) => (
                   <tr key={stu._id} className="border-b hover:bg-gray-50 text-center">
-                    <td className="p-1">{stu.enrollNo || `#${index + 1}`}</td>
+                    <td className="p-1">{ `${index + 1}`}</td>
                     <td className="p-1">{stu.name}</td>
                     <td className="p-1">{stu.enrollNo}</td>
                     <td className="p-1 hidden sm:table-cell">{stu.contact}</td>
@@ -421,10 +412,10 @@ const ManageClasses = () => {
         </div>
       )}
 
-      {/* ✅ Scrollable Student Modal */}
+      {/* Student Modal */}
       {showStudentModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md relative overflow-y-auto max-h-[80vh] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+          <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md relative overflow-y-auto max-h-[80vh]">
             <button
               onClick={closeStudentModal}
               className="absolute top-3 right-3 text-gray-500 hover:text-red-600"
@@ -447,7 +438,7 @@ const ManageClasses = () => {
               />
               <input
                 type="text"
-                placeholder="Enroll Number"
+                placeholder="Enroll Number (optional)"
                 value={newStudent.enrollNo}
                 onChange={(e) =>
                   setNewStudent({ ...newStudent, enrollNo: e.target.value })
@@ -483,10 +474,10 @@ const ManageClasses = () => {
         </div>
       )}
 
-      {/* ✅ Scrollable Add/Edit Class Modal */}
+      {/* Add/Edit Class Modal */}
       {showAddClassModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md relative overflow-y-auto max-h-[80vh] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+          <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md relative overflow-y-auto max-h-[80vh]">
             <button
               onClick={closeClassModal}
               className="absolute top-3 right-3 text-gray-500 hover:text-red-600"
