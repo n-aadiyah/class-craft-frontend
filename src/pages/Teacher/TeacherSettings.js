@@ -3,8 +3,8 @@ import { Settings as  Upload, Bell, Globe, SunMoon } from "lucide-react";
 
 const TeacherSettings = () => {
   const [profile, setProfile] = useState({
-    name: "Ms. Shency",
-    email: "shency@example.com",
+    name: "your username",
+    email: "username@example.com",
     password: "",
     profilePic: "/Avatar.jpg",
   });
