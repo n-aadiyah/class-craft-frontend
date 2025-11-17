@@ -1,7 +1,19 @@
+// src/pages/TeacherDashboard.js
 import React from "react";
 import { BookOpen, Users, Award, BarChart3, Bell } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+
 
 const TeacherDashboard = () => {
+  const { user } = useAuth();
+
+  // display name logic: prefer user.name, then email, then generic
+  const displayName =
+    user?.name?.trim() ||
+    user?.fullName?.trim?.() ||
+    user?.email?.split?.("@")?.[0] ||
+    "Teacher";
+
   const stats = [
     {
       title: "Total Classes",
@@ -46,7 +58,7 @@ const TeacherDashboard = () => {
           Teacher Dashboard
         </h1>
         <p className="text-gray-600 text-sm sm:text-base md:text-lg mt-1">
-          Welcome back, Ms. Shency! 👋
+          Welcome back, <span className="font-semibold">{displayName}</span>! 👋
         </p>
       </div>
 
@@ -137,5 +149,4 @@ const TeacherDashboard = () => {
     </div>
   );
 };
-
 export default TeacherDashboard;

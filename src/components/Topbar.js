@@ -1,9 +1,21 @@
+// src/components/Topbar.js
 import React from "react";
 import { Menu } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const Topbar = ({ onMenuClick }) => {
+  const { user } = useAuth();
+
+  // display name fallback logic
+  const displayName =
+    user?.name?.trim() ||
+    user?.fullName?.trim?.() ||
+    user?.email?.split("@")?.[0] ||
+    "Teacher";
+
   return (
     <div className="bg-white fixed top-0 left-0 right-0 shadow-md flex flex-wrap justify-between items-center px-4 sm:px-8 py-3 z-50 border-b border-gray-200 w-full">
+      
       {/* Left: Menu + Title */}
       <div className="flex items-center gap-3 mb-2 sm:mb-0">
         <button className="text-red-700 lg:hidden" onClick={onMenuClick}>
@@ -18,8 +30,9 @@ const Topbar = ({ onMenuClick }) => {
       {/* Right: Profile Section */}
       <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
         <span className="text-gray-800 font-medium text-sm sm:text-base truncate max-w-[120px] sm:max-w-none">
-          Hello, Ms. Shency
+          Hello, {displayName}
         </span>
+
         <img
           src="/Avatar.jpg"
           alt="Teacher Avatar"

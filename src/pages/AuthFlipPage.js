@@ -1,10 +1,14 @@
+// src/pages/AuthFlipPage.js
 import React, { useState } from "react";
 import API from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
+import { useAuth } from "../context/AuthContext";
 
 const AuthPage = () => {
   const navigate = useNavigate();
+  const { setToken, setUser } = useAuth();
+
   const [isLogin, setIsLogin] = useState(true); // true = Login, false = Register
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -18,27 +22,65 @@ const AuthPage = () => {
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
+  // helper to decode token payload safely
+  const decodeJwt = (token) => {
+    if (!token) return null;
+    try {
+      const payload = token.split(".")[1];
+      const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
+      return JSON.parse(json);
+    } catch (e) {
+      console.warn("Failed to decode token", e);
+      return null;
+    }
+  };
+
+  const routeByRole = (role) => {
+    if (role === "admin") navigate("/admin/dashboard");
+    else if (role === "teacher") navigate("/teacher/dashboard");
+    else if (role === "student") navigate("/student/dashboard");
+    else navigate("/");
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
+
     try {
       const res = await API.post("/auth/login", {
         email: formData.email,
         password: formData.password,
         role: formData.role,
       });
-      const userRole = res.data.user.role;
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("role", userRole);
-      alert("🎉 Login successful!");
 
-      if (userRole === "admin") navigate("/admin/dashboard");
-      else if (userRole === "teacher") navigate("/teacher/dashboard");
-      else if (userRole === "student") navigate("/student/dashboard");
-      else navigate("/");
+      // backend may return { token, user } or just { token }
+      const token = res.data.token;
+      let user = res.data.user || null;
+
+      if (!token) throw new Error("No token returned from server");
+
+      if (!user) {
+        // decode token to extract name/email/role claims
+        const payload = decodeJwt(token);
+        user = {
+          name: payload?.name || payload?.fullName || payload?.username || payload?.email || "Teacher",
+          email: payload?.email,
+          role: payload?.role || formData.role || res.data.role,
+        };
+      }
+
+      // update central auth state (also persists to localStorage via AuthContext)
+      setToken(token);
+      setUser(user);
+
+      alert("🎉 Login successful!");
+      // route by the authoritative role (prefer user.role)
+      routeByRole(user.role);
+
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      console.error("Login failed:", err);
+      setError(err.response?.data?.message || err.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -51,16 +93,21 @@ const AuthPage = () => {
     try {
       await API.post("/auth/register", formData);
       alert("🎉 Registration successful!");
-      setTimeout(() => setIsLogin(true), 600);
+      // switch to login view and clear sensitive fields
+      setTimeout(() => {
+        setIsLogin(true);
+        setFormData({ ...formData, password: "" });
+      }, 600);
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
+      console.error("Register failed:", err);
+      setError(err.response?.data?.message || err.message || "Registration failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-<div className="relative flex items-center justify-center min-h-screen bg-black overflow-hidden text-white">
+    <div className="relative flex items-center justify-center min-h-screen bg-black overflow-hidden text-white">
       {/* Neon Glow Orbs */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="w-75 h-75 bg-red-600/30 blur-3xl rounded-full absolute top-0 left-0 animate-pulse"></div>
@@ -116,6 +163,7 @@ const AuthPage = () => {
                     className="w-full px-3 py-2 rounded-lg bg-gray-900 border border-red-500 focus:ring-2 focus:ring-red-400 focus:outline-none text-white text-sm"
                     onChange={handleChange}
                     required
+                    value={formData.role}
                   >
                     <option value="">Choose role</option>
                     <option value="student">Student</option>
@@ -135,7 +183,7 @@ const AuthPage = () => {
                 <p className="text-center text-gray-400 mt-4 text-sm">
                   Don’t have an account?{" "}
                   <span
-                    onClick={() => setIsLogin(false)}
+                    onClick={() => { setIsLogin(false); setError(""); }}
                     className="text-red-400 font-semibold  hover:text-red-300 cursor-pointer"
                   >
                     Create one 💫
@@ -199,6 +247,7 @@ const AuthPage = () => {
                     className="w-full px-3 py-2 rounded-lg bg-gray-900 border border-red-500 focus:ring-2 focus:ring-red-400 focus:outline-none text-white text-sm"
                     onChange={handleChange}
                     required
+                    value={formData.role}
                   >
                     <option value="">Choose role</option>
                     <option value="student">Student</option>
@@ -218,7 +267,7 @@ const AuthPage = () => {
                 <p className="text-center text-gray-400 mt-4 text-sm">
                   Already have an account?{" "}
                   <span
-                    onClick={() => setIsLogin(true)}
+                    onClick={() => { setIsLogin(true); setError(""); }}
                     className="text-red-400 font-semibold hover:text-red-300 cursor-pointer"
                   >
                     Login here 💫
