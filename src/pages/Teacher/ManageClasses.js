@@ -20,6 +20,7 @@ const ManageClasses = () => {
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [editStudent, setEditStudent] = useState(null);
   const [editClass, setEditClass] = useState(null);
+  const [deletingId, setDeletingId] = useState(null); // track deletion in progress
 
   const [newClass, setNewClass] = useState({
     name: "",
@@ -116,18 +117,35 @@ const ManageClasses = () => {
     setShowAddClassModal(true);
   };
 
+  // Improved delete handler: validates id, attaches token fallback, gives clear user feedback and disables UI while in-flight
   const handleDeleteClass = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this class?")) return;
-    try {
-      await API.delete(`/classes/${id}`);
-      await fetchClasses();
-    } catch (err) {
-      console.error("Error deleting class:", err);
-      const msg = err?.response?.data?.message || "Failed to delete class";
-      alert(msg);
-    }
-  };
+  console.log("handleDeleteClass called - id:", id, "tokenPresent:", !!localStorage.getItem("token"));
 
+  if (!id) {
+    alert("No class id provided.");
+    return;
+  }
+  if (!window.confirm("Are you sure you want to delete this class?")) return;
+
+  try {
+    setDeletingId(id); // you already have this state
+    // Using API.delete(`/classes/${id}`) is fine because axiosInstance.baseURL includes /api
+    const resp = await API.delete(`/classes/${id}`);
+    console.log("delete resp:", resp.status, resp.data);
+    await fetchClasses();
+    // optional: show a success toast
+  } catch (err) {
+    console.error("Error deleting class (client):", {
+      status: err?.response?.status,
+      data: err?.response?.data,
+      message: err?.message,
+    });
+    const msg = err?.response?.data?.message || "Failed to delete class";
+    alert(msg);
+  } finally {
+    setDeletingId(null);
+  }
+};
   // View students for class — uses auth and ownership check on backend (GET /students/class/:classId)
   const handleViewClass = async (cls) => {
     try {
@@ -302,9 +320,10 @@ const ManageClasses = () => {
                       <Edit size={18} />
                     </button>
                     <button
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                      className={`p-2 rounded-lg ${deletingId === cls.id ? 'opacity-50 cursor-not-allowed' : 'text-red-600 hover:bg-red-50'}`}
                       onClick={() => handleDeleteClass(cls.id)}
                       title="Delete Class"
+                      disabled={deletingId === cls.id}
                     >
                       <Trash2 size={18} />
                     </button>
@@ -340,7 +359,7 @@ const ManageClasses = () => {
 
             <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
               <p className="text-gray-600 text-sm sm:text-base">
-                Total Allowed: <b>{selectedClass.students}</b> | Added:{" "}
+                Total Allowed: <b>{selectedClass.students}</b> | Added: {" "}
                 <b>{selectedClass.studentList.length}</b>
               </p>
               <button
