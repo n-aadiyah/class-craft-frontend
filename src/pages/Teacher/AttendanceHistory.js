@@ -1,7 +1,9 @@
+// src/pages/Teacher/AttendanceHistory.js
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import API from "../../api/axiosInstance";
+import { downloadCsv } from "../../utils/download";
 
 const AttendanceHistory = () => {
   const navigate = useNavigate();
@@ -10,13 +12,13 @@ const AttendanceHistory = () => {
   // Preselect current month/year
   const now = new Date();
   const [month, setMonth] = useState(String(now.getMonth() + 1)); // "1".."12"
-  const [year, setYear] = useState(String(now.getFullYear()));    // "2025"
+  const [year, setYear] = useState(String(now.getFullYear())); // "2025"
 
   // Filters
   const [selectedClass, setSelectedClass] = useState(""); // className (string)
 
   // Data
-  const [classes, setClasses] = useState([]);       // [{_id, name, grade, ...}]
+  const [classes, setClasses] = useState([]); // [{_id, name, grade, ...}]
   const [matrixDays, setMatrixDays] = useState([]); // [1..N]
   const [matrixRows, setMatrixRows] = useState([]); // [{studentId,name,enrollNo,daily,present,absent}]
 
@@ -177,6 +179,50 @@ const AttendanceHistory = () => {
     return [current - 1, current, current + 1].map(String);
   }, []);
 
+  // -------------------
+  // Download handler
+  // -------------------
+  const handleDownload = () => {
+    if (!selectedClass || !month || !year) {
+      return alert("Please select Class, Month and Year before downloading.");
+    }
+    if (!matrixRows || matrixRows.length === 0) {
+      return alert("No attendance data to download for the selected filters.");
+    }
+
+    // Build columns: Date columns (Day 1..N) plus meta columns
+    const dayCols = matrixDays.map((d) => ({ key: `day_${d}`, label: String(d) }));
+    const columns = [
+      { key: "rollNo", label: "Roll No" },
+      { key: "studentName", label: "Student Name" },
+      { key: "enrollNo", label: "Enrollment No" },
+      ...dayCols,
+      { key: "present", label: "Present" },
+      { key: "absent", label: "Absent" },
+    ];
+
+    // Build rows: map each matrix row to the column keys
+    const rows = matrixRows.map((r, idx) => {
+      const base = {
+        rollNo: idx + 1,
+        studentName: r.name || "",
+        enrollNo: r.enrollNo || "",
+        present: r.present ?? 0,
+        absent: r.absent ?? 0,
+      };
+      // fill day_N keys from r.daily array (match matrixDays order)
+      (matrixDays || []).forEach((d, i) => {
+        const st = (r.daily && r.daily[i]) || "";
+        base[`day_${d}`] = st === "Present" ? "Present" : st === "Absent" ? "Absent" : st || "";
+      });
+      return base;
+    });
+
+    const timestamp = `${year}-${String(month).padStart(2, "0")}`;
+    const filename = `attendance_${selectedClass.replace(/\s+/g, "_")}_${timestamp}.csv`;
+    downloadCsv(filename, rows, columns);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-red-50 dark:from-gray-900 dark:to-gray-800 p-6 md:p-10 transition-all duration-500">
       <div className="max-w-6xl mx-auto bg-white/80 dark:bg-gray-900/70 backdrop-blur-lg shadow-xl rounded-2xl p-8 relative">
@@ -240,18 +286,33 @@ const AttendanceHistory = () => {
             ))}
           </select>
 
-          <button
-            onClick={() => {
-              setSelectedClass(classes[0]?.name || "");
-              setMonth(String(now.getMonth() + 1));
-              setYear(String(now.getFullYear()));
-              setMatrixDays([]);
-              setMatrixRows([]);
-            }}
-            className="w-full md:w-1/4 bg-red-800 hover:bg-red-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition-all duration-300"
-          >
-            Reset Filters
-          </button>
+          <div className="flex gap-3 w-full md:w-1/4">
+            {/* <button
+              onClick={() => {
+                setSelectedClass(classes[0]?.name || "");
+                setMonth(String(now.getMonth() + 1));
+                setYear(String(now.getFullYear()));
+                setMatrixDays([]);
+                setMatrixRows([]);
+              }}
+              className="flex-1 bg-red-800 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-300"
+            >
+              Reset Filters
+            </button> */}
+
+            <button
+              onClick={handleDownload}
+              disabled={loadingMonthly || !matrixRows.length}
+              title={loadingMonthly ? "Preparing data..." : (!matrixRows.length ? "No data to download" : "Download CSV")}
+              className={`flex-none px-4 py-2 rounded-lg font-semibold transition ${
+                loadingMonthly || !matrixRows.length
+                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                  : "bg-green-600 hover:bg-green-500 text-white"
+              }`}
+            >
+              {loadingMonthly ? "Preparing..." : "Download CSV"}
+            </button>
+          </div>
         </div>
 
         {/* Matrix Table */}
