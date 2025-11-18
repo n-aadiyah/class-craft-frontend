@@ -17,8 +17,9 @@ const subjectImages = [
   "/english1.jpg",
   "/maths.jpeg",
   "/hindi.jpeg",
+  "/malayalam.jpeg",
 ];
-const subjectNames = ["Biology", "Chemistry", "English", "Maths", "Hindi"];
+const subjectNames = ["Biology", "Chemistry", "English", "Maths", "Hindi", "Malayalam",];
 
 const LandingPage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
