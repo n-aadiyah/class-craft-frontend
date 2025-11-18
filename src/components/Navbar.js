@@ -76,8 +76,8 @@ const Navbar = () => {
     }}
     className="text-white font-semibold rounded hover:bg-white/20 px-4 py-2 text-sm transition"
   >
-    <i className="bi bi-box-arrow-in-right"></i>
     Dashboard
+        <span> <i class="bi bi-box-arrow-right text-xl"></i> </span>  
   </button>
 )}
 
