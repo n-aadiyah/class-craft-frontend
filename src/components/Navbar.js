@@ -65,6 +65,22 @@ const Navbar = () => {
         >
           Home
         </Link>
+{/* If logged-in → show dashboard button */}
+{token && user?.role && (
+  <button
+    onClick={() => {
+      if (user.role === "teacher") navigate("/teacher/dashboard");
+      else if (user.role === "student") navigate("/student/dashboard");
+      else if (user.role === "admin") navigate("/admin/dashboard");
+      else navigate("/");
+    }}
+    className="text-white font-semibold rounded hover:bg-white/20 px-4 py-2 text-sm transition"
+  >
+    <i className="bi bi-box-arrow-in-right"></i>
+    Dashboard
+  </button>
+)}
+
       </div>
 
       <hr className="border-gray-200/30 dark:border-gray-700/30 mt-4" />
