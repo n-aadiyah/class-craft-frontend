@@ -1,5 +1,7 @@
 // src/components/Sidebar.js
 import React from "react";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { Link, useLocation } from "react-router-dom";
 import {
   BookOpen,
@@ -23,6 +25,17 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: "Reward System", path: "/teacher/rewards", icon: <Award size={20} /> },
     { name: "Settings", path: "/teacher/settings", icon: <Settings size={20} /> },
   ];
+  const { setToken, setUser } = useAuth();
+const navigate = useNavigate();
+
+const handleLogout = () => {
+  setToken(null);
+  setUser(null);
+  localStorage.removeItem("token");
+  localStorage.removeItem("role");
+  navigate("/");
+};
+
 
   return (
     <>
@@ -67,7 +80,9 @@ const Sidebar = ({ isOpen, onClose }) => {
 
         {/* Logout Button */}
         <div className="mt-8">
-          <button className="w-full bg-white text-red-700 py-2 rounded-lg font-semibold hover:bg-gray-200 transition flex items-center justify-center gap-2">
+          <button
+    onClick={handleLogout}
+    className="w-full bg-white text-red-700 py-2 rounded-lg font-semibold hover:bg-gray-200 transition flex items-center justify-center gap-2">
             <LogOut size={20} />
             Logout
           </button>
