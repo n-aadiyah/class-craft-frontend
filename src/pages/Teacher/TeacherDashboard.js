@@ -2,10 +2,14 @@
 import React from "react";
 import { BookOpen, Users, Award, BarChart3, Bell } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useEffect, useState } from "react";
+import API from "../../api/axiosInstance";
 
 
 const TeacherDashboard = () => {
   const { user } = useAuth();
+const [totalClasses, setTotalClasses] = useState(0);
+const [totalStudents, setTotalStudents] = useState(0);
 
   // display name logic: prefer user.name, then email, then generic
   const displayName =
@@ -14,17 +18,38 @@ const TeacherDashboard = () => {
     user?.email?.split?.("@")?.[0] ||
     "Teacher";
 
+useEffect(() => {
+  const loadStats = async () => {
+    try {
+      // 1) total classes
+      const classRes = await API.get("/classes/my-classes");
+      setTotalClasses(classRes.data.length);
+
+      // 2) total students
+      const studentRes = await API.get("/students/count-by-teacher");
+      setTotalStudents(studentRes.data.totalStudents || 0);
+
+    } catch (err) {
+      console.error("Error fetching stats:", err);
+    }
+  };
+
+  loadStats();
+}, []);
+
+
+
   const stats = [
-    {
-      title: "Total Classes",
-      value: "5 Active Classes",
-      icon: <BookOpen size={26} className="text-red-600" />,
-    },
-    {
-      title: "Total Students",
-      value: "120 Students",
-      icon: <Users size={26} className="text-red-600" />,
-    },
+  {
+    title: "Total Classes",
+    value: `${totalClasses} Active Classes`,
+    icon: <BookOpen size={26} className="text-red-600" />,
+  },
+  {
+    title: "Total Students",
+    value: `${totalStudents} Students`,
+    icon: <Users size={26} className="text-red-600" />,
+  },
     {
       title: "Average Quest Completion",
       value: "75% Completed",
