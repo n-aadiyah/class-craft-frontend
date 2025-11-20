@@ -87,12 +87,12 @@ return (
     {/* Right Side — HOME + DASHBOARD */}
     {/* Hidden on mobile */}
     <div className="hidden sm:flex items-center gap-1 md:gap-3">
-      <Link
+      {/* <Link
         to="/"
         className="text-white font-semibold rounded hover:bg-white/20 px-3 py-1 text-xs md:text-sm transition-all"
       >
         Home
-      </Link>
+      </Link> */}
 
       {token && user?.role && (
         <button
