@@ -4,6 +4,9 @@ import { Settings as UploadIcon, Bell, Globe, SunMoon, LogOut, Trash2 } from "lu
 import API from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import uploadAvatar from "../../api/uploads";
+
+console.log("uploadAvatar type:", typeof uploadAvatar);
 
 const TeacherSettings = () => {
   const navigate = useNavigate();
@@ -33,7 +36,26 @@ const TeacherSettings = () => {
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPrefs, setSavingPrefs] = useState(false);
   const [avatarFile, setAvatarFile] = useState(null);
-  const avatarPreviewRef = useRef(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  // refs
+  const avatarPreviewRef = useRef(null); // holds object URL string for revoke
+  const fileInputRef = useRef(null);
+
+  // helper: make full URL if backend returns relative path like "/uploads/avatars/..."
+  const makeFullAvatarUrl = (avatarUrl) => {
+    if (!avatarUrl) return avatarUrl;
+    if (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://")) return avatarUrl;
+    // try to derive from API.baseURL (which includes /api). remove trailing /api
+    try {
+      const base = API.defaults?.baseURL || "";
+      const origin = base.replace(/\/api\/?$/, "") || window.location.origin;
+      // ensure leading slash
+      return avatarUrl.startsWith("/") ? `${origin}${avatarUrl}` : `${origin}/${avatarUrl}`;
+    } catch {
+      return avatarUrl;
+    }
+  };
 
   // load profile on mount (from backend)
   useEffect(() => {
@@ -44,13 +66,12 @@ const TeacherSettings = () => {
         const res = await API.get("/users/me");
         if (!mounted) return;
         const u = res.data || {};
-        setProfile((p) => ({
-          ...p,
+        setProfile({
           name: u.name || "",
           email: u.email || "",
-          profilePic: u.avatarUrl || "/Avatar.jpg",
-        }));
-        setPreferences(u.preferences || preferences);
+          profilePic: makeFullAvatarUrl(u.avatarUrl || u.avatar || "/Avatar.jpg"),
+        });
+        setPreferences(u.preferences || { notifications: true, theme: "light", language: "English" });
         // sync auth context user if needed
         if (setUser) setUser(u);
       } catch (err) {
@@ -60,7 +81,14 @@ const TeacherSettings = () => {
       }
     };
     loadProfile();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+      // revoke any preview URL on unmount
+      if (avatarPreviewRef.current) {
+        URL.revokeObjectURL(avatarPreviewRef.current);
+        avatarPreviewRef.current = null;
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -82,7 +110,7 @@ const TeacherSettings = () => {
   const handleProfilePicChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      // revoke old preview
+      // revoke old preview URL if any
       if (avatarPreviewRef.current) {
         URL.revokeObjectURL(avatarPreviewRef.current);
       }
@@ -93,61 +121,84 @@ const TeacherSettings = () => {
     }
   };
 
-  // Save profile: upload avatar (if any), then update name/email, then update auth context
-  const handleSaveProfile = async () => {
-    try {
-      setSavingProfile(true);
+ const handleSaveProfile = async () => {
+  try {
+    setSavingProfile(true);
+    setUploadProgress(0);
+    
+    console.log("About to call uploadAvatar, typeof:", typeof uploadAvatar);
+if (typeof uploadAvatar !== "function") {
+  alert("uploadAvatar is not a function — check import/path and rebuild");
+  return;
+}
 
-      // 1) upload avatar if present
-      if (avatarFile) {
-        const fd = new FormData();
-        fd.append("avatar", avatarFile);
-        const up = await API.post("/users/me/avatar", fd, {
-          headers: { "Content-Type": "multipart/form-data" },
+
+    // 1) upload avatar if present (uses helper)
+    if (avatarFile) {
+      try {
+        const upData = await uploadAvatar(avatarFile, (pct) => {
+          setUploadProgress(pct);
         });
-        if (up?.data?.avatarUrl) {
-          setProfile((p) => ({ ...p, profilePic: up.data.avatarUrl }));
+
+        const returnedAvatar = upData.avatarFullUrl || upData.avatarUrl || upData.avatar;
+        if (returnedAvatar) {
+          const full = makeFullAvatarUrl(returnedAvatar);
+          setProfile((p) => ({ ...p, profilePic: full }));
+        }
+      } catch (uploadErr) {
+        console.error("Avatar upload failed:", uploadErr);
+        const msg = uploadErr?.response?.data?.message || uploadErr?.message || "Avatar upload failed";
+        alert(msg);
+        setSavingProfile(false);
+        setUploadProgress(0);
+        return; // stop further saving if upload fails
+      } finally {
+        setAvatarFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        if (avatarPreviewRef.current) {
+          URL.revokeObjectURL(avatarPreviewRef.current);
+          avatarPreviewRef.current = null;
         }
       }
-
-      // 2) update basic profile (name/email)
-      const payload = { name: profile.name, email: profile.email };
-      const updatedRes = await API.put("/users/me", payload);
-      const updatedUser = updatedRes.data || {};
-      // 3) update context and local state
-      if (setUser) setUser(updatedUser);
-      // ensure local profile uses server-provided avatar if present
-      setProfile((p) => ({
-        ...p,
-        name: updatedUser.name || p.name,
-        email: updatedUser.email || p.email,
-        profilePic: updatedUser.avatarUrl || p.profilePic,
-      }));
-
-      alert("Profile updated successfully");
-    } catch (err) {
-      console.error("Error saving profile:", err);
-      alert(err?.response?.data?.message || "Failed to save profile");
-    } finally {
-      setSavingProfile(false);
-      // free avatarFile reference (optional)
-      setAvatarFile(null);
     }
-  };
+
+    // 2) update basic profile (name/email)
+    const payload = { name: profile.name, email: profile.email };
+    const updatedRes = await API.put("/users/me", payload);
+    const updatedUser = updatedRes?.data || {};
+
+    // 3) update context and local state
+    if (setUser) setUser(updatedUser);
+
+    setProfile((p) => ({
+      ...p,
+      name: updatedUser.name || p.name,
+      email: updatedUser.email || p.email,
+      profilePic: makeFullAvatarUrl(updatedUser.avatarUrl || updatedUser.avatar || p.profilePic),
+    }));
+
+    alert("Profile updated successfully");
+  } catch (err) {
+    console.error("Error saving profile:", err);
+    alert(err?.response?.data?.message || err?.message || "Failed to save profile");
+  } finally {
+    setSavingProfile(false);
+    setUploadProgress(0);
+  }
+};
 
   // Save preferences separately
   const handleSavePreferences = async () => {
     try {
       setSavingPrefs(true);
       const res = await API.put("/users/me/preferences", preferences);
-      // backend may return user object; if so, sync
       if (res?.data) {
         if (setUser) setUser(res.data);
       }
       alert("Preferences saved");
     } catch (err) {
       console.error("Error saving preferences:", err);
-      alert(err?.response?.data?.message || "Failed to save preferences");
+      alert(err?.response?.data?.message || err?.message || "Failed to save preferences");
     } finally {
       setSavingPrefs(false);
     }
@@ -161,14 +212,14 @@ const TeacherSettings = () => {
       setChangingPassword(true);
       const res = await API.put("/users/change-password", { currentPassword, newPassword });
       alert(res.data?.message || "Password changed. Please login again.");
-      // optional: force logout on password change
+      // force logout on password change
       setToken && setToken(null);
       setUser && setUser(null);
       localStorage.removeItem("token");
       navigate("/login");
     } catch (err) {
       console.error("Change password error:", err);
-      alert(err?.response?.data?.message || "Password change failed");
+      alert(err?.response?.data?.message || err?.message || "Password change failed");
     } finally {
       setChangingPassword(false);
       setCurrentPassword("");
@@ -181,17 +232,15 @@ const TeacherSettings = () => {
     const v = window.prompt("Type DELETE to confirm account deletion");
     if (v !== "DELETE") return;
     try {
-      // optional: you might require password to delete; adjust as backend requires
       await API.delete("/users/me");
       alert("Account deleted");
-      // clear auth & redirect
       setToken && setToken(null);
       setUser && setUser(null);
       localStorage.removeItem("token");
       navigate("/login");
     } catch (err) {
       console.error("Delete account error:", err);
-      alert(err?.response?.data?.message || "Failed to delete account");
+      alert(err?.response?.data?.message || err?.message || "Failed to delete account");
     }
   };
 
@@ -202,13 +251,15 @@ const TeacherSettings = () => {
     localStorage.removeItem("token");
     navigate("/login");
   };
-if (loading) {
-  return (
-    <div className="p-10 text-center text-lg font-semibold">
-      Loading profile...
-    </div>
-  );
-}
+
+  if (loading) {
+    return (
+      <div className="p-10 text-center text-lg font-semibold">
+        Loading profile...
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-6 sm:p-10">
       <div className="max-w-4xl mx-auto">
@@ -237,6 +288,7 @@ if (loading) {
                 <UploadIcon size={16} className="text-white" />
                 <span>Upload</span>
                 <input
+                  ref={fileInputRef}
                   type="file"
                   accept="image/*"
                   onChange={handleProfilePicChange}
@@ -244,6 +296,15 @@ if (loading) {
                 />
               </label>
             </div>
+
+            {uploadProgress > 0 && uploadProgress < 100 && (
+              <div className="w-full">
+                <div className="h-2 bg-gray-200 rounded">
+                  <div style={{ width: `${uploadProgress}%` }} className="h-2 bg-red-700 rounded" />
+                </div>
+                <div className="text-xs mt-1">{uploadProgress}%</div>
+              </div>
+            )}
 
             <div>
               <label className="block text-gray-700 font-medium mb-2">Full Name</label>
@@ -278,14 +339,13 @@ if (loading) {
 
               <button
                 onClick={() => {
-                  // reset to server values if available
                   if (authUser) {
                     setProfile({
                       name: authUser.name || "",
                       email: authUser.email || "",
-                      profilePic: authUser.avatarUrl || "/Avatar.jpg",
+                      profilePic: makeFullAvatarUrl(authUser.avatarUrl || authUser.avatar || "/Avatar.jpg"),
                     });
-                    setPreferences(authUser.preferences || preferences);
+                    setPreferences(authUser.preferences || { notifications: true, theme: "light", language: "English" });
                     alert("Reverted to saved profile values");
                   } else {
                     alert("No saved profile available to revert");
@@ -364,7 +424,6 @@ if (loading) {
 
               <button
                 onClick={() => {
-                  // Revert preferences to saved values
                   if (authUser?.preferences) {
                     setPreferences(authUser.preferences);
                     alert("Preferences reverted");

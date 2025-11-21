@@ -13,11 +13,10 @@ const BASE_URL =
 
 const API = axios.create({
   baseURL: BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  timeout: 30_000, // 30s default (adjust if needed)
+  // do NOT force a global Content-Type — let individual requests set it
+  timeout: 30_000,
 });
+
 
 // Helper to set token programmatically (AuthContext may call this)
 export function setAuthToken(token) {
