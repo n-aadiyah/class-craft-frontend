@@ -1,6 +1,6 @@
 // src/context/AuthContext.js
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import API, { setAuthToken } from "../api/axiosInstance";
+import { setAuthToken } from "../api/axiosInstance";
 
 /**
  * Safe JWT decode (browser). Returns payload object or null.
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
       try {
         return JSON.parse(u);
       } catch {
-        // fallthrough
+        // ignore parse error
       }
     }
     const t = localStorage.getItem("token");
@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }) => {
     const timer = setTimeout(() => {
       setToken(null);
       setUser(null);
-      // cleanup localStorage and axios header handled by setToken
+      // cleanup handled by setToken
     }, timeout);
 
     return () => clearTimeout(timer);
@@ -109,7 +109,7 @@ export const AuthProvider = ({ children }) => {
   const logout = useCallback(() => {
     setToken(null);
     setUser(null);
-    // setToken already clears localStorage and axios header
+    // setToken clears localStorage and axios header
   }, [setToken]);
 
   return (
@@ -122,3 +122,4 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => useContext(AuthContext);
 
 export default AuthContext;
+
