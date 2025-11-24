@@ -307,13 +307,13 @@ if (typeof uploadAvatar !== "function") {
             )}
 
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Full Name</label>
+              <label className="block text-gray-700 font-medium mb-1">Full Name</label>
               <input
                 type="text"
                 name="name"
                 value={profile.name}
                 onChange={handleProfileChange}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-red-600"
               />
             </div>
 
@@ -405,7 +405,7 @@ if (typeof uploadAvatar !== "function") {
                 name="language"
                 value={preferences.language}
                 onChange={handlePreferencesChange}
-                className="border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-red-600"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-red-600 w-full sm:w-auto"
               >
                 <option value="English">English</option>
                 <option value="Hindi">Hindi</option>
