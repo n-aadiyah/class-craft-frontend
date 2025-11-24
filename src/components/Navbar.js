@@ -33,28 +33,25 @@ const Navbar = () => {
     user?.name || user?.fullName || user?.email?.split("@")[0] || "User";
 
   const initials = displayName?.charAt(0)?.toUpperCase() || "U";
-  const [isVisible, setIsVisible] = React.useState(true);
-const lastScrollY = React.useRef(0);
+  const lastScrollY = React.useRef(0);
 
-React.useEffect(() => {
+ React.useEffect(() => {
   const handleScroll = () => {
     const currentScroll = window.scrollY;
 
     if (currentScroll > lastScrollY.current) {
-      // scrolling down → hide navbar
-      setIsVisible(false);
+      setShowNavbar(false); // hide on scroll down
     } else {
-      // scrolling up → show navbar
-      setIsVisible(true);
+      setShowNavbar(true); // show on scroll up
     }
 
     lastScrollY.current = currentScroll;
   };
 
   window.addEventListener("scroll", handleScroll);
-
   return () => window.removeEventListener("scroll", handleScroll);
 }, []);
+
 
   // Avatar path fix
   const makeFullAvatarUrl = (avatarUrl) => {
@@ -74,7 +71,7 @@ React.useEffect(() => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 w-full z-50 backdrop-blur-ml 
+      className={`fixed top-0 left-0 right-0 w-full z-50 backdrop-blur-xl 
       transition-all duration-500 
       ${showNavbar ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-8"}
       bg-black/10 border-b border-white/10 shadow-md`}
@@ -97,7 +94,8 @@ React.useEffect(() => {
             <div className="flex items-center gap-2 md:gap-3">
               {/* Avatar */}
               {avatarSrc ? (
-                <img alt=" "
+                <img
+                  alt=" "
                   src={avatarSrc}
                   className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover border-2 border-yellow-400 shadow"
                 />
@@ -193,17 +191,29 @@ React.useEffect(() => {
       )}
 
       {/* BOTTOM NAV */}
-  <nav className="flex justify-center items-center gap-6 py-2 text-xs md:text-sm font-semibold bg-black/10 backdrop-blur-sm border-t border-white/5 shadow-md">
-        <Link to="/student" className="text-yellow-400 font-bold border-b-2 border-red-600 pb-1">
+      <nav className="flex justify-center items-center gap-6 py-2 text-xs md:text-sm font-semibold bg-black/10 backdrop-blur-sm border-t border-white/5 shadow-md">
+        <Link
+          to="/student"
+          className="text-yellow-400 font-bold border-b-2 border-red-600 pb-1"
+        >
           Student
         </Link>
-        <Link to="/curriculum" className="text-white hover:text-yellow-400 pb-1 border-b-2 border-transparent hover:border-red-600">
+        <Link
+          to="/curriculum"
+          className="text-white hover:text-yellow-400 pb-1 border-b-2 border-transparent hover:border-red-600"
+        >
           Curriculum
         </Link>
-        <Link to="/leaderboard" className="text-white hover:text-yellow-400 pb-1 border-b-2 border-transparent hover:border-red-600">
+        <Link
+          to="/leaderboard"
+          className="text-white hover:text-yellow-400 pb-1 border-b-2 border-transparent hover:border-red-600"
+        >
           Leaderboard
         </Link>
-        <Link to="/about" className="text-white hover:text-yellow-400 pb-1 border-b-2 border-transparent hover:border-red-600">
+        <Link
+          to="/about"
+          className="text-white hover:text-yellow-400 pb-1 border-b-2 border-transparent hover:border-red-600"
+        >
           About
         </Link>
       </nav>
