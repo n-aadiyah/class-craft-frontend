@@ -4,12 +4,13 @@ import API from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 const AuthPage = () => {
   const navigate = useNavigate();
   const { setToken, setUser } = useAuth();
 
-  const [isLogin, setIsLogin] = useState(true); // true = Login, false = Register
+  const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
@@ -22,15 +23,13 @@ const AuthPage = () => {
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  // helper to decode token payload safely
   const decodeJwt = (token) => {
     if (!token) return null;
     try {
       const payload = token.split(".")[1];
       const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
       return JSON.parse(json);
-    } catch (e) {
-      console.warn("Failed to decode token", e);
+    } catch {
       return null;
     }
   };
@@ -42,6 +41,7 @@ const AuthPage = () => {
     else navigate("/");
   };
 
+  // ------------------ LOGIN ------------------
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -54,53 +54,89 @@ const AuthPage = () => {
         role: formData.role,
       });
 
-      // backend may return { token, user } or just { token }
       const token = res.data.token;
-      let user = res.data.user || null;
+      let user = res.data.user ?? null;
 
-      if (!token) throw new Error("No token returned from server");
+      if (!token) throw new Error("No token returned");
 
       if (!user) {
-        // decode token to extract name/email/role claims
         const payload = decodeJwt(token);
         user = {
-          name: payload?.name || payload?.fullName || payload?.username || payload?.email || "Teacher",
+          name: payload?.name || payload?.email,
           email: payload?.email,
-          role: payload?.role || formData.role || res.data.role,
+          role: payload?.role,
         };
       }
 
-      // update central auth state (also persists to localStorage via AuthContext)
       setToken(token);
       setUser(user);
 
-      alert("🎉 Login successful!");
-      // route by the authoritative role (prefer user.role)
-      routeByRole(user.role);
+      // 🔥 Beautiful Success Toast
+      toast.success("🎉 Login Successful!", {
+        style: {
+          background: "#b91c1c",
+          color: "white",
+          fontWeight: "bold",
+          borderRadius: "10px",
+          border: "2px solid #facc15",
+          padding: "12px",
+        },
+        iconTheme: {
+          primary: "#facc15",
+          secondary: "#b91c1c",
+        },
+      });
 
+      routeByRole(user.role);
     } catch (err) {
-      console.error("Login failed:", err);
-      setError(err.response?.data?.message || err.message || "Login failed");
+      setError(err?.response?.data?.message || "Login failed");
+
+      // ❌ Error Toast
+      toast.error("Login Failed ❌", {
+        style: {
+          background: "#450a0a",
+          color: "white",
+          border: "2px solid #b91c1c",
+        },
+      });
     } finally {
       setLoading(false);
     }
   };
 
+  // ------------------ REGISTER ------------------
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
+
     try {
       await API.post("/auth/register", formData);
-      alert("🎉 Registration successful!");
-      // switch to login view and clear sensitive fields
+
+      toast.success("🎉 Registration successful!", {
+        style: {
+          background: "#b91c1c",
+          color: "white",
+          fontWeight: "bold",
+          borderRadius: "10px",
+          border: "2px solid #facc15",
+        },
+      });
+
       setTimeout(() => {
         setIsLogin(true);
         setFormData({ ...formData, password: "" });
-      }, 600);
+      }, 500);
     } catch (err) {
-      console.error("Register failed:", err);
-      setError(err.response?.data?.message || err.message || "Registration failed");
+      setError(err?.response?.data?.message || "Registration failed");
+
+      toast.error("Registration Failed ❌", {
+        style: {
+          background: "#450a0a",
+          color: "white",
+          border: "2px solid #b91c1c",
+        },
+      });
     } finally {
       setLoading(false);
     }
@@ -114,57 +150,40 @@ const AuthPage = () => {
         <div className="w-50 h-50 bg-red-400/30 blur-3xl rounded-full absolute bottom-0 right-0 animate-ping"></div>
       </div>
 
-      {/* 3D Flip Card Container */}
+      {/* 3D Flip Card */}
       <div className="flip-container">
         <div className={`flipper ${isLogin ? "" : "flipped"}`}>
-          {/* ---------- LOGIN FRONT ---------- */}
+
+          {/* LOGIN CARD */}
           <div className="front-card">
             <div className="auth-card">
-              <div className="hidden md:flex w-full md:w-1/2 justify-center mb-3 md:mb-0">
-                <img
-                  src="/girl.png"
-                  alt="Anime Character"
-                  className="w-30 md:w-50 animate-glow-float drop-shadow-[0_0_10px_#ff0033]"
-                />
+              {/* left image */}
+              <div className="hidden md:flex w-full md:w-1/2 justify-center mb-3">
+                <img src="/girl.png" alt="Character"
+                  className="w-30 md:w-50 animate-glow-float" />
               </div>
+
+              {/* Right Form */}
               <div className="w-full md:w-1/2">
-                <h2 className="text-3xl font-extrabold text-center text-red-600 mb-2 drop-shadow-[0_0_12px_#ff1a1a]">
+                <h2 className="text-3xl font-extrabold text-center text-red-600 mb-2">
                   ⚡ Login ⚡
                 </h2>
-                <p className="text-center text-gray-400 mb-4 text-sm">
-                  Step into the world of learning!
-                </p>
 
                 {error && (
-                  <div className="text-red-300 text-center bg-red-900/40 border border-red-500 py-1.5 rounded-md mb-3 font-medium text-sm">
+                  <div className="text-red-300 text-center bg-red-900/40 border border-red-500 py-1.5 rounded-md mb-3 text-sm">
                     {error}
                   </div>
                 )}
 
                 <form onSubmit={handleLogin} className="space-y-3">
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    className="w-full px-3 py-2 rounded-lg bg-gray-900 border border-red-500 focus:ring-2 focus:ring-red-400 focus:outline-none text-white placeholder-gray-500 text-sm"
-                    onChange={handleChange}
-                    required
-                  />
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    className="w-full px-3 py-2 rounded-lg bg-gray-900 border border-red-500 focus:ring-2 focus:ring-red-400 focus:outline-none text-white placeholder-gray-500 text-sm"
-                    onChange={handleChange}
-                    required
-                  />
-                  <select
-                    name="role"
-                    className="w-full px-3 py-2 rounded-lg bg-gray-900 border border-red-500 focus:ring-2 focus:ring-red-400 focus:outline-none text-white text-sm"
-                    onChange={handleChange}
-                    required
-                    value={formData.role}
-                  >
+                  <input type="email" name="email" placeholder="Email"
+                    className="input-auth" onChange={handleChange} required />
+
+                  <input type="password" name="password" placeholder="Password"
+                    className="input-auth" onChange={handleChange} required />
+
+                  <select name="role" value={formData.role}
+                    className="input-auth" onChange={handleChange} required>
                     <option value="">Choose role</option>
                     <option value="student">Student</option>
                     <option value="teacher">Teacher</option>
@@ -174,18 +193,16 @@ const AuthPage = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-red-700 text-white font-bold py-2 rounded-lg shadow-[0_0_15px_#ff0033] hover:shadow-[0_0_30px_#ff1a1a] transition-all duration-300 hover:scale-[1.02] text-sm"
+                    className="btn-auth"
                   >
-                    {loading ? "Signing In..." : "Enter the Learning world"}
+                    {loading ? "Signing In..." : "Enter the Learning World"}
                   </button>
                 </form>
 
                 <p className="text-center text-gray-400 mt-4 text-sm">
                   Don’t have an account?{" "}
-                  <span
-                    onClick={() => { setIsLogin(false); setError(""); }}
-                    className="text-red-400 font-semibold  hover:text-red-300 cursor-pointer"
-                  >
+                  <span className="link-auth"
+                    onClick={() => { setIsLogin(false); setError(""); }}>
                     Create one 💫
                   </span>
                 </p>
@@ -193,73 +210,45 @@ const AuthPage = () => {
             </div>
           </div>
 
-          {/* ---------- REGISTER BACK ---------- */}
+          {/* REGISTER CARD */}
           <div className="back-card">
             <div className="auth-card">
-              <div className="hidden md:flex w-full md:w-1/2 justify-center mb-3 md:mb-0">
-                <img
-                  src="/boy.png"
-                  alt="Anime Character"
-                  className="w-30 md:w-50 animate-glow-float drop-shadow-[0_0_15px_#ff0033]"
-                />
+
+              <div className="hidden md:flex w-full md:w-1/2 justify-center">
+                <img src="/boy.png" alt="Character"
+                  className="w-30 md:w-50 animate-glow-float" />
               </div>
+
               <div className="w-full md:w-1/2">
-                <h2 className="text-3xl font-extrabold text-center text-red-600 mb-2 drop-shadow-[0_0_12px_#ff1a1a]">
+                <h2 className="text-3xl font-extrabold text-center text-red-600 mb-2">
                   🌟 Register 🌟
                 </h2>
-                <p className="text-center text-gray-400 mb-4 text-sm">
-                  Join the adventure of learning!
-                </p>
 
                 {error && (
-                  <div className="text-red-300 text-center bg-red-900/40 border border-red-500 py-1.5 rounded-md mb-3 font-medium text-sm">
+                  <div className="text-red-300 text-center bg-red-900/40 border border-red-500 py-1.5 rounded-md mb-3 text-sm">
                     {error}
                   </div>
                 )}
 
                 <form onSubmit={handleRegister} className="space-y-3">
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Full Name"
-                    className="w-full px-3 py-2 rounded-lg bg-gray-900 border border-red-500 focus:ring-2 focus:ring-red-400 focus:outline-none text-white placeholder-gray-500 text-sm"
-                    onChange={handleChange}
-                    required
-                  />
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    className="w-full px-3 py-2 rounded-lg bg-gray-900 border border-red-500 focus:ring-2 focus:ring-red-400 focus:outline-none text-white placeholder-gray-500 text-sm"
-                    onChange={handleChange}
-                    required
-                  />
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    className="w-full px-3 py-2 rounded-lg bg-gray-900 border border-red-500 focus:ring-2 focus:ring-red-400 focus:outline-none text-white placeholder-gray-500 text-sm"
-                    onChange={handleChange}
-                    required
-                  />
-                  <select
-                    name="role"
-                    className="w-full px-3 py-2 rounded-lg bg-gray-900 border border-red-500 focus:ring-2 focus:ring-red-400 focus:outline-none text-white text-sm"
-                    onChange={handleChange}
-                    required
-                    value={formData.role}
-                  >
+                  <input type="text" name="name" placeholder="Full Name"
+                    className="input-auth" onChange={handleChange} required />
+
+                  <input type="email" name="email" placeholder="Email"
+                    className="input-auth" onChange={handleChange} required />
+
+                  <input type="password" name="password" placeholder="Password"
+                    className="input-auth" onChange={handleChange} required />
+
+                  <select name="role" className="input-auth"
+                    value={formData.role} onChange={handleChange} required>
                     <option value="">Choose role</option>
                     <option value="student">Student</option>
                     <option value="teacher">Teacher</option>
                     <option value="admin">Admin</option>
                   </select>
 
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-red-700 text-white font-bold py-2 rounded-lg shadow-[0_0_15px_#ff0033] hover:shadow-[0_0_30px_#ff1a1a] transition-all duration-300 hover:scale-[1.02] text-sm"
-                  >
+                  <button type="submit" disabled={loading} className="btn-auth">
                     {loading ? "Registering..." : "Create Account"}
                   </button>
                 </form>
@@ -267,68 +256,56 @@ const AuthPage = () => {
                 <p className="text-center text-gray-400 mt-4 text-sm">
                   Already have an account?{" "}
                   <span
-                    onClick={() => { setIsLogin(true); setError(""); }}
-                    className="text-red-400 font-semibold hover:text-red-300 cursor-pointer"
-                  >
+                    className="link-auth"
+                    onClick={() => { setIsLogin(true); setError(""); }}>
                     Login here 💫
                   </span>
                 </p>
               </div>
             </div>
           </div>
+
         </div>
       </div>
 
-      {/* Floating Glow Animation + Flip Animation */}
+      {/* Styles Inject */}
       <style>{`
-        .animate-glow-float {
-          animation: glowFloat 2s ease-in-out infinite;
+        .input-auth {
+          width: 100%;
+          padding: 0.5rem 0.75rem;
+          border-radius: 0.5rem;
+          background: #111;
+          border: 1px solid #ff2a2a;
+          color: white;
+          font-size: 0.875rem;
         }
-        @keyframes glowFloat {
-          0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 10px #ff0033); }
-          50% { transform: translateY(-8px); filter: drop-shadow(0 0 20px #ff1a1a); }
+        .input-auth:focus {
+          outline: none;
+          border-color: #facc15;
+          box-shadow: 0 0 5px #facc15;
         }
-
-        /* 3D Flip Card Animation */
-        .flip-container {
-          perspective: 1500px;
-          width: 80%;
-          max-width: 900px;
-          height: 70vh;
+        .btn-auth {
+          width: 100%;
+          background: #b91c1c;
+          color: white;
+          font-weight: bold;
+          padding: 0.5rem;
+          border-radius: 0.5rem;
+          text-transform: uppercase;
+          border: 2px solid #facc15;
+          transition: 0.3s;
         }
-        .flipper {
-          position: center;
-          width: 90%;
-          height: 100%;
-          transform-style: preserve-3d;
-          transition: transform 0.9s cubic-bezier(0.4, 0.2, 0.2, 1.2);
+        .btn-auth:hover {
+          transform: scale(1.05);
+          box-shadow: 0 0 12px #ff3b3b;
         }
-        .flipper.flipped {
-          transform: rotateY(180deg);
+        .link-auth {
+          color: #facc15;
+          font-weight: bold;
+          cursor: pointer;
         }
-        .front-card, .back-card {
-          position: absolute;
-          width: 90%;
-          height: 100%;
-          backface-visibility: hidden;
-          top: 0;
-          left: 0;
-        }
-        .back-card {
-          transform: rotateY(180deg);
-        }
-        .auth-card {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          justify-content: center;
-          background-color: rgba(0,0,0,0.7);
-          border: 1px solid #f00;
-          border-radius: 1.5rem;
-          box-shadow: 0 0 25px #f00;
-          padding: 3rem;
-          height: 100%;
-          backdrop-filter: blur(6px);
+        .link-auth:hover {
+          color: white;
         }
       `}</style>
     </div>

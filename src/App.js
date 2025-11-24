@@ -16,8 +16,11 @@ import AttendanceHistory from "./pages/Teacher/AttendanceHistory";
 import AdminDashboard from "./pages/AdminDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { Toaster } from "react-hot-toast";
 function App() {
-  return (
+  return (  
+    <>
+    <Toaster position="top-center" toastOptions={{ duration: 2000 }} />
     <Routes>
       {/* Public Page */}
       <Route path="/" element={<LandingPage />} />
@@ -51,6 +54,7 @@ function App() {
       <Route path="/teacher/students/:id" element={<TeacherDashboardLayout><StudentProfile /></TeacherDashboardLayout>} />
 
     </Routes>
+    </>
   );
 }
 

@@ -33,6 +33,28 @@ const Navbar = () => {
     user?.name || user?.fullName || user?.email?.split("@")[0] || "User";
 
   const initials = displayName?.charAt(0)?.toUpperCase() || "U";
+  const [isVisible, setIsVisible] = React.useState(true);
+const lastScrollY = React.useRef(0);
+
+React.useEffect(() => {
+  const handleScroll = () => {
+    const currentScroll = window.scrollY;
+
+    if (currentScroll > lastScrollY.current) {
+      // scrolling down → hide navbar
+      setIsVisible(false);
+    } else {
+      // scrolling up → show navbar
+      setIsVisible(true);
+    }
+
+    lastScrollY.current = currentScroll;
+  };
+
+  window.addEventListener("scroll", handleScroll);
+
+  return () => window.removeEventListener("scroll", handleScroll);
+}, []);
 
   // Avatar path fix
   const makeFullAvatarUrl = (avatarUrl) => {
