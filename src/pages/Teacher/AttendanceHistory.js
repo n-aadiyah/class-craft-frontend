@@ -12,89 +12,95 @@ const AttendanceHistory = () => {
   const now = new Date();
   const [month, setMonth] = useState(String(now.getMonth() + 1));
   const [year, setYear] = useState(String(now.getFullYear()));
-
   const [selectedClass, setSelectedClass] = useState("");
 
   const [classes, setClasses] = useState([]);
   const [matrixDays, setMatrixDays] = useState([]);
   const [matrixRows, setMatrixRows] = useState([]);
 
-  const [ setLoadingClasses] = useState(false);
   const [loadingMonthly, setLoadingMonthly] = useState(false);
 
   const latestReqId = useRef(0);
   const passedClassRef = useRef(null);
 
-  // Read passed class from navigation
+  // Read passed className from navigation
   useEffect(() => {
     try {
       const st = location?.state || {};
       const clsObj = st.class || st.cls || null;
-      const clsNameFromObj = clsObj?.name;
+      const clsNameFromObj = clsObj?.name || null;
       const clsNameFromParam = st.className || null;
 
       const chosen = clsNameFromObj || clsNameFromParam || null;
+
       if (chosen) {
         passedClassRef.current = String(chosen).trim();
         setSelectedClass(passedClassRef.current);
       }
 
-      const qParam = new URLSearchParams(location.search).get("className");
-      if (!passedClassRef.current && qParam) {
-        passedClassRef.current = qParam.trim();
-        setSelectedClass(passedClassRef.current);
+      const q = new URLSearchParams(location.search).get("className");
+      if (!passedClassRef.current && q) {
+        passedClassRef.current = q.trim();
+        setSelectedClass(q.trim());
       }
     } catch {}
   }, [location]);
 
   // Load class list
-  useEffect(() => {
-    let mounted = true;
-    const load = async () => {
-      try {
-        setLoadingClasses(true);
-        const res = await API.get("/classes");
-        const list = Array.isArray(res.data) ? res.data : [];
-        list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Load class list (run only once on mount)
+useEffect(() => {
+  let mounted = true;
 
-        if (!mounted) return;
-        setClasses(list);
+  const loadClasses = async () => {
+    try {
+      const res = await API.get("/classes");
+      const list = Array.isArray(res.data) ? res.data : [];
 
-        if (passedClassRef.current) {
-          const found = list.find(
-            (c) => String(c.name).trim() === passedClassRef.current
-          );
-          if (found) setSelectedClass(found.name);
-          else setSelectedClass(passedClassRef.current);
-          return;
-        }
+      list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
-        if (!selectedClass && list.length) {
-          setSelectedClass(list[0].name);
-        }
-      } finally {
-        if (mounted) setLoadingClasses(false);
+      if (!mounted) return;
+
+      setClasses(list);
+
+      if (passedClassRef.current) {
+        const found = list.find(
+          (c) =>
+            String(c.name).trim() === String(passedClassRef.current).trim()
+        );
+        setSelectedClass(found ? found.name : passedClassRef.current);
+      } else if (!selectedClass && list.length) {
+        // set default class without triggering dependency warnings
+        setSelectedClass(list[0].name);
       }
-    };
+    } catch {}
+  };
 
-    load();
-    return () => (mounted = false);
-  }, []);
+  loadClasses();
 
-  // Load monthly data
+  return () => {
+    mounted = false;
+  };
+  // We intentionally do NOT include selectedClass as dependency – run only once.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
+
+
+  // Load monthly attendance
   useEffect(() => {
     const controller = new AbortController();
     const reqId = ++latestReqId.current;
 
-    const load = async () => {
+    const loadMonthly = async () => {
       if (!selectedClass || !month || !year) {
-        setMatrixDays([]);
         setMatrixRows([]);
+        setMatrixDays([]);
         return;
       }
 
       try {
         setLoadingMonthly(true);
+
         const params = new URLSearchParams({
           className: selectedClass.trim(),
           month,
@@ -110,19 +116,22 @@ const AttendanceHistory = () => {
 
         setMatrixDays(res.data?.days || []);
         setMatrixRows(Array.isArray(res.data?.students) ? res.data.students : []);
+      } catch {
+        setMatrixRows([]);
+        setMatrixDays([]);
       } finally {
         if (reqId === latestReqId.current) setLoadingMonthly(false);
       }
     };
 
-    load();
+    loadMonthly();
     return () => controller.abort();
   }, [selectedClass, month, year]);
 
   // Summary
   const summary = useMemo(() => {
-    const present = matrixRows.reduce((s, r) => s + (r.present || 0), 0);
-    const absent = matrixRows.reduce((s, r) => s + (r.absent || 0), 0);
+    const present = matrixRows.reduce((sum, r) => sum + (r.present || 0), 0);
+    const absent = matrixRows.reduce((sum, r) => sum + (r.absent || 0), 0);
     return {
       totalStudents: matrixRows.length,
       present,
@@ -131,11 +140,11 @@ const AttendanceHistory = () => {
   }, [matrixRows]);
 
   const yearOptions = useMemo(() => {
-    const now = new Date().getFullYear();
-    return [String(now - 1), String(now), String(now + 1)];
+    const nowYear = new Date().getFullYear();
+    return [String(nowYear - 1), String(nowYear), String(nowYear + 1)];
   }, []);
 
-  // CSV
+  // Download CSV
   const handleDownload = () => {
     if (!matrixRows.length) return alert("No data to download.");
 
@@ -161,6 +170,7 @@ const AttendanceHistory = () => {
         present: r.present ?? 0,
         absent: r.absent ?? 0,
       };
+
       matrixDays.forEach((d, i) => {
         base[`day_${d}`] =
           r.daily?.[i] === "Present"
@@ -169,6 +179,7 @@ const AttendanceHistory = () => {
             ? "Absent"
             : "NA";
       });
+
       return base;
     });
 
@@ -181,12 +192,13 @@ const AttendanceHistory = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-red-50 p-4 md:p-10">
-      <div className="max-w-6xl mx-auto bg-white/90 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl relative">
+      <div className="max-w-6xl mx-auto bg-white/90 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl">
 
-        {/* BACK BUTTON */}
+        {/* BACK */}
         <button
           onClick={() => navigate("/teacher/attendance")}
-  className="mb-4 flex items-center gap-2 bg-red-700 hover:bg-red-800 text-white px-4 py-2 rounded-lg shadow-md w-fit"        >
+          className="mb-4 flex items-center gap-2 bg-red-700 hover:bg-red-800 text-white px-4 py-2 rounded-lg shadow-md w-fit"
+        >
           <ArrowLeft size={18} />
           Back
         </button>
@@ -243,15 +255,14 @@ const AttendanceHistory = () => {
           </button>
         </div>
 
-        {/* RESPONSIVE TABLE (NON-STICKY) */}
+        {/* TABLE */}
         <div className="w-full overflow-x-auto rounded-lg border">
-          <table className="min-w-max border-collapse w-full">
-            {/* HEADER */}
+          <table className="min-w-max w-full border-collapse">
             <thead className="bg-red-800 text-white">
               <tr>
-                <th className="px-4 py-3 text-sm font-semibold">Roll No</th>
-                <th className="px-4 py-3 text-sm font-semibold">Student Name</th>
-                <th className="px-4 py-3 text-sm font-semibold">Enrollment No</th>
+                <th className="px-4 py-3 font-semibold text-sm">Roll No</th>
+                <th className="px-4 py-3 font-semibold text-sm">Student Name</th>
+                <th className="px-4 py-3 font-semibold text-sm">Enrollment No</th>
 
                 {matrixDays.map((d) => (
                   <th
@@ -262,17 +273,16 @@ const AttendanceHistory = () => {
                   </th>
                 ))}
 
-                <th className="px-4 py-3 text-sm font-semibold">Present</th>
-                <th className="px-4 py-3 text-sm font-semibold">Absent</th>
+                <th className="px-4 py-3 font-semibold text-sm">Present</th>
+                <th className="px-4 py-3 font-semibold text-sm">Absent</th>
               </tr>
             </thead>
 
-            {/* BODY */}
             <tbody>
               {loadingMonthly ? (
                 <tr>
                   <td
-                    colSpan={3 + matrixDays.length + 2}
+                    colSpan={matrixDays.length + 5}
                     className="text-center py-6 text-gray-600"
                   >
                     Loading attendance...
@@ -288,7 +298,7 @@ const AttendanceHistory = () => {
                     {(row.daily || []).map((st, i) => (
                       <td
                         key={i}
-                        className={`px-3 py-2 text-center font-bold ${
+                        className={`px-3 py-2 text-center font-semibold ${
                           st === "Present"
                             ? "text-green-700"
                             : st === "Absent"
@@ -311,7 +321,7 @@ const AttendanceHistory = () => {
               ) : (
                 <tr>
                   <td
-                    colSpan={3 + matrixDays.length + 2}
+                    colSpan={matrixDays.length + 5}
                     className="text-center py-6 text-gray-600"
                   >
                     No records found.
@@ -324,7 +334,7 @@ const AttendanceHistory = () => {
 
         {/* SUMMARY */}
         <div className="mt-6 p-4 bg-white dark:bg-gray-800 border rounded-xl text-center shadow">
-          <h2 className="font-semibold text-red-800 dark:text-white text-xl mb-2">
+          <h2 className="text-xl font-semibold text-red-800 dark:text-white mb-2">
             Summary
           </h2>
 
