@@ -19,7 +19,7 @@ const AttendanceHistory = () => {
   const [matrixDays, setMatrixDays] = useState([]);
   const [matrixRows, setMatrixRows] = useState([]);
 
-  const [loadingClasses, setLoadingClasses] = useState(false);
+  const [ setLoadingClasses] = useState(false);
   const [loadingMonthly, setLoadingMonthly] = useState(false);
 
   const latestReqId = useRef(0);
