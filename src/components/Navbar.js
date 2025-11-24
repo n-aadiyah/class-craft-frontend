@@ -9,87 +9,94 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { user, token, setToken, setUser } = useAuth();
   const [showMenu, setShowMenu] = React.useState(false);
-  const [scrolled, setScrolled] = React.useState(false);
+
+  // Show navbar only at top
+  const [showNavbar, setShowNavbar] = React.useState(true);
 
   React.useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
+    const handleScroll = () => setShowNavbar(window.scrollY < 40);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Logout
   const handleLogout = () => {
-    setToken && setToken(null);
-    setUser && setUser(null);
-    try {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-    } catch (e) {}
+    setToken(null);
+    setUser(null);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     navigate("/login");
   };
 
+  // Display name
   const displayName =
-    user?.name ||
-    user?.fullName ||
-    user?.email?.split("@")[0] ||
-    "User";
+    user?.name || user?.fullName || user?.email?.split("@")[0] || "User";
 
   const initials = displayName?.charAt(0)?.toUpperCase() || "U";
 
-  // Build full avatar URL when server returns relative path like '/uploads/avatars/..'
+  // Avatar path fix
   const makeFullAvatarUrl = (avatarUrl) => {
     if (!avatarUrl) return null;
-    if (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://")) return avatarUrl;
-    try {
-      const base = (API.defaults && API.defaults.baseURL) ? API.defaults.baseURL.replace(/\/api\/?$/, "") : window.location.origin;
-      return avatarUrl.startsWith("/") ? `${base}${avatarUrl}` : `${base}/${avatarUrl}`;
-    } catch {
-      return avatarUrl;
-    }
+    if (avatarUrl.startsWith("http")) return avatarUrl;
+
+    const base =
+      API?.defaults?.baseURL?.replace(/\/api\/?$/, "") ||
+      window.location.origin;
+
+    return avatarUrl.startsWith("/")
+      ? `${base}${avatarUrl}`
+      : `${base}/${avatarUrl}`;
   };
 
   const avatarSrc = makeFullAvatarUrl(user?.avatarUrl || user?.avatar);
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 border-b border-red-400/20 transition-all duration-300 ${
-        scrolled ? "bg-black/40 backdrop-blur-md shadow-md" : "bg-white/10 backdrop-blur-0"
-      }`}
+      className={`fixed top-0 left-0 right-0 w-full z-50 backdrop-blur-ml 
+      transition-all duration-500 
+      ${showNavbar ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-8"}
+      bg-black/10 border-b border-white/10 shadow-md`}
     >
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between">
+      {/* TOP MAIN ROW */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between relative">
 
-        {/* Left Side — USER */}
+        {/* LEFT USER AREA */}
         <div className="flex items-center gap-3">
           {!token ? (
             <button
-              type="button"
-              className="text-white font-semibold rounded-lg bg-red-600 hover:bg-red-700 px-3 py-2 text-xs md:text-sm transition-all"
+              className="text-white bg-red-600 hover:bg-red-700 
+                         px-4 py-2 text-xs md:text-sm 
+                         rounded-lg font-semibold transition-all"
               onClick={() => navigate("/login")}
             >
               Portal Login
             </button>
           ) : (
             <div className="flex items-center gap-2 md:gap-3">
-              {/* Avatar or initials */}
+              {/* Avatar */}
               {avatarSrc ? (
-                <img
+                <img alt=" "
                   src={avatarSrc}
-                  alt="avatar"
-                  className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover shadow-sm"
+                  className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover border-2 border-yellow-400 shadow"
                 />
               ) : (
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-red-600 to-yellow-400 text-white flex items-center justify-center font-bold shadow text-sm md:text-base">
+                <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br 
+                                from-red-600 to-yellow-400 text-white 
+                                flex items-center justify-center font-bold shadow">
                   {initials}
                 </div>
               )}
 
-              {/* Hide name on very small screens */}
+              {/* Display name */}
               <span className="hidden sm:block text-white font-semibold text-sm">
                 {displayName}
               </span>
 
+              {/* Logout */}
               <button
                 onClick={handleLogout}
-                className="text-white bg-red-600 hover:bg-red-700 rounded-md px-1 py-1 text-xs md:text-sm transition-all"
+                className="text-white bg-red-600 hover:bg-red-700 
+                           px-2 py-1 text-xs md:text-sm rounded-md shadow transition-all"
               >
                 Logout
               </button>
@@ -97,13 +104,16 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Center — SCHOOL NAME */}
-        <h1 className="text-center text-sm sm:text-base md:text-2xl lg:text-3xl font-serif font-extrabold text-white tracking-wide absolute left-1/2 -translate-x-1/2 whitespace-nowrap drop-shadow-lg">
-          GAYATHRI CENTRAL SCHOOL
-        </h1>
+        {/* CENTER SCHOOL TITLE */}
+        <div className="absolute left-1/2 -translate-x-1/2">
+          <h1 className="text-white font-serif font-extrabold drop-shadow-md
+                         text-sm sm:text-base md:text-2xl lg:text-3xl whitespace-nowrap">
+            GAYATHRI CENTRAL SCHOOL
+          </h1>
+        </div>
 
-        {/* Right Side — HOME + DASHBOARD */}
-        <div className="hidden sm:flex items-center gap-1 md:gap-3">
+        {/* RIGHT DASHBOARD */}
+        <div className="hidden sm:flex items-center">
           {token && user?.role && (
             <button
               onClick={() => {
@@ -112,78 +122,66 @@ const Navbar = () => {
                 else if (user.role === "admin") navigate("/admin/dashboard");
                 else navigate("/");
               }}
-              className="text-white font-semibold rounded hover:bg-white/20 px-3 py-1 text-xs md:text-sm transition-all flex items-center gap-1 group"
+              className="flex items-center gap-1 px-3 py-1 rounded 
+                         text-white hover:bg-white/20 
+                         text-xs md:text-sm font-semibold transition-all"
             >
-              <LayoutDashboard
-                size={16}
-                className="text-red-500 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-6"
-              />
+              <LayoutDashboard size={18} className="text-yellow-400" />
               Dashboard
             </button>
           )}
         </div>
 
-        {/* Mobile Menu Button */}
+        {/* MOBILE MENU BUTTON */}
         <button
-          className="sm:hidden text-white text-xl px-2 py-1 rounded hover:bg-white/20 transition"
+          className="sm:hidden text-white text-xl px-2 py-1 
+                    rounded hover:bg-white/20 transition-all"
           onClick={() => setShowMenu((prev) => !prev)}
         >
           ☰
         </button>
       </div>
 
-      {/* Mobile Dropdown Menu */}
+      {/* MOBILE DROPDOWN */}
       {showMenu && (
-        <div className="sm:hidden flex flex-col items-start gap-3 px-4 py-3 bg-white/10 backdrop-blur-lg animate-slide-down shadow-lg border-t border-red-300/30">
+        <div className="sm:hidden px-4 py-3 bg-black/40 backdrop-blur-xl shadow-inner border-t border-white/10">
           <Link
             to="/"
-            className="text-white font-medium py-1"
+            className="text-white block py-2"
             onClick={() => setShowMenu(false)}
           >
             Home
           </Link>
 
-          {token && user?.role && (
+          {token && (
             <button
               onClick={() => {
                 if (user.role === "teacher") navigate("/teacher/dashboard");
                 else if (user.role === "student") navigate("/student/dashboard");
-                else if (user.role === "admin") navigate("/admin/dashboard");
                 else navigate("/");
                 setShowMenu(false);
               }}
-              className="text-white font-medium py-1 flex gap-2"
+              className="text-white flex items-center gap-2 py-2"
             >
-              <LayoutDashboard size={16} /> Dashboard
+              <LayoutDashboard size={16} className="text-yellow-400" />
+              Dashboard
             </button>
           )}
         </div>
       )}
 
-      {/* Bottom Nav — stays same */}
-      <nav className="flex justify-center items-center gap-4 md:gap-6 py-2 flex-wrap text-xs md:text-sm font-semibold">
-        <Link
-          to="/student"
-          className="text-white font-bold border-b-2 border-red-600 pb-1"
-        >
+      {/* BOTTOM NAV */}
+  <nav className="flex justify-center items-center gap-6 py-2 text-xs md:text-sm font-semibold bg-black/10 backdrop-blur-sm border-t border-white/5 shadow-md">
+        <Link to="/student" className="text-yellow-400 font-bold border-b-2 border-red-600 pb-1">
           Student
         </Link>
-        <Link
-          to="/curriculum"
-          className="text-white hover:text-red-600 pb-1 border-b-2 border-transparent hover:border-red-600 transition-all"
-        >
+        <Link to="/curriculum" className="text-white hover:text-yellow-400 pb-1 border-b-2 border-transparent hover:border-red-600">
           Curriculum
         </Link>
-        <Link
-          to="/leaderboard"
-          className="text-white hover:text-red-600 pb-1 border-b-2 border-transparent hover:border-red-600 transition-all"
-        >
+        <Link to="/leaderboard" className="text-white hover:text-yellow-400 pb-1 border-b-2 border-transparent hover:border-red-600">
           Leaderboard
         </Link>
-        <Link
-          to="/about"
-          className="text-white hover:text-red-600 pb-1 border-b-2 border-transparent hover:border-red-600 transition-all"
-        >
+        <Link to="/about" className="text-white hover:text-yellow-400 pb-1 border-b-2 border-transparent hover:border-red-600">
           About
         </Link>
       </nav>
