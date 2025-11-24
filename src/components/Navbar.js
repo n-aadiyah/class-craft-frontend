@@ -24,25 +24,34 @@ const Navbar = () => {
     "User";
 
   const initials = displayName?.charAt(0)?.toUpperCase() || "U";
-
-  const [scrolled, setScrolled] = React.useState(false);
+  const [isVisible, setIsVisible] = React.useState(true);
+const lastScrollY = React.useRef(0);
 
 React.useEffect(() => {
   const handleScroll = () => {
-    setScrolled(window.scrollY > 10);
+    const currentScroll = window.scrollY;
+
+    if (currentScroll > lastScrollY.current) {
+      // scrolling down → hide navbar
+      setIsVisible(false);
+    } else {
+      // scrolling up → show navbar
+      setIsVisible(true);
+    }
+
+    lastScrollY.current = currentScroll;
   };
 
   window.addEventListener("scroll", handleScroll);
+
   return () => window.removeEventListener("scroll", handleScroll);
 }, []);
 
 
 return (
 <header
-  className={`fixed top-0 left-0 right-0 z-50 border-b border-red-400/20 transition-all duration-300 ${
-    scrolled
-      ? "bg-black/40 backdrop-blur-md shadow-md"
-      : "bg-white/10 backdrop-blur-0"
+  className={`fixed top-0 left-0 right-0 z-50 bg-white/9 backdrop-blur-ml border-b border-red-400/20 transition-transform duration-300 ${
+    isVisible ? "translate-y-0" : "-translate-y-full"
   }`}
 >
   <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between">
