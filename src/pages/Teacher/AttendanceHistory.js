@@ -9,34 +9,26 @@ const AttendanceHistory = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Preselect current month/year
   const now = new Date();
-  const [month, setMonth] = useState(String(now.getMonth() + 1)); // "1".."12"
-  const [year, setYear] = useState(String(now.getFullYear())); // "2025"
+  const [month, setMonth] = useState(String(now.getMonth() + 1));
+  const [year, setYear] = useState(String(now.getFullYear()));
 
-  // Filters
-  const [selectedClass, setSelectedClass] = useState(""); // className (string)
+  const [selectedClass, setSelectedClass] = useState("");
 
-  // Data
-  const [classes, setClasses] = useState([]); // [{_id, name, grade, ...}]
-  const [matrixDays, setMatrixDays] = useState([]); // [1..N]
-  const [matrixRows, setMatrixRows] = useState([]); // [{studentId,name,enrollNo,daily,present,absent}]
+  const [classes, setClasses] = useState([]);
+  const [matrixDays, setMatrixDays] = useState([]);
+  const [matrixRows, setMatrixRows] = useState([]);
 
-  // Status
   const [loadingClasses, setLoadingClasses] = useState(false);
   const [loadingMonthly, setLoadingMonthly] = useState(false);
 
-  // Guard for out-of-order responses
   const latestReqId = useRef(0);
-
-  // store the passed-in className from location.state (if any)
   const passedClassRef = useRef(null);
 
-  // 0) Read location.state once and store passed className (support multiple keys)
+  // Read passed class from navigation
   useEffect(() => {
     try {
       const st = location?.state || {};
-      // support multiple shapes: { class: cls }, { cls: cls }, { className: '...' }
       const clsObj = st.class || st.cls || null;
       const clsNameFromObj = clsObj?.name;
       const clsNameFromParam = st.className || null;
@@ -44,74 +36,57 @@ const AttendanceHistory = () => {
       const chosen = clsNameFromObj || clsNameFromParam || null;
       if (chosen) {
         passedClassRef.current = String(chosen).trim();
-        console.log("[AttendanceHistory] passed class from location.state:", passedClassRef.current);
-        // set it eagerly so UI reflects the clicked class quickly
         setSelectedClass(passedClassRef.current);
       }
-      // Also accept query param className in URL ?className=...
+
       const qParam = new URLSearchParams(location.search).get("className");
       if (!passedClassRef.current && qParam) {
-        passedClassRef.current = String(qParam).trim();
+        passedClassRef.current = qParam.trim();
         setSelectedClass(passedClassRef.current);
-        console.log("[AttendanceHistory] passed class from query param:", passedClassRef.current);
       }
-    } catch (e) {
-      console.warn("Error reading location.state in AttendanceHistory:", e);
-    }
-    // only run when location changes
+    } catch {}
   }, [location]);
 
-  // 1) Load classes once. Do not overwrite selectedClass if already set by location.state.
+  // Load class list
   useEffect(() => {
     let mounted = true;
-    const loadClasses = async () => {
+    const load = async () => {
       try {
         setLoadingClasses(true);
-        const res = await API.get("/classes", { headers: { "Cache-Control": "no-cache" } });
+        const res = await API.get("/classes");
         const list = Array.isArray(res.data) ? res.data : [];
-        // alphabetical for UX
         list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
         if (!mounted) return;
         setClasses(list);
 
-        // if we already have a selected class (passed from location/state), prefer it
         if (passedClassRef.current) {
-          // ensure it exists in the fetched list
-          const found = list.find((c) => String(c.name).trim() === String(passedClassRef.current).trim());
-          if (found) {
-            setSelectedClass(found.name);
-            console.log("[AttendanceHistory] selectedClass set from passedClassRef:", found.name);
-            return;
-          } else {
-            // passed class not found — still set (backend may accept string), but log it
-            console.warn("[AttendanceHistory] passed class not found in classes list:", passedClassRef.current);
-            setSelectedClass(passedClassRef.current);
-            return;
-          }
+          const found = list.find(
+            (c) => String(c.name).trim() === passedClassRef.current
+          );
+          if (found) setSelectedClass(found.name);
+          else setSelectedClass(passedClassRef.current);
+          return;
         }
 
-        // otherwise, if no selectedClass set and we have classes, auto-select first
         if (!selectedClass && list.length) {
           setSelectedClass(list[0].name);
-          console.log("[AttendanceHistory] auto-selected first class:", list[0].name);
         }
-      } catch (e) {
-        console.error("Error fetching classes:", e);
       } finally {
         if (mounted) setLoadingClasses(false);
       }
     };
-    loadClasses();
-    return () => { mounted = false; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    load();
+    return () => (mounted = false);
   }, []);
 
-  // 2) Load monthly matrix whenever filters change (and are complete)
+  // Load monthly data
   useEffect(() => {
     const controller = new AbortController();
     const reqId = ++latestReqId.current;
 
-    const fetchMonthly = async () => {
+    const load = async () => {
       if (!selectedClass || !month || !year) {
         setMatrixDays([]);
         setMatrixRows([]);
@@ -120,52 +95,34 @@ const AttendanceHistory = () => {
 
       try {
         setLoadingMonthly(true);
-
-        // normalize and trim
-        const classNameTrim = String(selectedClass).trim();
         const params = new URLSearchParams({
-          className: classNameTrim,
-          month: String(month),
-          year: String(year),
-          _t: Date.now().toString(), // cache buster
+          className: selectedClass.trim(),
+          month,
+          year,
+          _t: Date.now(),
         });
 
-        const url = `/attendance/monthly?${params.toString()}`;
-        console.log("[AttendanceHistory] fetching monthly for:", { url, className: classNameTrim });
-
-        const res = await API.get(url, {
+        const res = await API.get(`/attendance/monthly?${params}`, {
           signal: controller.signal,
-          headers: {
-            "Cache-Control": "no-cache",
-            Pragma: "no-cache",
-          },
         });
 
-        if (reqId !== latestReqId.current) {
-          console.log("[AttendanceHistory] ignoring out-of-order response", reqId);
-          return;
-        }
+        if (reqId !== latestReqId.current) return;
 
         setMatrixDays(res.data?.days || []);
         setMatrixRows(Array.isArray(res.data?.students) ? res.data.students : []);
-      } catch (e) {
-        if (e.name === "CanceledError" || e.code === "ERR_CANCELED") return;
-        console.error("Error fetching monthly attendance:", e);
-        setMatrixDays([]);
-        setMatrixRows([]);
       } finally {
         if (reqId === latestReqId.current) setLoadingMonthly(false);
       }
     };
 
-    fetchMonthly();
+    load();
     return () => controller.abort();
   }, [selectedClass, month, year]);
 
-  // Summary totals
+  // Summary
   const summary = useMemo(() => {
-    const present = matrixRows.reduce((sum, r) => sum + (r.present || 0), 0);
-    const absent = matrixRows.reduce((sum, r) => sum + (r.absent || 0), 0);
+    const present = matrixRows.reduce((s, r) => s + (r.present || 0), 0);
+    const absent = matrixRows.reduce((s, r) => s + (r.absent || 0), 0);
     return {
       totalStudents: matrixRows.length,
       present,
@@ -173,25 +130,20 @@ const AttendanceHistory = () => {
     };
   }, [matrixRows]);
 
-  // Year options
   const yearOptions = useMemo(() => {
-    const current = new Date().getFullYear();
-    return [current - 1, current, current + 1].map(String);
+    const now = new Date().getFullYear();
+    return [String(now - 1), String(now), String(now + 1)];
   }, []);
 
-  // -------------------
-  // Download handler
-  // -------------------
+  // CSV
   const handleDownload = () => {
-    if (!selectedClass || !month || !year) {
-      return alert("Please select Class, Month and Year before downloading.");
-    }
-    if (!matrixRows || matrixRows.length === 0) {
-      return alert("No attendance data to download for the selected filters.");
-    }
+    if (!matrixRows.length) return alert("No data to download.");
 
-    // Build columns: Date columns (Day 1..N) plus meta columns
-    const dayCols = matrixDays.map((d) => ({ key: `day_${d}`, label: String(d) }));
+    const dayCols = matrixDays.map((d) => ({
+      key: `day_${d}`,
+      label: String(d),
+    }));
+
     const columns = [
       { key: "rollNo", label: "Roll No" },
       { key: "studentName", label: "Student Name" },
@@ -201,7 +153,6 @@ const AttendanceHistory = () => {
       { key: "absent", label: "Absent" },
     ];
 
-    // Build rows: map each matrix row to the column keys
     const rows = matrixRows.map((r, idx) => {
       const base = {
         rollNo: idx + 1,
@@ -210,59 +161,59 @@ const AttendanceHistory = () => {
         present: r.present ?? 0,
         absent: r.absent ?? 0,
       };
-      // fill day_N keys from r.daily array (match matrixDays order)
-      (matrixDays || []).forEach((d, i) => {
-        const st = (r.daily && r.daily[i]) || "";
-        base[`day_${d}`] = st === "Present" ? "Present" : st === "Absent" ? "Absent" : st || "";
+      matrixDays.forEach((d, i) => {
+        base[`day_${d}`] =
+          r.daily?.[i] === "Present"
+            ? "Present"
+            : r.daily?.[i] === "Absent"
+            ? "Absent"
+            : "NA";
       });
       return base;
     });
 
-    const timestamp = `${year}-${String(month).padStart(2, "0")}`;
-    const filename = `attendance_${selectedClass.replace(/\s+/g, "_")}_${timestamp}.csv`;
-    downloadCsv(filename, rows, columns);
+    downloadCsv(
+      `attendance_${selectedClass}_${year}-${month}.csv`,
+      rows,
+      columns
+    );
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-red-50 dark:from-gray-900 dark:to-gray-800 p-6 md:p-10 transition-all duration-500">
-      <div className="max-w-6xl mx-auto bg-white/80 dark:bg-gray-900/70 backdrop-blur-lg shadow-xl rounded-2xl p-8 relative">
-        {/* Back */}
+    <div className="min-h-screen bg-gradient-to-b from-white to-red-50 p-4 md:p-10">
+      <div className="max-w-6xl mx-auto bg-white/90 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl relative">
+
+        {/* BACK BUTTON */}
         <button
           onClick={() => navigate("/teacher/attendance")}
-          className="absolute top-6 left-6 flex items-center gap-2 bg-red-700 hover:bg-red-800 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-300"
-        >
+  className="mb-4 flex items-center gap-2 bg-red-700 hover:bg-red-800 text-white px-4 py-2 rounded-lg shadow-md w-fit"        >
           <ArrowLeft size={18} />
           Back
         </button>
 
-        <h1 className="text-3xl md:text-4xl font-serif text-center text-red-800 dark:text-white mb-8">
+        <h1 className="text-2xl md:text-4xl text-center font-serif text-red-800 dark:text-white mb-6">
           Attendance History
         </h1>
 
-        {/* Filters */}
-        <div className="flex flex-col md:flex-row justify-between gap-4 mb-10">
-          {/* Class (uses class name because backend expects className) */}
+        {/* FILTERS */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <select
-            className="border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-red-700 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800"
             value={selectedClass}
             onChange={(e) => setSelectedClass(e.target.value)}
-            disabled={loadingClasses}
+            className="p-2 border rounded-lg bg-white dark:bg-gray-800"
           >
-            <option value="">
-              {loadingClasses ? "Loading classes..." : "Select Class"}
-            </option>
+            <option value="">Select Class</option>
             {classes.map((c) => (
               <option key={c._id} value={c.name}>
-                {c.name}{c.grade ? ` ` : ""}
+                {c.name}
               </option>
             ))}
           </select>
 
-          {/* Month */}
           <select
-            className="border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-red-700 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800"
             value={month}
             onChange={(e) => setMonth(e.target.value)}
+            className="p-2 border rounded-lg bg-white dark:bg-gray-800"
           >
             <option value="">Month</option>
             {[...Array(12)].map((_, i) => (
@@ -272,110 +223,98 @@ const AttendanceHistory = () => {
             ))}
           </select>
 
-          {/* Year */}
           <select
-            className="border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-red-700 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800"
             value={year}
             onChange={(e) => setYear(e.target.value)}
+            className="p-2 border rounded-lg bg-white dark:bg-gray-800"
           >
             <option value="">Year</option>
             {yearOptions.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
+              <option key={y}>{y}</option>
             ))}
           </select>
 
-          <div className="flex gap-3 w-full md:w-1/4">
-            {/* <button
-              onClick={() => {
-                setSelectedClass(classes[0]?.name || "");
-                setMonth(String(now.getMonth() + 1));
-                setYear(String(now.getFullYear()));
-                setMatrixDays([]);
-                setMatrixRows([]);
-              }}
-              className="flex-1 bg-red-800 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-300"
-            >
-              Reset Filters
-            </button> */}
-
-            <button
-              onClick={handleDownload}
-              disabled={loadingMonthly || !matrixRows.length}
-              title={loadingMonthly ? "Preparing data..." : (!matrixRows.length ? "No data to download" : "Download CSV")}
-              className={`flex-none px-4 py-2 rounded-lg font-semibold transition ${
-                loadingMonthly || !matrixRows.length
-                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-500 text-white"
-              }`}
-            >
-              {loadingMonthly ? "Preparing..." : "Download CSV"}
-            </button>
-          </div>
+          <button
+            onClick={handleDownload}
+            disabled={!matrixRows.length}
+            className="bg-green-600 hover:bg-green-500 text-white font-semibold px-4 py-2 rounded-lg shadow-md disabled:bg-gray-300 disabled:text-gray-600"
+          >
+            Download CSV
+          </button>
         </div>
 
-        {/* Matrix Table */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+        {/* RESPONSIVE TABLE (NON-STICKY) */}
+        <div className="w-full overflow-x-auto rounded-lg border">
+          <table className="min-w-max border-collapse w-full">
+            {/* HEADER */}
             <thead className="bg-red-800 text-white">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold uppercase">Roll No</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold uppercase">Student Name</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold uppercase">Enrollment No</th>
+                <th className="px-4 py-3 text-sm font-semibold">Roll No</th>
+                <th className="px-4 py-3 text-sm font-semibold">Student Name</th>
+                <th className="px-4 py-3 text-sm font-semibold">Enrollment No</th>
+
                 {matrixDays.map((d) => (
                   <th
                     key={d}
-                    className="px-3 py-3 text-center text-xs font-semibold uppercase"
-                    title={`Day ${d}`}
+                    className="px-3 py-3 text-xs font-semibold text-center border-l"
                   >
                     {d}
                   </th>
                 ))}
-                <th className="px-6 py-3 text-center text-sm font-semibold uppercase">Present</th>
-                <th className="px-6 py-3 text-center text-sm font-semibold uppercase">Absent</th>
+
+                <th className="px-4 py-3 text-sm font-semibold">Present</th>
+                <th className="px-4 py-3 text-sm font-semibold">Absent</th>
               </tr>
             </thead>
+
+            {/* BODY */}
             <tbody>
               {loadingMonthly ? (
                 <tr>
-                  <td colSpan={3 + matrixDays.length + 2} className="text-center py-6 text-gray-500 dark:text-gray-400">
+                  <td
+                    colSpan={3 + matrixDays.length + 2}
+                    className="text-center py-6 text-gray-600"
+                  >
                     Loading attendance...
                   </td>
                 </tr>
               ) : matrixRows.length > 0 ? (
                 matrixRows.map((row, idx) => (
-                  <tr key={row.studentId} className="hover:bg-red-50 dark:hover:bg-gray-800 transition duration-300">
-                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{idx + 1}</td>
-                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{row.name}</td>
-                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{row.enrollNo}</td>
+                  <tr key={row.studentId} className="hover:bg-red-50">
+                    <td className="px-4 py-3">{idx + 1}</td>
+                    <td className="px-4 py-3">{row.name}</td>
+                    <td className="px-4 py-3">{row.enrollNo}</td>
 
                     {(row.daily || []).map((st, i) => (
                       <td
                         key={i}
-                        className={`px-3 py-2 text-center font-semibold ${
+                        className={`px-3 py-2 text-center font-bold ${
                           st === "Present"
-                            ? "text-green-700 dark:text-green-400"
+                            ? "text-green-700"
                             : st === "Absent"
-                            ? "text-red-700 dark:text-red-400"
-                            : "text-gray-500 dark:text-gray-400"
+                            ? "text-red-600"
+                            : "text-gray-500"
                         }`}
-                        title={st}
                       >
-                        {st === "Present" ? "P" : st === "Absent" ? "A" : "NA"}
+                        {st === "Present"
+                          ? "P"
+                          : st === "Absent"
+                          ? "A"
+                          : "NA"}
                       </td>
                     ))}
 
-                    <td className="px-6 py-4 text-center text-gray-700 dark:text-gray-300">{row.present}</td>
-                    <td className="px-6 py-4 text-center text-gray-700 dark:text-gray-300">{row.absent}</td>
+                    <td className="px-4 py-3 text-center">{row.present}</td>
+                    <td className="px-4 py-3 text-center">{row.absent}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={3 + matrixDays.length + 2} className="text-center py-6 text-gray-500 dark:text-gray-400">
-                    {selectedClass && month && year
-                      ? "No records for this month."
-                      : "Select Class, Month & Year to view attendance."}
+                  <td
+                    colSpan={3 + matrixDays.length + 2}
+                    className="text-center py-6 text-gray-600"
+                  >
+                    No records found.
                   </td>
                 </tr>
               )}
@@ -383,15 +322,21 @@ const AttendanceHistory = () => {
           </table>
         </div>
 
-        {/* Summary */}
-        <div className="mt-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 text-center shadow-md hover:shadow-lg transition-all duration-300">
-          <h2 className="text-xl font-semibold text-red-800 dark:text-white mb-2">Summary</h2>
+        {/* SUMMARY */}
+        <div className="mt-6 p-4 bg-white dark:bg-gray-800 border rounded-xl text-center shadow">
+          <h2 className="font-semibold text-red-800 dark:text-white text-xl mb-2">
+            Summary
+          </h2>
+
           {selectedClass && month && year ? (
             <p className="text-gray-700 dark:text-gray-300">
-              Students: {summary.totalStudents} &nbsp;|&nbsp; Present (sum): {summary.present} &nbsp;|&nbsp; Absent (sum): {summary.absent}
+              Students: {summary.totalStudents} | Present: {summary.present} |
+              Absent: {summary.absent}
             </p>
           ) : (
-            <p className="text-gray-700 dark:text-gray-300">Select Class, Month & Year to view summary.</p>
+            <p className="text-gray-600 dark:text-gray-400">
+              Select all filters to view summary.
+            </p>
           )}
         </div>
       </div>
