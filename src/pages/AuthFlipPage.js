@@ -70,6 +70,8 @@ const AuthPage = () => {
 
       setToken(token);
       setUser(user);
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", user.role);
 
       // 🔥 Beautiful Success Toast
       toast.success("🎉 Login Successful!", {

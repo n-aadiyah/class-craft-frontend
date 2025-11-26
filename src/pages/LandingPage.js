@@ -298,7 +298,7 @@ const LandingPage = () => {
 
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
       {[
-        "https://www.youtube.com/embed/GlQD8-lIOpM",
+        "https://www.youtube.com/embed/DcTSVSyJcBw",
         "https://www.youtube.com/embed/QM1TpWjur_Q",
         "https://www.youtube.com/embed/Ccd6R9oSyOw",
       ].map((src, i) => (
@@ -353,7 +353,7 @@ const LandingPage = () => {
         <h2 className="text-xl font-bold leading-tight tracking-[-0.015em] font-serif">Our School</h2>
       </div>
       <p className="text-sm text-black dark:text-gray-400 mt-2 font-serif">
-        © 2025  Little Flower School. All rights reserved.
+        © 2025  Gayathri Central School. All rights reserved.
       </p>
     </div>
 
