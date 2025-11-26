@@ -13,8 +13,8 @@ import AttendanceRegister from "./pages/Teacher/Attendence Register";
 import AuthPage from "./pages/AuthFlipPage";
 import AttendanceHistory from "./pages/Teacher/AttendanceHistory";  
 
-import AdminDashboard from "./pages/AdminDashboard";
-import StudentDashboard from "./pages/StudentDashboard";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+import StudentDashboard from "./pages/Student/StudentDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster } from "react-hot-toast";
 function App() {
@@ -26,7 +26,7 @@ function App() {
       <Route path="/" element={<LandingPage />} />
  <Route path="/login" element={< AuthPage/>} />
          <Route
-          path="/AdminDashboard"
+          path="/admin/dashboard"
           element={
             <ProtectedRoute role="admin">
               <AdminDashboard />
