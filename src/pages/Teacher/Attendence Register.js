@@ -153,45 +153,51 @@ const AttendanceRegister = () => {
               {selectedClass.name} — Attendance
             </h2>
 
-            <table className="w-full border-collapse text-sm md:text-base">
-              <thead className="bg-red-100 text-red-800 text-center font-serif">
-                <tr>
-                  <th className="p-2 text-center w-1/12">Roll No</th>
-                  <th className="p-2 text-center w-1/6">Student Name</th>
-                  <th className="p-2 text-center w-1/6">Enroll No</th>
-                  <th className="p-2 text-center w-1/6">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.map((stu, index) => (
-                  <tr key={stu._id} className="border-b hover:bg-gray-50 transition text-center">
-                    <td className="p-2">{index + 1}</td>
-                    <td className="p-2">{stu.name}</td>
-                    <td className="p-2">{stu.enrollNo}</td>
-                    <td className="p-2 px-5text-center">
-                      <button
-                        onClick={() => toggleAttendance(stu._id)}
-                        className={`flex items-center justify-center gap-1 px-5 py-1 rounded-lg font-medium transition ${
-                          attendance[stu._id] === "Present"
-                            ? "bg-green-100 text-green-700 hover:bg-green-200"
-                            : "bg-red-100 text-red-700 hover:bg-red-200"
-                        }`}
-                      >
-                        {attendance[stu._id] === "Present" ? (
-                          <>
-                            <CheckCircle size={16} /> Present
-                          </>
-                        ) : (
-                          <>
-                            <XCircle size={16} /> Absent
-                          </>
-                        )}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+{/* Scrollable Student List */}
+<div className="max-h-80 overflow-y-auto custom-scrollbar mt-2 border rounded-xl">
+  <table className="w-full border-collapse text-sm md:text-base">
+    <thead className="bg-red-100 text-red-800 text-center font-serif sticky top-0 z-10">
+      <tr>
+        <th className="p-2 text-center w-1/12">Roll No</th>
+        <th className="p-2 text-center w-1/6">Student Name</th>
+        <th className="p-2 text-center w-1/6">Enroll No</th>
+        <th className="p-2 text-center w-1/6">Status</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {students.map((stu, index) => (
+        <tr key={stu._id} className="border-b hover:bg-gray-50 transition text-center">
+          <td className="p-2">{index + 1}</td>
+          <td className="p-2">{stu.name}</td>
+          <td className="p-2">{stu.enrollNo}</td>
+
+          <td className="p-2 text-center">
+            <button
+              onClick={() => toggleAttendance(stu._id)}
+              className={`flex items-center justify-center gap-1 px-5 py-1 rounded-lg font-medium transition ${
+                attendance[stu._id] === "Present"
+                  ? "bg-green-100 text-green-700 hover:bg-green-200"
+                  : "bg-red-100 text-red-700 hover:bg-red-200"
+              }`}
+            >
+              {attendance[stu._id] === "Present" ? (
+                <>
+                  <CheckCircle size={16} /> Present
+                </>
+              ) : (
+                <>
+                  <XCircle size={16} /> Absent
+                </>
+              )}
+            </button>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
 
             {/* ✅ Buttons Section */}
             <div className="flex justify-between items-center mt-5 flex-wrap gap-3">
