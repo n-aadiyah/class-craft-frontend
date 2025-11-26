@@ -1,7 +1,10 @@
 import React from "react";
-import { BookOpen, Users, UserCircle, Menu } from "lucide-react";
+import { BookOpen, Users, UserCircle, Menu, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+
   // Get admin name from localStorage (from login)
   const adminName = localStorage.getItem("name") || "Admin";
 
@@ -11,11 +14,24 @@ const AdminDashboard = () => {
       {/* 🔥 TOP NAVBAR */}
       <div className="w-full bg-white shadow-md px-4 sm:px-8 py-3 flex justify-between items-center sticky top-0 z-50">
 
-        {/* Left Side - Title */}
-        <h1 className="text-xl sm:text-2xl font-bold text-red-700 font-serif flex items-center gap-2">
-          <Menu className="text-red-700 block sm:hidden" />
-          Admin Dashboard
-        </h1>
+        {/* Left Side - Back Button + Title */}
+        <div className="flex items-center gap-3">
+          
+          {/* 🔙 Back Button */}
+          <button
+            onClick={() => navigate("/")}
+            className="p-2 rounded-lg hover:bg-red-50 transition"
+            title="Go Back"
+          >
+            <ArrowLeft size={22} className="text-red-700" />
+          </button>
+
+          {/* Title */}
+          <h1 className="text-xl sm:text-2xl font-bold text-red-700 font-serif flex items-center gap-2">
+            <Menu className="text-red-700 block sm:hidden" />
+            Admin Dashboard
+          </h1>
+        </div>
 
         {/* Right Side - Admin Profile */}
         <div className="flex items-center gap-3">
@@ -29,11 +45,11 @@ const AdminDashboard = () => {
             {adminName.charAt(0).toUpperCase()}
           </div>
         </div>
+
       </div>
 
       {/* PAGE BODY */}
       <div className="p-4 sm:p-6 md:p-10">
-
 
         {/* Title */}
         <h1 className="text-2xl sm:text-3xl font-bold text-red-700 mb-6 font-serif">
@@ -42,7 +58,7 @@ const AdminDashboard = () => {
 
         {/* Responsive Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          
+
           {/* Classes Card */}
           <div className="bg-white p-5 sm:p-6 shadow-md rounded-xl border-t-4 border-red-700 flex items-center gap-4 hover:shadow-lg transition">
             <BookOpen size={36} className="text-red-700" />
