@@ -48,14 +48,14 @@ const AuthPage = () => {
     setLoading(true);
 
     try {
+      // IMPORTANT: do not send `role` here to avoid role-mismatch 403
       const res = await API.post("/auth/login", {
         email: formData.email,
         password: formData.password,
-        role: formData.role,
       });
 
-      const token = res.data.token;
-      let user = res.data.user ?? null;
+      const token = res.data?.token;
+      let user = res.data?.user ?? null;
 
       if (!token) throw new Error("No token returned");
 
@@ -68,12 +68,13 @@ const AuthPage = () => {
         };
       }
 
+      // update auth state & storage
       setToken(token);
       setUser(user);
       localStorage.setItem("token", token);
-      localStorage.setItem("role", user.role);
+      localStorage.setItem("role", user.role ?? "");
 
-      // 🔥 Beautiful Success Toast
+      // Success toast
       toast.success("🎉 Login Successful!", {
         style: {
           background: "#b91c1c",
@@ -91,9 +92,11 @@ const AuthPage = () => {
 
       routeByRole(user.role);
     } catch (err) {
-      setError(err?.response?.data?.message || "Login failed");
+      console.error("Login failed:", err?.response ?? err);
 
-      // ❌ Error Toast
+      const msg = err?.response?.data?.message || err?.message || "Login failed";
+      setError(msg);
+
       toast.error("Login Failed ❌", {
         style: {
           background: "#450a0a",
@@ -130,6 +133,7 @@ const AuthPage = () => {
         setFormData({ ...formData, password: "" });
       }, 500);
     } catch (err) {
+      console.error("Register failed:", err?.response ?? err);
       setError(err?.response?.data?.message || "Registration failed");
 
       toast.error("Registration Failed ❌", {
@@ -184,14 +188,7 @@ const AuthPage = () => {
                   <input type="password" name="password" placeholder="Password"
                     className="input-auth" onChange={handleChange} required />
 
-                  <select name="role" value={formData.role}
-                    className="input-auth" onChange={handleChange} required>
-                    <option value="">Choose role</option>
-                    <option value="student">Student</option>
-                    <option value="teacher">Teacher</option>
-                    <option value="admin">Admin</option>
-                  </select>
-
+                  {/* note: removed role selection from login to avoid role-mismatch 403 */}
                   <button
                     type="submit"
                     disabled={loading}
