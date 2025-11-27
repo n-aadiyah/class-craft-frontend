@@ -120,7 +120,7 @@ const Navbar = () => {
 <h1
   className="absolute left-1/2 -translate-x-1/2 
              text-white font-serif font-extrabold drop-shadow-md
-             text-sm font-bold sm:hidden"
+             text-sm  sm:hidden"
 >
   GCS
 </h1>
