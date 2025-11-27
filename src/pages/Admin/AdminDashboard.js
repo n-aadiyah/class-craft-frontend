@@ -9,7 +9,7 @@ const AdminDashboard = () => {
   const adminName = localStorage.getItem("name") || "Admin";
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-70 min-h-screen">
 
       {/* 🔥 TOP NAVBAR */}
       <div className="w-full bg-white shadow-md px-4 sm:px-8 py-3 flex justify-between items-center sticky top-0 z-50">
