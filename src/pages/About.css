@@ -1,0 +1,160 @@
+/* src/styles/About.css */
+
+:root {
+  --red: #c1121f;
+  --yellow: #fcbf49;
+  --white: #ffffff;
+  --dark: #1a1a1a;
+}
+
+.about-container {
+  background: var(--white);
+  color: var(--dark);
+  overflow-x: hidden;
+}
+
+/* HERO */
+.about-hero {
+  height: 80vh;
+  background: url("https://images.unsplash.com/photo-1523050854058-8df90110c9f1")
+    center/cover no-repeat;
+  position: relative;
+}
+
+.hero-overlay {
+  height: 100%;
+  background: linear-gradient(
+    rgba(193, 18, 31, 0.85),
+    rgba(0, 0, 0, 0.7)
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: var(--white);
+  text-align: center;
+}
+
+.hero-overlay h1 {
+  font-size: 3rem;
+  color: var(--yellow);
+}
+
+.hero-overlay p {
+  max-width: 600px;
+  font-size: 1.2rem;
+}
+
+/* SECTIONS */
+.about-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 80px 10%;
+  gap: 40px;
+}
+
+.about-content img {
+  width: 100%;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+/* VALUES */
+.about-values {
+  background: var(--red);
+  color: var(--white);
+  padding: 80px 10%;
+  text-align: center;
+}
+
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.value-card {
+  background: var(--white);
+  color: var(--dark);
+  padding: 30px;
+  border-radius: 16px;
+  transition: transform 0.4s;
+}
+
+.value-card:hover {
+  transform: translateY(-10px);
+}
+
+/* VIDEO */
+.about-video {
+  padding: 80px 10%;
+  text-align: center;
+}
+
+.video-wrapper {
+  margin-top: 30px;
+  position: relative;
+  padding-top: 56.25%;
+}
+
+.video-wrapper iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+}
+
+/* ANIMATIONS */
+.fade-in {
+  animation: fadeIn 1.2s ease forwards;
+}
+
+.slide-up {
+  animation: slideUp 1.2s ease forwards;
+}
+
+.slide-left {
+  animation: slideLeft 1.2s ease forwards;
+}
+
+.slide-right {
+  animation: slideRight 1.2s ease forwards;
+}
+
+.zoom-in {
+  animation: zoomIn 0.8s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideLeft {
+  from { opacity: 0; transform: translateX(-60px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideRight {
+  from { opacity: 0; transform: translateX(60px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .about-content {
+    grid-template-columns: 1fr;
+  }
+}
