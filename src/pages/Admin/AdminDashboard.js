@@ -2,13 +2,18 @@ import React, { useEffect, useState } from "react";
 import { BookOpen, Users, UserCircle, Menu, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import API from "../../api/axiosInstance";
+import { useAuth } from "../../context/AuthContext";
+
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-
+  const { user } = useAuth();
   // Admin name from localStorage
-  const adminName = localStorage.getItem("name") || "Admin";
-
+ const adminName =
+    user?.name?.trim() ||
+    user?.fullName?.trim?.() ||
+    user?.email?.split("@")?.[0] ||
+    "Admin";
   // Dashboard stats state
   const [stats, setStats] = useState({
     totalClasses: 0,
