@@ -1,33 +1,54 @@
 // src/api/axiosInstance.js
 import axios from "axios";
 
-const DEFAULT_LOCAL = "http://localhost:5000/api";
-const DEFAULT_PROD = "https://class-craft-backend.onrender.com/api";
+/**
+ * Build a normalized baseURL that ALWAYS ends with "/api" (no trailing slash),
+ * and prevents double "/api/api" when callers use API.get('/...').
+ *
+ * Acceptable env values:
+ * - REACT_APP_API_BASE_URL = "http://localhost:5000"          -> normalized to http://localhost:5000/api
+ * - REACT_APP_API_BASE_URL = "http://localhost:5000/api"      -> normalized to http://localhost:5000/api
+ * - REACT_APP_API_BASE_URL = "" (not set)                    -> fallback to DEFAULTs below
+ */
 
-// env override (useful for dev)
-const BASE_URL =
-  process.env.REACT_APP_API_BASE_URL ||
-  (["localhost", "127.0.0.1"].includes(window.location.hostname)
-    ? DEFAULT_LOCAL
-    : DEFAULT_PROD);
+const DEFAULT_LOCAL = "http://localhost:5000";
+const DEFAULT_PROD = "https://class-craft-backend.onrender.com";
 
+function normalizeBase(originOrUrl) {
+  if (!originOrUrl || typeof originOrUrl !== "string") return null;
+  // remove trailing spaces
+  let url = originOrUrl.trim();
+
+  // remove trailing slash(es)
+  url = url.replace(/\/+$/, "");
+
+  // if it already ends with "/api", keep it
+  if (url.toLowerCase().endsWith("/api")) return url;
+
+  // otherwise append /api
+  return `${url}/api`;
+}
+
+// prefer explicit env var (developer chooses), else detect hostname
+const env = typeof process !== "undefined" ? process.env.REACT_APP_API_BASE_URL : undefined;
+
+const ORIGIN = env && env.length ? env : (["localhost", "127.0.0.1"].includes(window.location.hostname) ? DEFAULT_LOCAL : DEFAULT_PROD);
+
+const BASE_URL = normalizeBase(ORIGIN);
+
+// Create axios instance
 const API = axios.create({
   baseURL: BASE_URL,
-  // do NOT force a global Content-Type — let individual requests set it
   timeout: 30_000,
 });
 
-
-// Helper to set token programmatically (AuthContext may call this)
+// helper to set Authorization header programmatically
 export function setAuthToken(token) {
-  if (token) {
-    API.defaults.headers.common.Authorization = `Bearer ${token}`;
-  } else {
-    delete API.defaults.headers.common.Authorization;
-  }
+  if (token) API.defaults.headers.common.Authorization = `Bearer ${token}`;
+  else delete API.defaults.headers.common.Authorization;
 }
 
-// Attach Authorization header on every request (reads fresh token)
+// Attach Authorization and anti-cache headers
 API.interceptors.request.use(
   (config) => {
     try {
@@ -36,7 +57,7 @@ API.interceptors.request.use(
         config.headers = config.headers || {};
         config.headers.Authorization = `Bearer ${token}`;
       }
-      if (config.method === "get") {
+      if ((config.method || "").toLowerCase() === "get") {
         config.headers = config.headers || {};
         config.headers["Cache-Control"] = "no-cache";
         config.headers.Pragma = "no-cache";
@@ -50,26 +71,20 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Global response handler: handle auth expiry centrally
+// central response handler for 401
 API.interceptors.response.use(
-  (resp) => resp,
-  (error) => {
-    const status = error?.response?.status;
+  (r) => r,
+  (err) => {
+    const status = err?.response?.status;
     if (status === 401) {
-      // token expired or invalid — clear local auth and redirect to login
       try {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         delete API.defaults.headers.common.Authorization;
-      } catch (e) {
-        /* ignore */
-      }
-      // optional: redirect to login page — adjust path as needed
-      if (typeof window !== "undefined") {
-        window.location.href = "/login";
-      }
+      } catch (e) { /* ignore */ }
+      if (typeof window !== "undefined") window.location.href = "/login";
     }
-    return Promise.reject(error);
+    return Promise.reject(err);
   }
 );
 
