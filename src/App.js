@@ -17,6 +17,8 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import StudentDashboard from "./pages/Student/StudentDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster } from "react-hot-toast";
+import About from "./pages/About";  
+
 function App() {
   return (  
     <>
@@ -52,6 +54,9 @@ function App() {
 
       {/* Student Pages */}
       <Route path="/teacher/students/:id" element={<TeacherDashboardLayout><StudentProfile /></TeacherDashboardLayout>} />
+
+      {/* About Page */}
+      <Route path="/about" element={<About />} />
 
     </Routes>
     </>

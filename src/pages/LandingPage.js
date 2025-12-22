@@ -299,8 +299,8 @@ const LandingPage = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
       {[
         "https://www.youtube.com/embed/DcTSVSyJcBw",
-        "https://www.youtube.com/embed/QM1TpWjur_Q",
-        "https://www.youtube.com/embed/Ccd6R9oSyOw",
+        "https://www.youtube.com/embed/DcTSVSyJcBw",
+        "https://www.youtube.com/embed/DcTSVSyJcBw",
       ].map((src, i) => (
         <div
           key={i}
