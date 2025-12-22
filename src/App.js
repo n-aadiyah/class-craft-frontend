@@ -1,33 +1,48 @@
 // src/App.js
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+
 import LandingPage from "./pages/LandingPage";
-import TeacherDashboardLayout  from "./layout/TeacherDashboardlayout";
+import AuthPage from "./pages/AuthFlipPage";
+import About from "./pages/About";
+
+/* Admin */
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+import AdminClasses from "./pages/Admin/AdminClasses";
+import AdminStudents from "./pages/Admin/AdminStudents";
+import AdminTeachers from "./pages/Admin/AdminTeachers";
+
+/* Teacher */
+import TeacherDashboardLayout from "./layout/TeacherDashboardlayout";
+import TeacherDashboard from "./pages/Teacher/TeacherDashboard";
 import ManageClasses from "./pages/Teacher/ManageClasses";
 import ManageQuests from "./pages/Teacher/ManageQuests";
 import RewardSystem from "./pages/Teacher/RewardSystem";
 import TeacherSettings from "./pages/Teacher/TeacherSettings";
-import TeacherDashboard from "./pages/Teacher/TeacherDashboard";
-import StudentProfile from "./pages/Student/Studentprofile";
-import AttendanceRegister from "./pages/Teacher/Attendence Register"; 
-import AuthPage from "./pages/AuthFlipPage";
-import AttendanceHistory from "./pages/Teacher/AttendanceHistory";  
+import AttendanceRegister from "./pages/Teacher/AttendanceRegister";
+import AttendanceHistory from "./pages/Teacher/AttendanceHistory";
 
-import AdminDashboard from "./pages/Admin/AdminDashboard";
+/* Student */
 import StudentDashboard from "./pages/Student/StudentDashboard";
+import StudentProfile from "./pages/Student/Studentprofile";
+
+/* Auth */
 import ProtectedRoute from "./components/ProtectedRoute";
-import { Toaster } from "react-hot-toast";
-import About from "./pages/About";  
 
 function App() {
-  return (  
+  return (
     <>
-    <Toaster position="top-center" toastOptions={{ duration: 2000 }} />
-    <Routes>
-      {/* Public Page */}
-      <Route path="/" element={<LandingPage />} />
- <Route path="/login" element={< AuthPage/>} />
-         <Route
+      <Toaster position="top-center" toastOptions={{ duration: 2000 }} />
+
+      <Routes>
+        {/* Public */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="/about" element={<About />} />
+
+        {/* Admin */}
+        <Route
           path="/admin/dashboard"
           element={
             <ProtectedRoute role="admin">
@@ -36,6 +51,32 @@ function App() {
           }
         />
         <Route
+          path="/admin/classes"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminClasses />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/classes/:id/students"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminStudents />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/teachers"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminTeachers />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Student */}
+        <Route
           path="/student-dashboard"
           element={
             <ProtectedRoute role="student">
@@ -43,22 +84,76 @@ function App() {
             </ProtectedRoute>
           }
         />
-      {/* Teacher Dashboard Pages */}
-      <Route path="/teacher/dashboard"element={<TeacherDashboardLayout><TeacherDashboard /></TeacherDashboardLayout>}/>
-      <Route path="/teacher/classes"element={<TeacherDashboardLayout><ManageClasses /></TeacherDashboardLayout>}/>
-      <Route path="/teacher/quests" element={ <TeacherDashboardLayout><ManageQuests /></TeacherDashboardLayout>}/>
-      <Route path="/teacher/rewards" element={ <TeacherDashboardLayout><RewardSystem /></TeacherDashboardLayout>}/>
-      <Route path="/teacher/settings" element={ <TeacherDashboardLayout> <TeacherSettings /> </TeacherDashboardLayout>}/>
-      <Route path="/teacher/attendance" element={ <TeacherDashboardLayout><AttendanceRegister /></TeacherDashboardLayout>} />
-      <Route path="/teacher/attendance-history" element={ <AttendanceHistory />} />
 
-      {/* Student Pages */}
-      <Route path="/teacher/students/:id" element={<TeacherDashboardLayout><StudentProfile /></TeacherDashboardLayout>} />
+        {/* Teacher */}
+        <Route
+          path="/teacher/dashboard"
+          element={
+            <TeacherDashboardLayout>
+              <TeacherDashboard />
+            </TeacherDashboardLayout>
+          }
+        />
+        <Route
+          path="/teacher/classes"
+          element={
+            <TeacherDashboardLayout>
+              <ManageClasses />
+            </TeacherDashboardLayout>
+          }
+        />
+        <Route
+          path="/teacher/quests"
+          element={
+            <TeacherDashboardLayout>
+              <ManageQuests />
+            </TeacherDashboardLayout>
+          }
+        />
+        <Route
+          path="/teacher/rewards"
+          element={
+            <TeacherDashboardLayout>
+              <RewardSystem />
+            </TeacherDashboardLayout>
+          }
+        />
+        <Route
+          path="/teacher/settings"
+          element={
+            <TeacherDashboardLayout>
+              <TeacherSettings />
+            </TeacherDashboardLayout>
+          }
+        />
+        <Route
+          path="/teacher/attendance"
+          element={
+            <TeacherDashboardLayout>
+              <AttendanceRegister />
+            </TeacherDashboardLayout>
+          }
+        />
+        <Route
+          path="/teacher/attendance-history"
+          element={
+            <TeacherDashboardLayout>
+              <AttendanceHistory />
+            </TeacherDashboardLayout>
+          }
+        />
+        <Route
+          path="/teacher/students/:id"
+          element={
+            <TeacherDashboardLayout>
+              <StudentProfile />
+            </TeacherDashboardLayout>
+          }
+        />
 
-      {/* About Page */}
-      <Route path="/about" element={<About />} />
-
-    </Routes>
+        {/* Fallback */}
+        <Route path="*" element={<div className="p-10">Page Not Found</div>} />
+      </Routes>
     </>
   );
 }
