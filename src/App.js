@@ -12,6 +12,7 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminClasses from "./pages/Admin/AdminClasses";
 import AdminStudents from "./pages/Admin/AdminStudents";
 import AdminTeachers from "./pages/Admin/AdminTeachers";
+import AdminUsers from "./pages/Admin/AdminUsers";
 
 /* Teacher */
 import TeacherDashboardLayout from "./layout/TeacherDashboardlayout";
@@ -71,6 +72,14 @@ function App() {
           element={
             <ProtectedRoute role="admin">
               <AdminTeachers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminUsers />
             </ProtectedRoute>
           }
         />

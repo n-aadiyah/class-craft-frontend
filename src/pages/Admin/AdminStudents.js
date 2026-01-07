@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import API from "../../api/axiosInstance";
-import { ArrowLeft, Users } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
 function downloadCsv(filename, rows) {
@@ -135,137 +135,169 @@ const AdminStudents = () => {
     };
   }, [selectedClassId]);
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-6 md:p-10">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
+return (
+  <div className="min-h-screen bg-gray-50">
+    <div className="max-w-7xl mx-auto px-6 py-8">
+
+      {/* ===== Header ===== */}
+      <div className="bg-white border-b border-red-100 rounded-xl px-6 py-5 mb-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-center gap-3">
             <button
-              className="p-2 rounded hover:bg-gray-100"
               onClick={() => navigate(-1)}
-              title="Back"
+              className="p-2 rounded hover:bg-red-50"
               aria-label="Go back"
             >
               <ArrowLeft size={20} className="text-red-700" />
             </button>
-            <h1 className="text-2xl font-bold text-red-700">Admin — Students</h1>
+            <div>
+              <h1 className="text-2xl font-extrabold text-gray-800">
+                Students Overview
+              </h1>
+              <p className="text-sm text-gray-500">
+                View and manage students by class
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 text-gray-700">
-              <Users size={18} />
-              <span className="text-sm">Manage students by class</span>
-            </div>
-            <button
-              onClick={() => {
-                if (students && students.length) {
-                  const rows = students.map((s) => ({
-                    name: s.name || "",
-                    enrollNo: s.enrollNo || "",
-                    contact: s.contact || "",
-                    createdAt: s.createdAt ? new Date(s.createdAt).toLocaleString() : "",
-                    id: s._id || s.id || "",
-                  }));
-                  const safeName = (selectedClassInfo?.name || "students").replace(/[^a-z0-9_-]/gi, "_").toLowerCase();
-                  downloadCsv(`${safeName}-students.csv`, rows);
-                }
-              }}
-              className={`px-3 py-2 rounded text-sm ${
-                students && students.length ? "bg-red-700 text-white hover:bg-red-800" : "bg-gray-200 text-gray-500 cursor-not-allowed"
+          <button
+            onClick={() => {
+              if (!students.length) return;
+              const rows = students.map((s) => ({
+                name: s.name || "",
+                enrollNo: s.enrollNo || "",
+                contact: s.contact || "",
+                joined: fmtDate(s.createdAt) || "",
+              }));
+              const safe =
+                (selectedClassInfo?.name || "students")
+                  .replace(/[^a-z0-9_-]/gi, "_")
+                  .toLowerCase();
+              downloadCsv(`${safe}-students.csv`, rows);
+            }}
+            disabled={!students.length}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition
+              ${
+                students.length
+                  ? "bg-red-700 text-white hover:bg-red-800"
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
               }`}
-              disabled={!students || students.length === 0}
-              aria-disabled={!students || students.length === 0}
-              aria-label="Export students to CSV"
-              title={!students || students.length === 0 ? "No students to export" : "Export students to CSV"}
-            >
-              Export CSV
-            </button>
-          </div>
-        </div>
-
-        {/* Class selector */}
-        <div className="bg-white p-4 rounded-lg shadow mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Select Class</label>
-          {classesLoading ? (
-            <div>Loading classes...</div>
-          ) : classesError ? (
-            <div className="text-red-600">Failed to load classes: {classesError}</div>
-          ) : (
-            <div className="flex gap-3 items-center">
-              <select
-                aria-label="Select class"
-                value={selectedClassId}
-                onChange={(e) => setSelectedClassId(e.target.value)}
-                className="border border-gray-300 rounded px-3 py-2"
-              >
-                {classes.length ? (
-                  classes.map((c, idx) => {
-                    const id = c._id ?? c.id ?? `class-${idx}`;
-                    return (
-                      <option key={id} value={id}>
-                        {c.name} {c.grade ? `— ${c.grade}` : ""} {c.studentCount != null ? `(${c.studentCount})` : ""}
-                      </option>
-                    );
-                  })
-                ) : (
-                  <option value="">No classes available</option>
-                )}
-              </select>
-
-              {selectedClassInfo && (
-                <div className="text-sm text-gray-600">
-                  <div>
-                    <strong>Teacher:</strong> {selectedClassInfo.teacher?.name || "—"}
-                  </div>
-                  <div>
-                    <strong>Grade:</strong> {selectedClassInfo.grade || "—"}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Students table */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-3">Students {selectedClassInfo ? `— ${selectedClassInfo.name}` : ""}</h2>
-
-          {studentsLoading ? (
-            <div className="py-6 text-center">Loading students...</div>
-          ) : studentsError ? (
-            <div className="py-6 text-center text-red-600">Failed to fetch students: {studentsError}</div>
-          ) : students.length === 0 ? (
-            <div className="py-6 text-center text-gray-600">No students found for this class.</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead>
-                  <tr className="bg-gray-100 text-left">
-                    <th className="p-2">#</th>
-                    <th className="p-2">Name</th>
-                    <th className="p-2">Enrollment No</th>
-                    <th className="p-2">Contact</th>
-                    <th className="p-2">Joined</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.map((s, idx) => (
-                    <tr key={s._id || s.id || idx} className="border-b hover:bg-gray-50">
-                      <td className="p-2">{idx + 1}</td>
-                      <td className="p-2">{s.name || "—"}</td>
-                      <td className="p-2">{s.enrollNo || "—"}</td>
-                      <td className="p-2">{s.contact || "—"}</td>
-                      <td className="p-2">{fmtDate(s.createdAt) ?? "—"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          >
+            Export CSV
+          </button>
         </div>
       </div>
+
+      {/* ===== Class Context Card ===== */}
+      <div className="bg-white rounded-xl shadow border border-red-100 p-6 mb-6">
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          Selected Class
+        </label>
+
+        {classesLoading ? (
+          <div className="text-gray-500">Loading classes…</div>
+        ) : classesError ? (
+          <div className="text-red-600">{classesError}</div>
+        ) : (
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
+            <select
+              value={selectedClassId}
+              onChange={(e) => setSelectedClassId(e.target.value)}
+              className="border border-gray-300 rounded-lg px-4 py-2 w-full md:w-72 focus:ring-2 focus:ring-red-500"
+            >
+              {classes.map((c, idx) => {
+                const id = c._id ?? c.id ?? idx;
+                return (
+                  <option key={id} value={id}>
+                    {c.name} {c.grade ? `— ${c.grade}` : ""}
+                  </option>
+                );
+              })}
+            </select>
+
+            {selectedClassInfo && (
+              <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
+                <div>
+                  <span className="block text-gray-500">Teacher</span>
+                  <span className="font-semibold">
+                    {selectedClassInfo.teacher?.name || "Unassigned"}
+                  </span>
+                </div>
+                <div>
+                  <span className="block text-gray-500">Students</span>
+                  <span className="font-semibold">
+                    {students.length}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ===== Students Table ===== */}
+      <div className="bg-white rounded-xl shadow border border-red-100 overflow-hidden">
+        <div className="px-6 py-4 border-b border-red-100">
+          <h2 className="text-lg font-bold text-gray-800">
+            Students List
+            {selectedClassInfo && (
+              <span className="text-gray-500 font-medium">
+                {" "}— {selectedClassInfo.name}
+              </span>
+            )}
+          </h2>
+        </div>
+
+        {studentsLoading ? (
+          <div className="py-8 text-center text-gray-500">
+            Loading students…
+          </div>
+        ) : studentsError ? (
+          <div className="py-8 text-center text-red-600">
+            {studentsError}
+          </div>
+        ) : students.length === 0 ? (
+          <div className="py-8 text-center text-gray-500">
+            No students found for this class.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="bg-red-50 text-gray-700">
+                <tr>
+                  <th className="px-4 py-3 text-left">#</th>
+                  <th className="px-4 py-3 text-left">Name</th>
+                  <th className="px-4 py-3 text-left">Enrollment No</th>
+                  <th className="px-4 py-3 text-left">Contact</th>
+                  <th className="px-4 py-3 text-left">Joined</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {students.map((s, idx) => (
+                  <tr
+                    key={s._id || idx}
+                    className="hover:bg-yellow-50 transition"
+                  >
+                    <td className="px-4 py-3">{idx + 1}</td>
+                    <td className="px-4 py-3 font-medium text-gray-800">
+                      {s.name || "—"}
+                    </td>
+                    <td className="px-4 py-3">{s.enrollNo || "—"}</td>
+                    <td className="px-4 py-3">{s.contact || "—"}</td>
+                    <td className="px-4 py-3">
+                      {fmtDate(s.createdAt) || "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
-  );
+  </div>
+);
+
 };
 
 export default AdminStudents;
