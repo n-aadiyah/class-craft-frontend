@@ -6,7 +6,6 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
 
-
   // modal state
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -30,8 +29,8 @@ export default function AdminUsers() {
         console.error("Failed to load users", e);
         setErr(
           e?.response?.data?.message ||
-          e?.message ||
-          "Failed to load users"
+            e?.message ||
+            "Failed to load users"
         );
       } finally {
         if (mounted) setLoading(false);
@@ -48,11 +47,11 @@ export default function AdminUsers() {
      DERIVED STATS
   ======================== */
   const stats = useMemo(() => {
-    const admins = users.filter(u => u.role === "admin").length;
     return {
-      totalUsers: users.length,
-      admins,
-      nonAdmins: users.length - admins,
+      total: users.length,
+      admins: users.filter(u => u.role === "admin").length,
+      teachers: users.filter(u => u.role === "teacher").length,
+      students: users.filter(u => u.role === "student").length,
     };
   }, [users]);
 
@@ -77,13 +76,15 @@ export default function AdminUsers() {
 
     try {
       setSaving(true);
-      const newRole = action === "make" ? "admin" : "user";
+
+      // BACKEND-ALIGNED ROLE VALUES
+      const newRole = action === "make" ? "admin" : "student";
 
       await API.patch(`/admin/users/${selectedUser._id}`, {
         role: newRole,
       });
 
-      // update UI optimistically
+      // optimistic UI update
       setUsers(prev =>
         prev.map(u =>
           u._id === selectedUser._id
@@ -97,7 +98,7 @@ export default function AdminUsers() {
       console.error("Role update failed", e);
       alert(
         e?.response?.data?.message ||
-        "Failed to update role"
+          "Failed to update role"
       );
       setSaving(false);
     }
@@ -108,31 +109,32 @@ export default function AdminUsers() {
   ======================== */
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* ===== HEADER ===== */}
+      {/* HEADER */}
       <div className="bg-white border-b border-red-100 px-6 py-6">
         <h1 className="text-2xl font-extrabold text-gray-800 font-serif">
           Users & Roles
         </h1>
         <p className="text-sm text-gray-500 mt-1 font-serif">
-          Control who has administrative access
+          Manage admins, teachers, and students
         </p>
       </div>
 
-      {/* ===== STATS ===== */}
-      <div className="px-6 py-6 grid grid-cols-1 sm:grid-cols-3 gap-5 font-serif">
-        <StatCard label="Total Users" value={stats.totalUsers} />
+      {/* STATS */}
+      <div className="px-6 py-6 grid grid-cols-1 sm:grid-cols-4 gap-5 font-serif">
+        <StatCard label="Total Users" value={stats.total} />
         <StatCard label="Admins" value={stats.admins} highlight />
-        <StatCard label="Regular Users" value={stats.nonAdmins} />
+        <StatCard label="Teachers" value={stats.teachers} />
+        <StatCard label="Students" value={stats.students} />
       </div>
 
-      {/* ===== ERROR ===== */}
+      {/* ERROR */}
       {err && (
         <div className="px-6 text-red-600 font-medium">
           {err}
         </div>
       )}
 
-      {/* ===== TABLE ===== */}
+      {/* TABLE */}
       <div className="px-6 pb-10">
         <div className="bg-white rounded-xl shadow border border-red-100 overflow-hidden font-serif">
           <table className="w-full text-sm">
@@ -174,17 +176,27 @@ export default function AdminUsers() {
                     <td className="px-4 py-3 text-gray-600 break-all">
                       {u.email}
                     </td>
+
+                    {/* ROLE LABEL */}
                     <td className="px-4 py-3">
-                      {u.role === "admin" ? (
+                      {u.role === "admin" && (
                         <span className="bg-red-700 text-white px-3 py-1 rounded-full text-xs font-semibold">
                           Admin
                         </span>
-                      ) : (
+                      )}
+                      {u.role === "teacher" && (
+                        <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                          Teacher
+                        </span>
+                      )}
+                      {u.role === "student" && (
                         <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-semibold">
-                          User
+                          Student
                         </span>
                       )}
                     </td>
+
+                    {/* ACTION */}
                     <td className="px-4 py-3">
                       {u.role === "admin" ? (
                         <button
@@ -196,7 +208,7 @@ export default function AdminUsers() {
                       ) : (
                         <button
                           onClick={() => openConfirm(u, "make")}
-                          className="text-yellow-600 font-semibold hover:underline"
+                          className="text-green-700 font-semibold hover:underline"
                         >
                           Make Admin
                         </button>
@@ -210,7 +222,7 @@ export default function AdminUsers() {
         </div>
       </div>
 
-      {/* ===== CONFIRM MODAL ===== */}
+      {/* CONFIRM MODAL */}
       {confirmOpen && selectedUser && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md">
