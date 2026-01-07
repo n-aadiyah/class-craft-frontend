@@ -49,35 +49,124 @@ export default function AdminTeachers() {
     };
   }, []);
 
-  return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Teachers</h1>
-      {loading && <div>Loading...</div>}
-      {err && <div className="text-red-600 mb-2">{err}</div>}
-      <div className="overflow-auto bg-white rounded shadow p-2">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left">
-              <th className="p-2">Name</th>
-              <th className="p-2">Email</th>
-              <th className="p-2">Joined</th>
-            </tr>
-          </thead>
-          <tbody>
-            {teachers.map((t) => {
-              const created = t.createdAt ? new Date(t.createdAt) : createdDateFromId(t._id) ?? new Date();
-              return (
-                <tr key={t._id || t.id} className="border-t">
-                  <td className="p-2">{t.name || "—"}</td>
-                  <td className="p-2">{t.email || "—"}</td>
-                  <td className="p-2">{created instanceof Date && !Number.isNaN(created.getTime()) ? created.toLocaleDateString() : "—"}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        {!loading && teachers.length === 0 && <div className="p-4 text-gray-500">No teachers found</div>}
+  const stats = {
+  totalTeachers: teachers.length,
+  recentTeachers: teachers.filter(t => {
+    const d = t.createdAt
+      ? new Date(t.createdAt)
+      : createdDateFromId(t._id);
+    return d && (Date.now() - d.getTime()) / (1000 * 60 * 60 * 24) <= 30;
+  }).length,
+};
+
+return (
+  <div className="min-h-screen bg-gray-50">
+    {/* ===== Header ===== */}
+    <div className="bg-white border-b border-red-100 px-6 py-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-serif font-extrabold text-gray-800">
+            Teachers Overview
+          </h1>
+          <p className="text-sm text-gray-500 mt-1 font-serif ">
+            Manage all registered teaching staff
+          </p>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <span className="bg-red-700 text-white px-4 py-2 rounded-lg text-sm  font-semibold shadow-md">
+            Total: {stats.totalTeachers}
+          </span>
+
+          <button className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-5 py-2 rounded-lg transition font-serif shadow-md">
+            + Add Teacher
+          </button>
+        </div>
       </div>
     </div>
-  );
+
+    {/* ===== Error ===== */}
+    {err && (
+      <div className="px-6 mt-4 text-red-600 font-medium">
+        {err}
+      </div>
+    )}
+
+    {/* ===== Summary Cards ===== */}
+    <div className="px-6 py-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div className="bg-white border border-red-100 rounded-xl p-5 shadow-sm">
+        <p className="text-sm text-gray-500 font-serif ">Total Teachers</p>
+        <p className="text-2xl font-bold text-gray-800 mt-2">
+          {stats.totalTeachers}
+        </p>
+      </div>
+
+      <div className="bg-white border border-red-100 rounded-xl p-5 shadow-sm">
+        <p className="text-sm text-gray-500 font-serif ">Joined in Last 30 Days</p>
+        <p className="text-2xl font-bold text-gray-800 mt-2">
+          {stats.recentTeachers}
+        </p>
+      </div>
+    </div>
+
+    {/* ===== Table ===== */}
+    <div className="px-6 pb-10">
+      <div className="bg-white rounded-xl shadow border border-red-100 overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-red-700 text-white font-serif ">
+            <tr>
+              <th className="px-4 py-3 text-left font-semibold">Name</th>
+              <th className="px-4 py-3 text-left font-semibold">Email</th>
+              <th className="px-4 py-3 text-left font-semibold">Joined</th>
+            </tr>
+          </thead>
+
+          <tbody className="divide-y">
+            {loading ? (
+              <tr>
+                <td colSpan={3} className="px-4 py-6 text-center text-gray-500 font-serif">
+                  Loading teachers…
+                </td>
+              </tr>
+            ) : teachers.length === 0 ? (
+              <tr>
+                <td colSpan={3} className="px-4 py-6 text-center text-gray-500">
+                  No teachers found
+                </td>
+              </tr>
+            ) : (
+              teachers.map((t) => {
+                const created =
+                  t.createdAt
+                    ? new Date(t.createdAt)
+                    : createdDateFromId(t._id);
+
+                return (
+                  <tr
+                    key={t._id || t.id}
+                    className="hover:bg-yellow-50 transition"
+                  >
+                    <td className="px-4 py-3 font-medium text-gray-800 font-serif ">
+                      {t.name || "—"}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600 break-all font-serif ">
+                      {t.email || "—"}
+                    </td>
+                    <td className="px-4 py-3 font-serif ">
+                      {created instanceof Date &&
+                      !Number.isNaN(created.getTime())
+                        ? created.toLocaleDateString()
+                        : "—"}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+);
+
 }
