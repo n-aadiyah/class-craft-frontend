@@ -12,27 +12,54 @@ const StudentDashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
   useEffect(() => {
+    let mounted = true;
+
     const loadDashboard = async () => {
       try {
-        const res = await API.get("/student/dashboard");
+        const res = await API.get("/students/dashboard");
+        if (!mounted) return;
+
         setStudent(res.data.student);
         setTasks(res.data.tasks || []);
         setAssignments(res.data.assignments || []);
       } catch (err) {
-        if (err?.response?.status === 401) {
+        if (!mounted) return;
+
+        const status = err?.response?.status;
+
+        if (status === 401) {
           navigate("/login");
+          return;
         }
+
+        if (status === 403) {
+          navigate("/unauthorized"); // or homepage
+          return;
+        }
+
+        setError(
+          err?.response?.data?.message ||
+          "Failed to load student dashboard"
+        );
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
 
     loadDashboard();
+    return () => {
+      mounted = false;
+    };
   }, [navigate]);
+
+  /* =======================
+     RENDER STATES
+  ======================== */
 
   if (loading) {
     return (
@@ -42,13 +69,25 @@ const StudentDashboard = () => {
     );
   }
 
-  if (!student) {
+  if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center text-red-600">
-        Failed to load student data
+        {error}
       </div>
     );
   }
+
+  if (!student) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-600">
+        Student data not available
+      </div>
+    );
+  }
+
+  /* =======================
+     MAIN VIEW
+  ======================== */
 
   return (
     <div className="min-h-screen bg-gray-50 px-6 py-6">
@@ -72,9 +111,7 @@ const StudentDashboard = () => {
 
           <section className="bg-white rounded-xl shadow border p-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold">
-                Active Tasks
-              </h3>
+              <h3 className="text-lg font-bold">Active Tasks</h3>
               <button
                 className="text-sm text-red-700 font-semibold hover:underline"
                 onClick={() => navigate("/student/tasks")}
@@ -96,9 +133,7 @@ const StudentDashboard = () => {
 
           <section className="bg-white rounded-xl shadow border p-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold">
-                Assignments
-              </h3>
+              <h3 className="text-lg font-bold">Assignments</h3>
               <button
                 className="text-sm text-red-700 font-semibold hover:underline"
                 onClick={() => navigate("/student/assignments")}
