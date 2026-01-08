@@ -27,6 +27,8 @@ import AttendanceHistory from "./pages/Teacher/AttendanceHistory";
 /* Student */
 import StudentDashboard from "./pages/Student/StudentDashboard";
 import StudentProfile from "./pages/Student/Studentprofile";
+import StudentAssignments from "./pages/Student/StudentAssignments";
+import StudentTasks from "./pages/Student/StudentTasks";  
 
 /* Auth */
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -86,10 +88,51 @@ function App() {
 
         {/* Student */}
         <Route
-          path="/student-dashboard"
+          path="/student/dashboard"
           element={
             <ProtectedRoute role="student">
               <StudentDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student/profile"
+          element={
+            <ProtectedRoute role="student">
+              <StudentProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student/tasks"
+          element={
+            <ProtectedRoute role="student">
+              <StudentTasks />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student/assignments"
+          element={
+            <ProtectedRoute role="student">
+              <StudentAssignments />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student/assignments"
+          element={
+            <ProtectedRoute role="student">
+              <StudentAssignments />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student/tasks"
+          element={
+            <ProtectedRoute role="student">
+              <StudentTasks />
             </ProtectedRoute>
           }
         />

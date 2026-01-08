@@ -111,7 +111,7 @@ export default function AdminUsers() {
     <div className="min-h-screen bg-gray-50">
       {/* HEADER */}
       <div className="bg-white border-b border-red-100 px-6 py-6">
-        <h1 className="text-2xl font-extrabold text-gray-800 font-serif">
+        <h1 className="text-3xl font-extrabold text-red-700 font-serif">
           Users & Roles
         </h1>
         <p className="text-sm text-gray-500 mt-1 font-serif">
@@ -120,7 +120,7 @@ export default function AdminUsers() {
       </div>
 
       {/* STATS */}
-      <div className="px-6 py-6 grid grid-cols-1 sm:grid-cols-4 gap-5 font-serif">
+      <div className="px-6 py-6 grid grid-cols-1 sm:grid-cols-4 gap-5 font-serif font-bold">
         <StatCard label="Total Users" value={stats.total} />
         <StatCard label="Admins" value={stats.admins} highlight />
         <StatCard label="Teachers" value={stats.teachers} />
@@ -138,7 +138,7 @@ export default function AdminUsers() {
       <div className="px-6 pb-10">
         <div className="bg-white rounded-xl shadow border border-red-100 overflow-hidden font-serif">
           <table className="w-full text-sm">
-            <thead className="bg-red-50 text-gray-700">
+            <thead className="bg-red-700 text-white">
               <tr>
                 <th className="px-4 py-3 text-left">Name</th>
                 <th className="px-4 py-3 text-left">Email</th>
@@ -166,8 +166,8 @@ export default function AdminUsers() {
                     key={u._id}
                     className={`transition ${
                       u.role === "admin"
-                        ? "bg-red-50 hover:bg-red-100"
-                        : "hover:bg-yellow-50"
+                        ? "bg-red-50 hover:bg-red-200"
+                        : "hover:bg-yellow-100"
                     }`}
                   >
                     <td className="px-4 py-3 font-medium text-gray-800">
