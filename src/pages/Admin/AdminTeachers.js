@@ -78,9 +78,6 @@ return (
             Total: {stats.totalTeachers}
           </span>
 
-          <button className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-5 py-2 rounded-lg transition font-serif shadow-md">
-            + Add Teacher
-          </button>
         </div>
       </div>
     </div>
@@ -144,7 +141,7 @@ return (
                 return (
                   <tr
                     key={t._id || t.id}
-                    className="hover:bg-yellow-50 transition"
+                    className="hover:bg-yellow-100 transition"
                   >
                     <td className="px-4 py-3 font-medium text-gray-800 font-serif ">
                       {t.name || "—"}
