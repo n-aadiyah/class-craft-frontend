@@ -13,6 +13,7 @@ const ManageClasses = () => {
   const navigate = useNavigate();
 
   const [classes, setClasses] = useState([]);
+  const [users, setUsers] = useState([]); // ✅ ADDED
   const [searchTerm, setSearchTerm] = useState("");
   const [showClassModal, setShowClassModal] = useState(false);
   const [selectedClass, setSelectedClass] = useState(null);
@@ -34,11 +35,25 @@ const ManageClasses = () => {
     name: "",
     enrollNo: "",
     contact: "",
+    userId: "",
   });
 
   useEffect(() => {
     fetchClasses();
   }, []);
+   /* =======================
+     FETCH UNASSIGNED USERS
+  ======================= */
+
+  const fetchUnassignedUsers = async () => {
+    try {
+      const res = await API.get("/users/unassigned-students");
+      setUsers(Array.isArray(res.data) ? res.data : []);
+    } catch {
+      alert("Failed to load student users");
+    }
+  };
+
 
   // Fetch classes owned by logged-in teacher (backend: GET /classes/my-classes)
   const fetchClasses = async () => {
@@ -59,6 +74,7 @@ const ManageClasses = () => {
       alert(msg);
     }
   };
+
 
   const handleAddOrUpdateClass = async () => {
     if (
@@ -165,64 +181,52 @@ const ManageClasses = () => {
   };
 
   // Add / update student (server enforces class ownership & limit)
-  const handleSaveStudent = async () => {
-    if (!newStudent.name || !newStudent.contact) {
-      return alert("Please fill all student fields");
-    }
+ const handleSaveStudent = async () => {
+  if (!newStudent.name || !newStudent.contact) {
+    return alert("Name and Contact are required");
+  }
 
-    if (!selectedClass || !selectedClass._id) {
-      return alert("No class selected. Open a class first.");
-    }
+  if (!selectedClass?._id) {
+    return alert("No class selected");
+  }
 
-    const limit = Number(selectedClass.students) || 0;
-    const currentCount = Array.isArray(selectedClass.studentList) ? selectedClass.studentList.length : 0;
-
-    if (!editStudent && limit > 0 && currentCount >= limit) {
-      return alert(`Cannot add student — class limit reached (${limit}).`);
-    }
-
-    try {
+  try {
+    // 🔁 EDIT STUDENT
+    if (editStudent) {
       const payload = {
-        ...newStudent,
-        classId: selectedClass._id,
+        name: newStudent.name,
+        enrollNo: newStudent.enrollNo,
+        contact: newStudent.contact,
       };
 
-      if (editStudent) {
-        await API.put(`/students/${editStudent._id}`, payload);
-      } else {
-        await API.post("/students", payload);
+      await API.put(`/students/${editStudent._id}`, payload);
+    } 
+    // ➕ ADD STUDENT
+    else {
+      if (!newStudent.userId) {
+        return alert("Registered Student is required");
       }
 
-      // refresh students
-      const res2 = await API.get(`/students/class/${selectedClass._id}`);
-      const studentsList = Array.isArray(res2.data) ? res2.data : [];
-      studentsList.sort((a, b) => a.name.localeCompare(b.name));
-      setSelectedClass({ ...selectedClass, studentList: studentsList });
+      const payload = {
+        name: newStudent.name,
+        enrollNo: newStudent.enrollNo,
+        contact: newStudent.contact,
+        classId: selectedClass._id,
+        userId: newStudent.userId,
+      };
 
-      closeStudentModal();
-    } catch (err) {
-      console.error("Error saving student:", err);
-      // If backend returned duplicate/enroll limit error, show message
-      const msg = err?.response?.data?.message || err.message || "Error saving student";
-      alert(msg);
+      await API.post("/students", payload);
     }
-  };
 
-  const closeStudentModal = () => {
-    setShowStudentModal(false);
-    setEditStudent(null);
-    setNewStudent({ name: "", enrollNo: "", contact: "" });
-  };
+    // 🔄 refresh student list
+    const res = await API.get(`/students/class/${selectedClass._id}`);
+    setSelectedClass({ ...selectedClass, studentList: res.data || [] });
 
-  const handleEditStudent = (stu) => {
-    setEditStudent(stu);
-    setNewStudent({
-      name: stu.name,
-      enrollNo: stu.enrollNo,
-      contact: stu.contact,
-    });
-    setShowStudentModal(true);
-  };
+    closeStudentModal();
+  } catch (err) {
+    alert(err.response?.data?.message || "Failed to save student");
+  }
+};
 
   const handleDeleteStudent = async (id) => {
     if (!window.confirm("Are you sure you want to delete this student?")) return;
@@ -242,11 +246,36 @@ const ManageClasses = () => {
   const handleViewStudentProfile = (student) => {
     navigate(`/student/${student._id}`, { state: { student } });
   };
+  /* =======================
+   STUDENT MODAL HELPERS
+======================= */
+
+const closeStudentModal = () => {
+  setShowStudentModal(false);
+  setEditStudent(null);
+  setNewStudent({
+    name: "",
+    enrollNo: "",
+    contact: "",
+    userId: "",
+  });
+};
+
+const handleEditStudent = (student) => {
+  setEditStudent(student);
+  setNewStudent({
+    name: student.name || "",
+    enrollNo: student.enrollNo || "",
+    contact: student.contact || "",
+    userId: "", // must NOT change on edit
+  });
+  setShowStudentModal(true);
+};
 
   const filteredClasses = classes.filter((cls) =>
     cls.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
+  
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
       {/* Header */}
@@ -364,10 +393,12 @@ const ManageClasses = () => {
               </p>
               <button
                 onClick={() => {
-                  setShowStudentModal(true);
-                  setEditStudent(null);
-                  setNewStudent({ name: "", enrollNo: "", contact: "" });
-                }}
+  setShowStudentModal(true);
+  setEditStudent(null);
+  setNewStudent({ name: "", enrollNo: "", contact: "", userId: "" });
+  fetchUnassignedUsers(); // ✅ REQUIRED
+}}
+
                 className="bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-red-800 transition"
               >
                 <Plus size={18} /> Add Student
@@ -474,6 +505,23 @@ const ManageClasses = () => {
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-600"
               />
             </div>
+{/* Registered Student User */}
+{!editStudent && (
+  <select
+    value={newStudent.userId}
+    onChange={(e) =>
+      setNewStudent({ ...newStudent, userId: e.target.value })
+    }
+    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-600"
+  >
+    <option value="">Select Registered Student</option>
+    {users.map((u) => (
+      <option key={u._id} value={u._id}>
+        {u.email}
+      </option>
+    ))}
+  </select>
+)}
 
             <div className="flex justify-end gap-3 mt-4">
               <button
