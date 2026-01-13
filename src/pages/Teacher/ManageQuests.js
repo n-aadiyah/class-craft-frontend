@@ -37,13 +37,13 @@ const ManageQuests = () => {
   }, []);
 
   const fetchClasses = async () => {
-    try {
-      const res = await API.get("/classes/my-classes");
-      setClasses(Array.isArray(res.data) ? res.data : []);
-    } catch {
-      alert("Failed to load classes");
-    }
-  };
+  try {
+const res = await API.get("/classes/all"); // ✅ ALL classes
+    setClasses(Array.isArray(res.data) ? res.data : []);
+  } catch {
+    alert("Failed to load classes");
+  }
+};
 
   const fetchQuests = async (classId = "") => {
     try {
