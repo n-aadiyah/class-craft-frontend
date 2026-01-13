@@ -1,0 +1,14 @@
+/* subtle glow for important elements */
+
+
+.card-bg {
+  background: linear-gradient(180deg, #9e0303 0%, #111111 100%);
+}
+
+.quest-border {
+  border-left: 4px solid #facc15;
+}
+
+.danger-border {
+  border-left: 4px solid #ef4444;
+}
