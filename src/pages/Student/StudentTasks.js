@@ -11,8 +11,8 @@ export default function StudentTasks() {
   useEffect(() => {
     const loadTasks = async () => {
       try {
-        const res = await API.get("/student/tasks");
-        setTasks(res.data || []);
+const res = await API.get("/students/tasks");     
+   setTasks(res.data || []);
       } catch (err) {
         if (err?.response?.status === 401) {
           navigate("/login");

@@ -4,7 +4,7 @@ export default function TaskCard({ task }) {
   const {
     title,
     description,
-    xpReward = 0,
+    rewardXP = 0,
     status = "pending", // pending | completed
     dueDate,
   } = task;
@@ -54,7 +54,7 @@ export default function TaskCard({ task }) {
             }
           `}
         >
-          {isCompleted ? "Completed" : `+${xpReward} XP`}
+          {isCompleted ? "Completed" : `+${Number(rewardXP)} XP`}
         </span>
       </div>
     </div>
