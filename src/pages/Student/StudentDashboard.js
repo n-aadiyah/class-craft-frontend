@@ -1,34 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import API from "../../api/axiosInstance";
+import { useNavigate } from "react-router-dom";
 
 import AvatarCard from "../../components/students/AvatarCard";
 import XPProgressBar from "../../components/students/XPProgressBar";
+import LevelBadge from "../../components/students/LevelBadge";
+import TaskCard from "../../components/students/TaskCard";
 
-import {
-  Chart as ChartJS,
-  LineElement,
-  ArcElement,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import { Line, Doughnut } from "react-chartjs-2";
-
-ChartJS.register(
-  LineElement,
-  ArcElement,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  Tooltip,
-  Legend
-);
-
-const StudentProfileDashboard = () => {
+const StudentDashboard = () => {
   const [student, setStudent] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -37,236 +19,144 @@ const StudentProfileDashboard = () => {
   useEffect(() => {
     let mounted = true;
 
-    const fetchProfile = async () => {
+    const loadDashboard = async () => {
       try {
         const res = await API.get("/students/dashboard");
         if (!mounted) return;
+
         setStudent(res.data.student);
+        setTasks(res.data.tasks || []);
+        setAssignments(res.data.assignments || []);
       } catch (err) {
+        if (!mounted) return;
+
         const status = err?.response?.status;
-        if (status === 401) return navigate("/login");
-        if (status === 403) return navigate("/unauthorized");
-        setError("Failed to load student dashboard");
+
+        if (status === 401) {
+          navigate("/login");
+          return;
+        }
+
+        if (status === 403) {
+          navigate("/unauthorized"); // or homepage
+          return;
+        }
+
+        setError(
+          err?.response?.data?.message ||
+          "Failed to load student dashboard"
+        );
       } finally {
         if (mounted) setLoading(false);
       }
     };
 
-    fetchProfile();
-    return () => (mounted = false);
+    loadDashboard();
+    return () => {
+      mounted = false;
+    };
   }, [navigate]);
 
-  if (loading)
+  /* =======================
+     RENDER STATES
+  ======================== */
+
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 text-gray-500">
+      <div className="min-h-screen flex items-center justify-center text-gray-600">
         Loading dashboard…
       </div>
     );
+  }
 
-  if (error)
+  if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 text-red-600">
+      <div className="min-h-screen flex items-center justify-center text-red-600">
         {error}
       </div>
     );
+  }
 
-  /* ---------------- DATA ---------------- */
+  if (!student) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-600">
+        Student data not available
+      </div>
+    );
+  }
 
-  const xpChartData = {
-    labels: ["W1", "W2", "W3", "W4"],
-    datasets: [
-      {
-        data: student.xpHistory || [15, 35, 60, student.xp],
-        borderColor: "#facc15",
-        backgroundColor: "rgba(250,204,21,0.15)",
-        tension: 0.4,
-        fill: true,
-      },
-    ],
-  };
-
-  const taskChartData = {
-    labels: ["Completed", "Remaining"],
-    datasets: [
-      {
-        data: [
-          student.completedTasks || 0,
-          Math.max(
-            0,
-            (student.totalTasks || 10) - (student.completedTasks || 0)
-          ),
-        ],
-        backgroundColor: ["#22c55e", "#ef4444"],
-        borderWidth: 0,
-      },
-    ],
-  };
-
-  /* ---------------- UI ---------------- */
+  /* =======================
+     MAIN VIEW
+  ======================== */
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
+    <div className="min-h-screen bg-gray-50 px-6 py-6">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-      {/* SIDEBAR */}
-      <aside className="w-64 bg-red-700 text-white flex flex-col justify-between">
-        <div>
-          <div className="px-6 py-6 text-xl font-bold">
-            Dashboard
-          </div>
-
-          <nav className="mt-4 space-y-1 px-4 text-sm">
-            <SidebarItem label="Overview" active />
-            <SidebarItem label="My Courses" />
-            <SidebarItem label="My Tasks" />
-            <SidebarItem label="Rewards" />
-            <SidebarItem label="Progress" />
-            <SidebarItem label="Settings" />
-          </nav>
+        {/* LEFT: Avatar & Progress */}
+        <div className="bg-white rounded-xl shadow border p-6 text-center">
+          <AvatarCard level={student.level} />
+          <h2 className="mt-4 text-xl font-bold text-gray-800">
+            {student.name}
+          </h2>
+          <LevelBadge level={student.level} />
+          <XPProgressBar
+            xp={student.xp}
+            nextLevelXp={student.nextLevelXp}
+          />
         </div>
 
-        <div className="p-4">
-          <button
-            onClick={() => navigate("/logout")}
-            className="w-full bg-white text-red-700 py-2 rounded-lg font-semibold"
-          >
-            Logout
-          </button>
-        </div>
-      </aside>
+        {/* RIGHT: Tasks & Assignments */}
+        <div className="lg:col-span-2 space-y-6">
 
-      {/* MAIN */}
-      <main className="flex-1">
-
-        {/* TOP BAR */}
-        <header className="flex justify-between items-center px-8 py-4 bg-white shadow-sm">
-          <h1 className="text-lg font-bold text-red-700">
-            Student Dashboard
-          </h1>
-
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600">
-              Hello, {student.name}
-            </span>
-            <img
-              src="/Avatar.jpg"
-              alt="avatar"
-              className="w-9 h-9 rounded-full border"
-            />
-          </div>
-        </header>
-
-        {/* CONTENT */}
-        <section className="p-8 space-y-6">
-
-          {/* TOP GRID */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-            {/* PROFILE */}
-            <div className="bg-white rounded-xl shadow-sm p-6 text-center">
-              <AvatarCard level={student.level} />
-
-              <h2 className="mt-4 text-lg font-bold text-gray-900">
-                {student.name}
-              </h2>
-
-              <p className="text-sm text-gray-500">
-                Level {student.level} • Beginner
-              </p>
-
-              <span className="inline-block mt-3 px-3 py-1 text-xs font-semibold
-                bg-green-100 text-green-700 rounded-full">
-                Enrolled • Active
-              </span>
-
-              <div className="mt-5">
-                <XPProgressBar
-                  xp={student.xp}
-                  nextLevelXp={student.nextLevelXp}
-                />
-              </div>
-
-              <div className="mt-6 text-left text-sm space-y-2">
-                <p><b>Enrollment No:</b> {student.enrollmentNo || "—"}</p>
-                <p><b>Course:</b> {student.course || "—"}</p>
-                <p><b>Batch:</b> {student.batch || "—"}</p>
-              </div>
-            </div>
-
-            {/* PROGRESS OVERVIEW */}
-            <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-sm font-bold text-gray-900 mb-4">
-                Progress Overview
-              </h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-
-                <div className="md:col-span-2">
-                  <Line
-                    data={xpChartData}
-                    options={{
-                      plugins: { legend: { display: false } },
-                      scales: { y: { beginAtZero: true } },
-                    }}
-                  />
-                </div>
-
-                <div className="text-center">
-                  <Doughnut data={taskChartData} />
-                  <p className="mt-3 text-sm font-semibold text-gray-700">
-                    {student.completedTasks || 0} / {student.totalTasks || 10}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Tasks Completed
-                  </p>
-                </div>
-
-              </div>
-            </div>
-          </div>
-
-          {/* SUMMARY */}
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h4 className="text-sm font-bold text-gray-900 mb-2">
-              Profile Summary
-            </h4>
-
-            <p className="text-sm text-gray-600 mb-4">
-              {student.bio || "No summary provided yet."}
-            </p>
-
-            <div className="flex gap-3">
+          <section className="bg-white rounded-xl shadow border p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold">Active Tasks</h3>
               <button
-                onClick={() => navigate("/student/profile")}
-                className="px-4 py-2 rounded-lg bg-yellow-400 text-black font-semibold text-sm"
-              >
-                Edit Profile
-              </button>
-
-              <button
+                className="text-sm text-red-700 font-semibold hover:underline"
                 onClick={() => navigate("/student/tasks")}
-                className="px-4 py-2 rounded-lg border border-red-500
-                text-red-500 font-semibold text-sm"
               >
-                View Tasks
+                View all
               </button>
             </div>
-          </div>
 
-        </section>
-      </main>
+            {tasks.length === 0 ? (
+              <p className="text-gray-500 text-sm">
+                No active tasks 🎉
+              </p>
+            ) : (
+              tasks.slice(0, 3).map(task => (
+                <TaskCard key={task._id} task={task} />
+              ))
+            )}
+          </section>
+
+          <section className="bg-white rounded-xl shadow border p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold">Assignments</h3>
+              <button
+                className="text-sm text-red-700 font-semibold hover:underline"
+                onClick={() => navigate("/student/assignments")}
+              >
+                View all
+              </button>
+            </div>
+
+            {assignments.length === 0 ? (
+              <p className="text-gray-500 text-sm">
+                No assignments due 🎯
+              </p>
+            ) : (
+              assignments.slice(0, 3).map(a => (
+                <TaskCard key={a._id} task={a} />
+              ))
+            )}
+          </section>
+
+        </div>
+      </div>
     </div>
   );
 };
 
-/* ---------------- SIDEBAR ITEM ---------------- */
-
-const SidebarItem = ({ label, active }) => (
-  <div
-    className={`px-4 py-2 rounded-lg cursor-pointer
-    ${active ? "bg-white text-red-700 font-semibold" : "hover:bg-red-600"}`}
-  >
-    {label}
-  </div>
-);
-
-export default StudentProfileDashboard;
+export default StudentDashboard;
