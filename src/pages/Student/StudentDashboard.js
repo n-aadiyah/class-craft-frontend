@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../api/axiosInstance";
-
+import { useLocation } from "react-router-dom";
 import AvatarCard from "../../components/students/AvatarCard";
 import XPProgressBar from "../../components/students/XPProgressBar";
 
@@ -31,7 +31,7 @@ const StudentProfileDashboard = () => {
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -103,7 +103,6 @@ const StudentProfileDashboard = () => {
   };
 
   /* ---------------- UI ---------------- */
-
   return (
     <div className="min-h-screen flex bg-gray-100">
 
@@ -114,14 +113,35 @@ const StudentProfileDashboard = () => {
             Dashboard
           </div>
 
-          <nav className="mt-4 space-y-1 px-4 text-sm">
-            <SidebarItem label="Overview" active />
-            <SidebarItem label="My Courses" />
-            <SidebarItem label="My Tasks" />
-            <SidebarItem label="Rewards" />
-            <SidebarItem label="Progress" />
-            <SidebarItem label="Settings" />
-          </nav>
+         <nav className="mt-4 space-y-1 px-4 text-sm">
+  <SidebarItem
+    label="Overview"
+    active
+    onClick={() => navigate("/student/dashboard")}
+  />
+  <SidebarItem
+    label="My Courses"
+    onClick={() => navigate("/student/courses")}
+  />
+  <SidebarItem
+  label="My Tasks"
+  active={location.pathname === "/student/tasks"}
+  onClick={() => navigate("/student/tasks")}
+/>
+  <SidebarItem
+    label="Rewards"
+    onClick={() => navigate("/student/rewards")}
+  />
+  <SidebarItem
+    label="Progress"
+    onClick={() => navigate("/student/progress")}
+  />
+  <SidebarItem
+    label="Settings"
+    onClick={() => navigate("/student/settings")}
+  />
+</nav>
+
         </div>
 
         <div className="p-4">
@@ -260,13 +280,17 @@ const StudentProfileDashboard = () => {
 
 /* ---------------- SIDEBAR ITEM ---------------- */
 
-const SidebarItem = ({ label, active }) => (
+const SidebarItem = ({ label, active, onClick }) => (
   <div
-    className={`px-4 py-2 rounded-lg cursor-pointer
-    ${active ? "bg-white text-red-700 font-semibold" : "hover:bg-red-600"}`}
+    onClick={onClick}
+    className={`px-4 py-2 rounded-lg cursor-pointer transition
+      ${active
+        ? "bg-white text-red-700 font-semibold"
+        : "hover:bg-red-600 hover:text-white"}`}
   >
     {label}
   </div>
 );
+
 
 export default StudentProfileDashboard;

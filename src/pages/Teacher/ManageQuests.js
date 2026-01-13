@@ -3,6 +3,9 @@ import React, { useEffect, useState } from "react";
 import { Map, Plus, Edit2, Trash2, Save } from "lucide-react";
 import API from "../../api/axiosInstance";
 
+// /classes/my-classes -> classes owned by teacher
+// /classes/all        -> all classes (used for quest assignment)
+
 const difficulties = ["Easy", "Medium", "Hard"];
 const statuses = ["Active", "Completed"];
 
