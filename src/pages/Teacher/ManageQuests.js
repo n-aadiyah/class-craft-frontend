@@ -243,58 +243,186 @@ const res = await API.get("/classes/all"); // ✅ ALL classes
       </div>
 
       {/* CREATE MODAL */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Create Quest</h2>
+{/* CREATE MODAL */}
+{showModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="w-full max-w-md rounded-xl bg-white p-6">
+      <h2 className="mb-6 text-xl font-bold text-gray-800">
+        Create Quest
+      </h2>
 
-            <input placeholder="Title" className="input" onChange={(e)=>setNewQuest({...newQuest,title:e.target.value})}/>
-            <textarea placeholder="Description" className="input" onChange={(e)=>setNewQuest({...newQuest,description:e.target.value})}/>
-            <select className="input" onChange={(e)=>setNewQuest({...newQuest,classId:e.target.value})}>
-              <option value="">Select Class</option>
-              {classes.map(c=> <option key={c._id} value={c._id}>{c.name}</option>)}
-            </select>
-            <select className="input" onChange={(e)=>setNewQuest({...newQuest,difficulty:e.target.value})}>
-              <option value="">Difficulty</option>
-              {difficulties.map(d=> <option key={d}>{d}</option>)}
-            </select>
-            <input placeholder="Reward XP" type="number" className="input" onChange={(e)=>setNewQuest({...newQuest,rewardXP:e.target.value})}/>
-            <input type="date" className="input" onChange={(e)=>setNewQuest({...newQuest,startDate:e.target.value})}/>
-            <input type="date" className="input" onChange={(e)=>setNewQuest({...newQuest,endDate:e.target.value})}/>
+      {/* FORM */}
+      <div className="space-y-4">
+        <input
+          placeholder="Title"
+          className="input w-full"
+          onChange={(e) =>
+            setNewQuest({ ...newQuest, title: e.target.value })
+          }
+        />
 
-            <div className="flex justify-end gap-3 mt-4">
-              <button onClick={()=>setShowModal(false)}>Cancel</button>
-              <button onClick={handleAddQuest} className="bg-red-700 text-white px-4 py-2 rounded">Create</button>
-            </div>
-          </div>
+        <textarea
+          placeholder="Description"
+          className="input w-full resize-none"
+          rows={3}
+          onChange={(e) =>
+            setNewQuest({ ...newQuest, description: e.target.value })
+          }
+        />
+
+        <select
+          className="input w-full"
+          onChange={(e) =>
+            setNewQuest({ ...newQuest, classId: e.target.value })
+          }
+        >
+          <option value="">Select Class</option>
+          {classes.map((c) => (
+            <option key={c._id} value={c._id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className="input w-full"
+          onChange={(e) =>
+            setNewQuest({ ...newQuest, difficulty: e.target.value })
+          }
+        >
+          <option value="">Difficulty</option>
+          {difficulties.map((d) => (
+            <option key={d}>{d}</option>
+          ))}
+        </select>
+
+        <input
+          type="number"
+          placeholder="Reward XP"
+          className="input w-full"
+          onChange={(e) =>
+            setNewQuest({ ...newQuest, rewardXP: e.target.value })
+          }
+        />
+
+        <div className="grid grid-cols-2 gap-3">
+          <input
+            type="date"
+            className="input w-full"
+            onChange={(e) =>
+              setNewQuest({ ...newQuest, startDate: e.target.value })
+            }
+          />
+          <input
+            type="date"
+            className="input w-full"
+            onChange={(e) =>
+              setNewQuest({ ...newQuest, endDate: e.target.value })
+            }
+          />
         </div>
-      )}
+      </div>
+
+      {/* ACTIONS */}
+      <div className="mt-6 flex justify-end gap-3">
+        <button
+          onClick={() => setShowModal(false)}
+          className="rounded px-4 py-2 text-gray-600 hover:bg-gray-100"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleAddQuest}
+          className="rounded bg-red-700 px-4 py-2 text-white hover:bg-red-800"
+        >
+          Create
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
       {/* EDIT MODAL */}
-      {showEditModal && editQuest && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Edit Quest</h2>
+{/* EDIT MODAL */}
+{showEditModal && editQuest && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="w-full max-w-md rounded-xl bg-white p-6">
+      <h2 className="mb-6 text-xl font-bold text-gray-800">
+        Edit Quest
+      </h2>
 
-            <input value={editQuest.title} onChange={(e)=>setEditQuest({...editQuest,title:e.target.value})} className="input"/>
-            <textarea value={editQuest.description} onChange={(e)=>setEditQuest({...editQuest,description:e.target.value})} className="input"/>
-            <select value={editQuest.difficulty} onChange={(e)=>setEditQuest({...editQuest,difficulty:e.target.value})} className="input">
-              {difficulties.map(d=> <option key={d}>{d}</option>)}
-            </select>
-            <input type="number" value={editQuest.rewardXP} onChange={(e)=>setEditQuest({...editQuest,rewardXP:e.target.value})} className="input"/>
-            <select value={editQuest.status} onChange={(e)=>setEditQuest({...editQuest,status:e.target.value})} className="input">
-              {statuses.map(s=> <option key={s}>{s}</option>)}
-            </select>
+      <div className="space-y-4">
+        <input
+          className="input w-full"
+          value={editQuest.title}
+          onChange={(e) =>
+            setEditQuest({ ...editQuest, title: e.target.value })
+          }
+        />
 
-            <div className="flex justify-end gap-3 mt-4">
-              <button onClick={()=>setShowEditModal(false)}>Cancel</button>
-              <button onClick={handleSaveEdit} className="bg-yellow-500 text-white px-4 py-2 rounded">
-                <Save size={16}/> Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        <textarea
+          className="input w-full resize-none"
+          rows={3}
+          value={editQuest.description}
+          onChange={(e) =>
+            setEditQuest({ ...editQuest, description: e.target.value })
+          }
+        />
+
+        <select
+          className="input w-full"
+          value={editQuest.difficulty}
+          onChange={(e) =>
+            setEditQuest({ ...editQuest, difficulty: e.target.value })
+          }
+        >
+          {difficulties.map((d) => (
+            <option key={d}>{d}</option>
+          ))}
+        </select>
+
+        <input
+          type="number"
+          className="input w-full"
+          value={editQuest.rewardXP}
+          onChange={(e) =>
+            setEditQuest({ ...editQuest, rewardXP: e.target.value })
+          }
+        />
+
+        <select
+          className="input w-full"
+          value={editQuest.status}
+          onChange={(e) =>
+            setEditQuest({ ...editQuest, status: e.target.value })
+          }
+        >
+          {statuses.map((s) => (
+            <option key={s}>{s}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="mt-6 flex justify-end gap-3">
+        <button
+          onClick={() => setShowEditModal(false)}
+          className="rounded px-4 py-2 text-gray-600 hover:bg-gray-100"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleSaveEdit}
+          className="flex items-center gap-2 rounded bg-yellow-500 px-4 py-2 text-white hover:bg-yellow-600"
+        >
+          <Save size={16} />
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };
