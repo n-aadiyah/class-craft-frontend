@@ -33,6 +33,14 @@ const StudentProfileDashboard = () => {
   const [error, setError] = useState(null);
 const location = useLocation();
   const navigate = useNavigate();
+  const handleLogout = () => {
+  
+  localStorage.removeItem("token");
+  localStorage.removeItem("user"); 
+
+
+  navigate("/login", { replace: true });
+};
 
   useEffect(() => {
     let mounted = true;
@@ -101,6 +109,7 @@ const location = useLocation();
       },
     ],
   };
+  
 
   /* ---------------- UI ---------------- */
   return (
@@ -145,12 +154,13 @@ const location = useLocation();
         </div>
 
         <div className="p-4">
-          <button
-            onClick={() => navigate("/logout")}
-            className="w-full bg-white text-red-700 py-2 rounded-lg font-semibold"
-          >
-            Logout
-          </button>
+         <button
+  onClick={handleLogout}
+  className="w-full bg-white text-red-700 py-2 rounded-lg font-semibold"
+>
+  Logout
+</button>
+
         </div>
       </aside>
 
