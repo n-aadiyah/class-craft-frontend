@@ -256,7 +256,7 @@ const RewardSystem = () => {
     setNewReward({
       ...newReward,
       classId: e.target.value,
-      student: "", // 🔥 reset student when class changes
+      student: "", // 🔥 reset student when class changes 
     })
   }
 >
