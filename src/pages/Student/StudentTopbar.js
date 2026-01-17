@@ -48,7 +48,7 @@ const StudentTopbar = ({ onMenuClick }) => {
 
         <img
           src={getAvatarUrl()}
-          alt="Student Avatar"
+          alt="  "
           className="w-10 h-10 rounded-full border-2 border-yellow-400 shadow-md object-cover"
         />
       </div>
