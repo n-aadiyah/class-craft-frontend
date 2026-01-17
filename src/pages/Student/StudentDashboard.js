@@ -31,6 +31,7 @@ ChartJS.register(
 const StudentProfileDashboard = () => {
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
@@ -42,12 +43,19 @@ const StudentProfileDashboard = () => {
       try {
         const res = await API.get("/students/dashboard");
         if (!mounted) return;
+
+        // ✅ HANDLE UNASSIGNED STUDENT
+        if (res.data?.onboarding) {
+          setPending(true);
+          return;
+        }
+
         setStudent(res.data.student);
       } catch (err) {
         const status = err?.response?.status;
         if (status === 401) return navigate("/login");
         if (status === 403) return navigate("/unauthorized");
-        setError("Failed to load student dashboard");
+        setError("Unable to load student dashboard.");
       } finally {
         if (mounted) setLoading(false);
       }
@@ -57,11 +65,28 @@ const StudentProfileDashboard = () => {
     return () => (mounted = false);
   }, [navigate]);
 
+  /* ---------------- STATES ---------------- */
+
   if (loading)
     return (
       <StudentLayout>
         <div className="h-[60vh] flex items-center justify-center text-yellow-400">
           Loading dashboard…
+        </div>
+      </StudentLayout>
+    );
+
+  if (pending)
+    return (
+      <StudentLayout>
+        <div className="h-[60vh] flex flex-col items-center justify-center text-yellow-400 text-center gap-3">
+          <h2 className="text-xl font-semibold">
+            Profile Pending Assignment
+          </h2>
+          <p className="text-sm text-gray-400 max-w-md">
+            Your account is active, but you are not assigned to a class yet.
+            Please wait for your teacher to complete the setup.
+          </p>
         </div>
       </StudentLayout>
     );
@@ -82,8 +107,11 @@ const StudentProfileDashboard = () => {
     datasets: [
       {
         data: student.xpHistory || [10, 30, 55, student.xp],
-        borderColor: "#facc15",
+        borderColor: "#ffffff",
         backgroundColor: "rgba(250,204,21,0.15)",
+        pointBackgroundColor: "#ffffff",
+        pointBorderColor: "#facc15",
+        borderWidth: 3,
         tension: 0.4,
         fill: true,
       },
@@ -98,7 +126,7 @@ const StudentProfileDashboard = () => {
           student.completedTasks || 0,
           Math.max(
             0,
-            (student.totalTasks || 10) - (student.completedTasks || 0)
+            (student.totalTasks || 0) - (student.completedTasks || 0)
           ),
         ],
         backgroundColor: ["#22c55e", "#ef4444"],
@@ -110,24 +138,19 @@ const StudentProfileDashboard = () => {
   /* ---------------- UI ---------------- */
 
   return (
-      <div className="pt-4 sm:pt-6 lg:pt-8 pb-10 px-4 sm:px-6 lg:px-10">
-
-        {/* GRID: PROFILE + PROGRESS */}
+    <StudentLayout>
+      <div className="pt-6 pb-10 px-4 sm:px-6 lg:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          {/* LEFT : PROFILE CARD */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl shadow-lg p-6 text-center">
+          {/* PROFILE */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 text-center">
             <AvatarCard level={student.level} />
-
             <h2 className="mt-4 text-xl font-bold text-white">
               {student.name}
             </h2>
+            <p className="text-gray-400 text-sm">Level {student.level}</p>
 
-            <p className="text-gray-400 text-sm">
-              Level {student.level} 
-            </p>
-
-            <div className="mt-4 ">
+            <div className="mt-4">
               <XPProgressBar xp={student.xp} nextLevelXp={student.nextLevelXp} />
             </div>
 
@@ -147,63 +170,16 @@ const StudentProfileDashboard = () => {
             </div>
           </div>
 
-          {/* RIGHT : PROGRESS SECTION */}
-          <div className="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-xl shadow-lg p-6">
+          {/* PROGRESS */}
+          <div className="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-xl p-6">
             <h3 className="text-lg font-semibold text-yellow-400 mb-6">
               Progress Overview
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
               <div className="md:col-span-2">
-<Line
-  data={{
-    ...xpChartData,
-    datasets: [
-      {
-        ...xpChartData.datasets[0],
-        borderColor: "#ffffff",               // WHITE LINE
-        backgroundColor: "rgba(250,204,21,0.15)", // subtle yellow fill
-        pointBackgroundColor: "#ffffff",      // white points
-        pointBorderColor: "#facc15",           // yellow border
-        pointBorderWidth: 2,
-        pointRadius: 5,
-        borderWidth: 3,                        // thicker line
-        tension: 0.4,
-        fill: true,
-      },
-    ],
-  }}
-  options={{
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: "#18181b",
-        titleColor: "#facc15",
-        bodyColor: "#ffffff",
-        borderColor: "#27272a",
-        borderWidth: 1,
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: { color: "#a78810" },           // light gray ticks
-        grid: {
-          color: "#e4d2d2",     // subtle grid lines
-        },
-      },
-      x: {
-        ticks: { color: "#a78810" },
-        grid: {
-          color: "#e4d2d2",
-        },
-      },
-    },
-  }}
-/>
-
+                <Line data={xpChartData} />
               </div>
-
               <div className="text-center">
                 <Doughnut data={taskChartData} />
                 <p className="mt-3 text-lg font-semibold text-yellow-300">
@@ -213,9 +189,10 @@ const StudentProfileDashboard = () => {
               </div>
             </div>
           </div>
-        </div>
 
+        </div>
       </div>
+    </StudentLayout>
   );
 };
 
