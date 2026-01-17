@@ -29,6 +29,7 @@ import StudentDashboard from "./pages/Student/StudentDashboard";
 import StudentProfile from "./pages/Student/Studentprofile";
 import StudentAssignments from "./pages/Student/StudentAssignments";
 import StudentTasks from "./pages/Student/StudentTasks";  
+import StudentRewards from "./pages/Student/StudentRewards";  
 import StudentLayout from "./layout/Studentlayout";
 
 /* Auth */
@@ -106,23 +107,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/student/tasks"
-          element={
-            <ProtectedRoute role="student">
-              <StudentTasks />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/student/assignments"
-          element={
-            <ProtectedRoute role="student">
-              <StudentAssignments />
-            </ProtectedRoute>
-          }
-        />
-
+        
         <Route
           path="/student/assignments"
           element={
@@ -136,6 +121,14 @@ function App() {
           element={
             <ProtectedRoute role="student">
               <StudentTasks />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+         path="/student/rewards"
+          element={
+            <ProtectedRoute role="student">
+              <StudentRewards />
             </ProtectedRoute>
           }
         />
