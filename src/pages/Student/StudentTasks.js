@@ -60,6 +60,7 @@ export default function StudentTasks() {
                 <tr className="bg-zinc-800/80 text-gray-300 uppercase tracking-wide">
                   <th className="py-3 px-4 text-left">Task</th>
                   <th className="py-3 px-4 text-left">Description</th>
+                    <th className="py-3 px-4 text-left">XP</th>
                   <th className="py-3 px-4 text-center">Due</th>
                   <th className="py-3 px-4 text-center">Status</th>
                   <th className="py-3 px-4 text-center">Action</th>
@@ -78,6 +79,10 @@ export default function StudentTasks() {
 
                     <td className="py-4 px-4 text-gray-400 max-w-xs">
                       {task.description || "—"}
+                    </td>
+
+                     <td className="py-4 px-4 text-gray-400 max-w-xs">
+                      {task.xp || "—"}
                     </td>
 
                     <td className="py-4 px-4 text-center text-gray-300">

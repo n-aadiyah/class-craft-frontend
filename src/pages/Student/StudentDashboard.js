@@ -112,11 +112,6 @@ const StudentProfileDashboard = () => {
   return (
       <div className="pt-4 sm:pt-6 lg:pt-8 pb-10 px-4 sm:px-6 lg:px-10">
 
-        {/* HEADER */}
-        <h1 className="text-3xl font-bold text-yellow-400 mb-6 tracking-wide">
-          Overview
-        </h1>
-
         {/* GRID: PROFILE + PROGRESS */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
@@ -129,10 +124,10 @@ const StudentProfileDashboard = () => {
             </h2>
 
             <p className="text-gray-400 text-sm">
-              Level {student.level} • Active Student
+              Level {student.level} 
             </p>
 
-            <div className="mt-4">
+            <div className="mt-4 ">
               <XPProgressBar xp={student.xp} nextLevelXp={student.nextLevelXp} />
             </div>
 
@@ -142,11 +137,11 @@ const StudentProfileDashboard = () => {
                 {student.enrollmentNo || "—"}
               </p>
               <p>
-                <span className="text-yellow-400 font-semibold">Course:</span>{" "}
+                <span className="text-yellow-400 font-semibold">Division:</span>{" "}
                 {student.course || "—"}
               </p>
               <p>
-                <span className="text-yellow-400 font-semibold">Batch:</span>{" "}
+                <span className="text-yellow-400 font-semibold">Class:</span>{" "}
                 {student.batch || "—"}
               </p>
             </div>
@@ -160,16 +155,53 @@ const StudentProfileDashboard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
               <div className="md:col-span-2">
-                <Line
-                  data={xpChartData}
-                  options={{
-                    plugins: { legend: { display: false } },
-                    scales: {
-                      y: { beginAtZero: true, ticks: { color: "#aaa" } },
-                      x: { ticks: { color: "#aaa" } },
-                    },
-                  }}
-                />
+<Line
+  data={{
+    ...xpChartData,
+    datasets: [
+      {
+        ...xpChartData.datasets[0],
+        borderColor: "#ffffff",               // WHITE LINE
+        backgroundColor: "rgba(250,204,21,0.15)", // subtle yellow fill
+        pointBackgroundColor: "#ffffff",      // white points
+        pointBorderColor: "#facc15",           // yellow border
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        borderWidth: 3,                        // thicker line
+        tension: 0.4,
+        fill: true,
+      },
+    ],
+  }}
+  options={{
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: "#18181b",
+        titleColor: "#facc15",
+        bodyColor: "#ffffff",
+        borderColor: "#27272a",
+        borderWidth: 1,
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { color: "#a78810" },           // light gray ticks
+        grid: {
+          color: "#e4d2d2",     // subtle grid lines
+        },
+      },
+      x: {
+        ticks: { color: "#a78810" },
+        grid: {
+          color: "#e4d2d2",
+        },
+      },
+    },
+  }}
+/>
+
               </div>
 
               <div className="text-center">
@@ -183,13 +215,6 @@ const StudentProfileDashboard = () => {
           </div>
         </div>
 
-        {/* SUMMARY */}
-        <div className="mt-10 bg-zinc-900 border border-zinc-800 rounded-xl shadow-lg p-6">
-          <h4 className="text-yellow-400 font-semibold mb-2">Profile Summary</h4>
-          <p className="text-gray-300 text-sm leading-relaxed">
-            {student.bio || "No profile summary provided yet."}
-          </p>
-        </div>
       </div>
   );
 };

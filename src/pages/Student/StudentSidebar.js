@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { User, BookOpen, Trophy, ListChecks, LogOut } from "lucide-react";
+import { User, Trophy, ListChecks, LogOut } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 const StudentSidebar = ({ isOpen, onClose }) => {
@@ -9,10 +9,9 @@ const StudentSidebar = ({ isOpen, onClose }) => {
   const { setToken, setUser } = useAuth();
 
   const links = [
-    { name: "Dashboard", path: "/student/dashboard", icon: <User size={18} /> },
+    { name: "Overview", path: "/student/dashboard", icon: <User size={18} /> },
     { name: "My Tasks", path: "/student/tasks", icon: <ListChecks size={18} /> },
     { name: "Rewards", path: "/student/rewards", icon: <Trophy size={18} /> },
-    { name: "Courses", path: "/student/courses", icon: <BookOpen size={18} /> },
   ];
 
   const handleLogout = () => {
