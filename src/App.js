@@ -29,6 +29,7 @@ import StudentDashboard from "./pages/Student/StudentDashboard";
 import StudentProfile from "./pages/Student/Studentprofile";
 import StudentAssignments from "./pages/Student/StudentAssignments";
 import StudentTasks from "./pages/Student/StudentTasks";  
+import StudentLayout from "./layout/Studentlayout";
 
 /* Auth */
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -91,7 +92,9 @@ function App() {
           path="/student/dashboard"
           element={
             <ProtectedRoute role="student">
-              <StudentDashboard />
+              <StudentLayout>
+                <StudentDashboard />
+              </StudentLayout>
             </ProtectedRoute>
           }
         />
