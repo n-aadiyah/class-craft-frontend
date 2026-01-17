@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../api/axiosInstance";
-import { useLocation } from "react-router-dom";
+
+import StudentLayout from "../../layout/Studentlayout";
 import AvatarCard from "../../components/students/AvatarCard";
 import XPProgressBar from "../../components/students/XPProgressBar";
 
@@ -31,16 +32,8 @@ const StudentProfileDashboard = () => {
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-const location = useLocation();
+
   const navigate = useNavigate();
-  const handleLogout = () => {
-  
-  localStorage.removeItem("token");
-  localStorage.removeItem("user"); 
-
-
-  navigate("/login", { replace: true });
-};
 
   useEffect(() => {
     let mounted = true;
@@ -66,25 +59,29 @@ const location = useLocation();
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 text-gray-500">
-        Loading dashboard…
-      </div>
+      <StudentLayout>
+        <div className="h-[60vh] flex items-center justify-center text-yellow-400">
+          Loading dashboard…
+        </div>
+      </StudentLayout>
     );
 
   if (error)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 text-red-600">
-        {error}
-      </div>
+      <StudentLayout>
+        <div className="h-[60vh] flex items-center justify-center text-red-500">
+          {error}
+        </div>
+      </StudentLayout>
     );
 
-  /* ---------------- DATA ---------------- */
+  /* ---------------- CHART DATA ---------------- */
 
   const xpChartData = {
     labels: ["W1", "W2", "W3", "W4"],
     datasets: [
       {
-        data: student.xpHistory || [15, 35, 60, student.xp],
+        data: student.xpHistory || [10, 30, 55, student.xp],
         borderColor: "#facc15",
         backgroundColor: "rgba(250,204,21,0.15)",
         tension: 0.4,
@@ -109,198 +106,92 @@ const location = useLocation();
       },
     ],
   };
-  
 
   /* ---------------- UI ---------------- */
+
   return (
-    <div className="min-h-screen flex bg-gray-100">
+      <div className="pt-4 sm:pt-6 lg:pt-8 pb-10 px-4 sm:px-6 lg:px-10">
 
-      {/* SIDEBAR */}
-      <aside className="w-64 bg-red-700 text-white flex flex-col justify-between">
-        <div>
-          <div className="px-6 py-6 text-xl font-bold">
-            Dashboard
-          </div>
+        {/* HEADER */}
+        <h1 className="text-3xl font-bold text-yellow-400 mb-6 tracking-wide">
+          Overview
+        </h1>
 
-         <nav className="mt-4 space-y-1 px-4 text-sm">
-  <SidebarItem
-    label="Overview"
-    active
-    onClick={() => navigate("/student/dashboard")}
-  />
-  <SidebarItem
-    label="My Courses"
-    onClick={() => navigate("/student/courses")}
-  />
-  <SidebarItem
-  label="My Tasks"
-  active={location.pathname === "/student/tasks"}
-  onClick={() => navigate("/student/tasks")}
-/>
-  <SidebarItem
-    label="Rewards"
-    onClick={() => navigate("/student/rewards")}
-  />
-  <SidebarItem
-    label="Progress"
-    onClick={() => navigate("/student/progress")}
-  />
-  <SidebarItem
-    label="Settings"
-    onClick={() => navigate("/student/settings")}
-  />
-</nav>
+        {/* GRID: PROFILE + PROGRESS */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        </div>
+          {/* LEFT : PROFILE CARD */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl shadow-lg p-6 text-center">
+            <AvatarCard level={student.level} />
 
-        <div className="p-4">
-         <button
-  onClick={handleLogout}
-  className="w-full bg-white text-red-700 py-2 rounded-lg font-semibold"
->
-  Logout
-</button>
+            <h2 className="mt-4 text-xl font-bold text-white">
+              {student.name}
+            </h2>
 
-        </div>
-      </aside>
+            <p className="text-gray-400 text-sm">
+              Level {student.level} • Active Student
+            </p>
 
-      {/* MAIN */}
-      <main className="flex-1">
+            <div className="mt-4">
+              <XPProgressBar xp={student.xp} nextLevelXp={student.nextLevelXp} />
+            </div>
 
-        {/* TOP BAR */}
-        <header className="flex justify-between items-center px-8 py-4 bg-white shadow-sm">
-          <h1 className="text-lg font-bold text-red-700">
-            Student Dashboard
-          </h1>
-
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600">
-              Hello, {student.name}
-            </span>
-            <img
-              src="/Avatar.jpg"
-              alt="avatar"
-              className="w-9 h-9 rounded-full border"
-            />
-          </div>
-        </header>
-
-        {/* CONTENT */}
-        <section className="p-8 space-y-6">
-
-          {/* TOP GRID */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-            {/* PROFILE */}
-            <div className="bg-white rounded-xl shadow-sm p-6 text-center">
-              <AvatarCard level={student.level} />
-
-              <h2 className="mt-4 text-lg font-bold text-gray-900">
-                {student.name}
-              </h2>
-
-              <p className="text-sm text-gray-500">
-                Level {student.level} • Beginner
+            <div className="mt-6 text-left space-y-2 text-sm">
+              <p>
+                <span className="text-yellow-400 font-semibold">Enrollment:</span>{" "}
+                {student.enrollmentNo || "—"}
               </p>
+              <p>
+                <span className="text-yellow-400 font-semibold">Course:</span>{" "}
+                {student.course || "—"}
+              </p>
+              <p>
+                <span className="text-yellow-400 font-semibold">Batch:</span>{" "}
+                {student.batch || "—"}
+              </p>
+            </div>
+          </div>
 
-              <span className="inline-block mt-3 px-3 py-1 text-xs font-semibold
-                bg-green-100 text-green-700 rounded-full">
-                Enrolled • Active
-              </span>
+          {/* RIGHT : PROGRESS SECTION */}
+          <div className="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-xl shadow-lg p-6">
+            <h3 className="text-lg font-semibold text-yellow-400 mb-6">
+              Progress Overview
+            </h3>
 
-              <div className="mt-5">
-                <XPProgressBar
-                  xp={student.xp}
-                  nextLevelXp={student.nextLevelXp}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+              <div className="md:col-span-2">
+                <Line
+                  data={xpChartData}
+                  options={{
+                    plugins: { legend: { display: false } },
+                    scales: {
+                      y: { beginAtZero: true, ticks: { color: "#aaa" } },
+                      x: { ticks: { color: "#aaa" } },
+                    },
+                  }}
                 />
               </div>
 
-              <div className="mt-6 text-left text-sm space-y-2">
-                <p><b>Enrollment No:</b> {student.enrollmentNo || "—"}</p>
-                <p><b>Course:</b> {student.course || "—"}</p>
-                <p><b>Batch:</b> {student.batch || "—"}</p>
-              </div>
-            </div>
-
-            {/* PROGRESS OVERVIEW */}
-            <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-sm font-bold text-gray-900 mb-4">
-                Progress Overview
-              </h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-
-                <div className="md:col-span-2">
-                  <Line
-                    data={xpChartData}
-                    options={{
-                      plugins: { legend: { display: false } },
-                      scales: { y: { beginAtZero: true } },
-                    }}
-                  />
-                </div>
-
-                <div className="text-center">
-                  <Doughnut data={taskChartData} />
-                  <p className="mt-3 text-sm font-semibold text-gray-700">
-                    {student.completedTasks || 0} / {student.totalTasks || 10}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Tasks Completed
-                  </p>
-                </div>
-
+              <div className="text-center">
+                <Doughnut data={taskChartData} />
+                <p className="mt-3 text-lg font-semibold text-yellow-300">
+                  {student.completedTasks}/{student.totalTasks}
+                </p>
+                <p className="text-xs text-gray-400">Tasks Completed</p>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* SUMMARY */}
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h4 className="text-sm font-bold text-gray-900 mb-2">
-              Profile Summary
-            </h4>
-
-            <p className="text-sm text-gray-600 mb-4">
-              {student.bio || "No summary provided yet."}
-            </p>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => navigate("/student/profile")}
-                className="px-4 py-2 rounded-lg bg-yellow-400 text-black font-semibold text-sm"
-              >
-                Edit Profile
-              </button>
-
-              <button
-                onClick={() => navigate("/student/tasks")}
-                className="px-4 py-2 rounded-lg border border-red-500
-                text-red-500 font-semibold text-sm"
-              >
-                View Tasks
-              </button>
-            </div>
-          </div>
-
-        </section>
-      </main>
-    </div>
+        {/* SUMMARY */}
+        <div className="mt-10 bg-zinc-900 border border-zinc-800 rounded-xl shadow-lg p-6">
+          <h4 className="text-yellow-400 font-semibold mb-2">Profile Summary</h4>
+          <p className="text-gray-300 text-sm leading-relaxed">
+            {student.bio || "No profile summary provided yet."}
+          </p>
+        </div>
+      </div>
   );
 };
-
-/* ---------------- SIDEBAR ITEM ---------------- */
-
-const SidebarItem = ({ label, active, onClick }) => (
-  <div
-    onClick={onClick}
-    className={`px-4 py-2 rounded-lg cursor-pointer transition
-      ${active
-        ? "bg-white text-red-700 font-semibold"
-        : "hover:bg-red-600 hover:text-white"}`}
-  >
-    {label}
-  </div>
-);
-
 
 export default StudentProfileDashboard;
