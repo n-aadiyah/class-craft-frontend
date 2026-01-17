@@ -267,8 +267,6 @@ const RewardSystem = () => {
     </option>
   ))}
 </select>
-
-
             <input
               type="number"
               placeholder="XP"
