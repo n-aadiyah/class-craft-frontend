@@ -102,21 +102,27 @@ const StudentProfileDashboard = () => {
 
   /* ---------------- CHART DATA ---------------- */
 
-  const xpChartData = {
-    labels: ["W1", "W2", "W3", "W4"],
-    datasets: [
-      {
-        data: student.xpHistory || [10, 30, 55, student.xp],
-        borderColor: "#ffffff",
-        backgroundColor: "rgba(250,204,21,0.15)",
-        pointBackgroundColor: "#ffffff",
-        pointBorderColor: "#facc15",
-        borderWidth: 3,
-        tension: 0.4,
-        fill: true,
-      },
-    ],
-  };
+  const xpPoints =
+  Array.isArray(student.xpHistory) && student.xpHistory.length > 0
+    ? student.xpHistory.map(h => h.xp)
+    : [student.xp];
+
+const xpChartData = {
+  labels: xpPoints.map((_, i) => `XP ${i + 1}`),
+  datasets: [
+    {
+      data: xpPoints,
+      borderColor: "#ffffff",
+      backgroundColor: "rgba(250,204,21,0.15)",
+      pointBackgroundColor: "#ffffff",
+      pointBorderColor: "#facc15",
+      borderWidth: 3,
+      tension: 0.4,
+      fill: true,
+    },
+  ],
+};
+
 
   const taskChartData = {
     labels: ["Completed", "Remaining"],
