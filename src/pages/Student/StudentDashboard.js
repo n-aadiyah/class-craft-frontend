@@ -138,7 +138,6 @@ const StudentProfileDashboard = () => {
   /* ---------------- UI ---------------- */
 
   return (
-    <StudentLayout>
       <div className="pt-6 pb-10 px-4 sm:px-6 lg:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
@@ -192,7 +191,6 @@ const StudentProfileDashboard = () => {
 
         </div>
       </div>
-    </StudentLayout>
   );
 };
 
