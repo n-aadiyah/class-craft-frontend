@@ -1,4 +1,3 @@
-// src/pages/LandingPage.js
 import React, { useState, useEffect, useRef } from "react";
 import Navbar from "../components/Navbar";
 import "../pages/landing.css";
@@ -9,8 +8,9 @@ const images = [
   "/classcraft8.jpg",
   "/classcraft9.jpg",
   "/classcraft10.jpg",
-"/classcraft11.jpg",
+  "/classcraft11.jpg",
 ];
+
 const subjectImages = [
   "/biology.jpeg",
   "/chemistry.png",
@@ -19,15 +19,26 @@ const subjectImages = [
   "/hindi.jpeg",
   "/malayalam.jpeg",
 ];
-const subjectNames = ["Biology", "Chemistry", "English", "Maths", "Hindi", "Malayalam",];
+
+const subjectNames = ["Biology", "Chemistry", "English", "Maths", "Hindi", "Malayalam"];
 
 const LandingPage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // NEW: responsive itemsPerSlide
+  const getItemsPerSlide = () => {
+    if (window.innerWidth <= 480) return 1;
+    if (window.innerWidth <= 768) return 2;
+    return 3;
+  };
+
+  const [itemsPerSlide, setItemsPerSlide] = useState(getItemsPerSlide());
   const [subjectIndex, setSubjectIndex] = useState(0);
+
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
-  // Hero auto-slide every 3 sec
+  // Hero auto-slide
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % images.length);
@@ -35,75 +46,90 @@ const LandingPage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Subject carousel auto-slide every 5 sec
+  // NEW: update itemsPerSlide on resize
   useEffect(() => {
-    const interval = setInterval(() => {
-      setSubjectIndex((prev) => (prev + 1) % Math.ceil(subjectImages.length / 3));
-    }, 5000);
-    return () => clearInterval(interval);
+    const handleResize = () => {
+      setItemsPerSlide(getItemsPerSlide());
+      setSubjectIndex(0);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Swipe handlers
+  // Subject auto-slide
+  useEffect(() => {
+    const totalSlides = Math.ceil(subjectImages.length / itemsPerSlide);
+    const interval = setInterval(() => {
+      setSubjectIndex((prev) => (prev + 1) % totalSlides);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [itemsPerSlide]);
+
+  // Swipe
   const handleTouchStart = (e) => {
     touchStartX.current = e.touches[0].clientX;
   };
+
   const handleTouchMove = (e) => {
     touchEndX.current = e.touches[0].clientX;
   };
+
   const handleTouchEnd = () => {
     const deltaX = touchStartX.current - touchEndX.current;
+    const totalSlides = Math.ceil(subjectImages.length / itemsPerSlide);
+
     if (Math.abs(deltaX) > 50) {
       if (deltaX > 0) {
-        setSubjectIndex(
-          (prev) => (prev + 1) % Math.ceil(subjectImages.length / 3)
-        );
+        setSubjectIndex((prev) => (prev + 1) % totalSlides);
       } else {
-        setSubjectIndex(
-          (prev) =>
-            (prev - 1 + Math.ceil(subjectImages.length / 3)) %
-            Math.ceil(subjectImages.length / 3)
-        );
+        setSubjectIndex((prev) => (prev - 1 + totalSlides) % totalSlides);
       }
     }
   };
 
+  // Slicing subjects dynamically
+  const start = subjectIndex * itemsPerSlide;
+  const end = start + itemsPerSlide;
+  const visibleSubjects = subjectImages.slice(start, end);
+
   return (
     <div className="relative min-h-screen w-900 mx-auto bg-white dark:bg-black">
-  {/* HERO Section */}
-  <main className="relative h-screen flex items-center justify-center overflow-hidden">
-    {images.map((img, index) => (
-      <div
-        key={index}
-        className={`absolute inset-0 bg-center transition-opacity duration-[1500ms] ease-in-out ${
-          index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
-        }`}
-        style={{
-          backgroundImage: `url(${img})`,
-          backgroundSize: "cover", // You can try 'contain' if images look stretched
-          backgroundRepeat: "no-repeat",
-          imageRendering: "crisp-edges", // Helps prevent blur
-          filter: "brightness(0.8) contrast(1.00)", // Enhance color quality slightly
-        }}
-      >
-        {/* Gradient overlay for better visibility */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40"></div>
-      </div>
-    ))}
 
-    <Navbar />
+      {/* HERO SECTION — unchanged */}
+      <main className="relative h-screen flex items-center justify-center overflow-hidden">
+        {images.map((img, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 bg-center transition-opacity duration-[1500ms] ease-in-out ${
+              index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+            }`}
+            style={{
+              backgroundImage: `url(${img})`,
+              backgroundSize: "cover",
+              backgroundRepeat: "no-repeat",
+              imageRendering: "crisp-edges",
+              filter: "brightness(0.8) contrast(1.00)",
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40"></div>
+          </div>
+        ))}
 
-    <div className="relative z-20 text-center text-white px-6">
-      <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter leading-tight drop-shadow-xl font-serif">
-        Welcome to the Academy of Excellence
-      </h1>
-      <p className="mt-6 max-w-2xl mx-auto text-lg text-gray-100 drop-shadow-md font-serif">
-        Empowering students through innovation, creativity, and knowledge.
-      </p>
-      <button className="mt-8 bg-red-800 text-white font-bold py-3 px-8 rounded-lg hover:bg-red-700 transition-all duration-300 shadow-xl font-serif">
-        Enroll Now
-      </button>
-    </div>
-  </main>
+        <Navbar />
+
+        <div className="relative z-20 text-center text-white px-6">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter leading-tight drop-shadow-xl font-serif">
+            Welcome to the Academy of Excellence
+          </h1>
+          <p className="mt-6 max-w-2xl mx-auto text-lg text-gray-100 drop-shadow-md font-serif">
+            Empowering students through innovation, creativity, and knowledge.
+          </p>
+          <button className="mt-8 bg-red-800 text-white font-bold py-3 px-8 rounded-lg hover:bg-red-700 transition-all duration-300 shadow-xl font-serif">
+            Enroll Now
+          </button>
+        </div>
+      </main>
+
 
       {/* ABOUT Section */}
       <section className="px-4 py-10 bg-white dark:bg-white/10">
@@ -136,59 +162,52 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+
       {/* SUBJECTS Carousel */}
-<section
-  className="relative w-full py-12 bg-gray-50 dark:bg-gray-900 overflow-hidden"
-  onTouchStart={handleTouchStart}
-  onTouchMove={handleTouchMove}
-  onTouchEnd={handleTouchEnd}
->
-  <h2 className="text-center text-3xl font-bold text-red-800 dark:text-white mb-8 font-serif">
-    Our Subjects
-  </h2>
+      <section
+        className="relative w-full py-12 bg-gray-50 dark:bg-gray-900 overflow-hidden"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <h2 className="text-center text-3xl font-bold text-red-800 dark:text-white mb-8 font-serif">
+          Our Subjects
+        </h2>
 
-  <div className="overflow-hidden">
-    <div
-      className="flex transition-transform duration-[2000ms] ease-in-out"
-      style={{
-        transform: `translateX(-${subjectIndex * 100}%)`,
-        width: `${subjectImages.length * (100 / 3)}%`,
-      }}
-    >
-      {subjectImages.map((img, index) => (
-       <div
-  key={index}
-  className="flex-shrink-0 w-1/3 flex flex-col items-center"
->
-  <div
-  className="w-[20rem] sm:w-[24rem] md:w-[26rem] lg:w-[28rem] h-60 bg-center bg-cover rounded-xl shadow-lg transition-transform duration-500 hover:scale-105"
-  style={{ backgroundImage: `url(${img})` }}
-></div>
+        <div className="overflow-hidden w-full">
+          <div className="flex justify-center gap-8 transition-all duration-[600ms] ease-in-out">
+            {visibleSubjects.map((img, i) => {
+              const globalIndex = start + i;
+              return (
+                <div key={globalIndex} className="flex flex-col items-center">
+                  <div
+                    className="w-60 sm:w-72 md:w-80 lg:w-96 h-60 bg-center bg-cover rounded-xl shadow-lg hover:scale-105 transition-transform duration-500"
+                    style={{ backgroundImage: `url(${img})` }}
+                  ></div>
+                  <span className="mt-4 text-center text-gray-800 dark:text-white font-semibold text-lg">
+                    {subjectNames[globalIndex]}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
-  <span className="mt-4 text-center text-gray-800 dark:text-white font-semibold text-lg">
-    {subjectNames[index]}
-  </span>
-</div>
-
-      ))}
-    </div>
-  </div>
-
-  {/* Navigation Dots */}
-  <div className="absolute bottom-5 left-1/2 transform -translate-x-1/2 flex space-x-3">
-    {Array.from({ length: Math.ceil(subjectImages.length / 3) }).map((_, idx) => (
-      <button
-        key={idx}
-        onClick={() => setSubjectIndex(idx)}
-        className={`w-2 h-2 rounded-full transition-all duration-300 ${
-          subjectIndex === idx
-            ? "bg-red-500 scale-125"
-            : "bg-gray-400 hover:bg-gray-300"
-        }`}
-      ></button>
-    ))}
-  </div>
-</section>
+        {/* Dots */}
+        <div className="mt-6 flex justify-center gap-3">
+          {Array.from({ length: Math.ceil(subjectImages.length / itemsPerSlide) }).map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setSubjectIndex(idx)}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                subjectIndex === idx
+                  ? "bg-red-500 scale-125"
+                  : "bg-gray-400 hover:bg-gray-300"
+              }`}
+            ></button>
+          ))}
+        </div>
+      </section>
 <section className="flex flex-col max-w-[1280px] mx-auto p-4 md:p-10 overflow-hidden">
       <div className="flex flex-col md:flex-row w-full">
         {/* Left side - Title */}
