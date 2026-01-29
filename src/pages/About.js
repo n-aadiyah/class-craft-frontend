@@ -1,9 +1,11 @@
 // src/pages/About.js
 import React from "react";
+import NaNvbar from "../components/Navbar";
 
 const About = () => {
   return (
     <div className="bg-white text-gray-900 overflow-x-hidden">
+      <NaNvbar />
 
       {/* HERO */}
 <section
