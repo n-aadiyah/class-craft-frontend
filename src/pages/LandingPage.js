@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import Navbar from "../components/Navbar";
 import "../pages/landing.css";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+ 
 
 const images = [
   "/classcraft7.jpg",
@@ -24,6 +26,7 @@ const subjectNames = ["Biology", "Chemistry", "English", "Maths", "Hindi", "Mala
 
 const LandingPage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const navigate = useNavigate();
 
   // NEW: responsive itemsPerSlide
   const getItemsPerSlide = () => {
@@ -124,8 +127,9 @@ const LandingPage = () => {
           <p className="mt-6 max-w-2xl mx-auto text-lg text-gray-100 drop-shadow-md font-serif">
             Empowering students through innovation, creativity, and knowledge.
           </p>
-          <button className="mt-8 bg-red-800 text-white font-bold py-3 px-8 rounded-lg hover:bg-red-700 transition-all duration-300 shadow-xl font-serif">
-            Enroll Now
+          <button className="mt-8 bg-red-800 text-white font-bold py-3 px-8 rounded-lg hover:bg-red-700 transition-all duration-300 shadow-xl font-serif"
+          onClick={() => navigate("/login")}>
+            Enroll Now 
           </button>
         </div>
       </main>
@@ -383,7 +387,6 @@ const LandingPage = () => {
           <li><a href="/academic" className="text-sm text-black dark:text-gray-300 hover:text-accent dark:hover:text-accent font-serif">Academic</a></li>
           <li><a href="/leadership" className="text-sm text-black dark:text-gray-300 hover:text-accent dark:hover:text-accent font-serif">Our Leadership</a></li>
           <li><a href="/careers" className="text-sm text-black dark:text-gray-300 hover:text-accent dark:hover:text-accent font-serif">Careers</a></li>
-          <li><a href="/hr" className="text-sm text-black dark:text-gray-300 hover:text-accent dark:hover:text-accent font-serif">Human Resource</a></li>
         </ul>
       </div>
 
@@ -393,7 +396,6 @@ const LandingPage = () => {
           <li><a href="/courses/maths" className="text-sm text-black dark:text-gray-300 hover:text-accent dark:hover:text-accent font-serif">Maths</a></li>
           <li><a href="/courses/science" className="text-sm text-black dark:text-gray-300 hover:text-accent dark:hover:text-accent font-serif">Science</a></li>
           <li><a href="/courses/arts" className="text-sm text-black dark:text-gray-300 hover:text-accent dark:hover:text-accent font-serif">Arts</a></li>
-          <li><a href="/courses/economics" className="text-sm text-black dark:text-gray-300 hover:text-accent dark:hover:text-accent font-serif">Economics</a></li>
         </ul>
       </div>
 
@@ -402,8 +404,7 @@ const LandingPage = () => {
         <ul className="space-y-3">
           <li><button className="text-sm text-black dark:text-black hover:text-accent dark:hover:text-accent">Help</button></li>
           <li><button className="text-sm text-black dark:text-black hover:text-accent dark:hover:text-accent">Support</button></li>
-          <li><button className="text-sm text-black dark:text-black hover:text-accent dark:hover:text-accent">Press</button></li>
-          <li><button className="text-sm text-black dark:text-black hover:text-accent dark:hover:text-accent">Share Our Story</button></li>
+          <li><button className="text-sm text-black dark:text-black hover:text-accent dark:hover:text-accent">contact Us</button></li>
         </ul>
       </div>
     </div>

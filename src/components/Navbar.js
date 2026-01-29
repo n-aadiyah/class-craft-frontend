@@ -202,27 +202,12 @@ const Navbar = () => {
                    bg-black/10 backdrop-blur-sm border-t border-white/5"
       >
         <Link
-          to="/student"
+          to="/"
           className="text-yellow-400 font-bold border-b-2 border-red-600 pb-1"
         >
-          Student
+            Home
         </Link>
 
-        <Link
-          to="/curriculum"
-          className="text-white hover:text-yellow-400 pb-1 
-                     border-b-2 border-transparent hover:border-red-600"
-        >
-          Curriculum
-        </Link>
-
-        <Link
-          to="/leaderboard"
-          className="text-white hover:text-yellow-400 pb-1 
-                     border-b-2 border-transparent hover:border-red-600"
-        >
-          Leaderboard
-        </Link>
 
         <Link
           to="/about"
@@ -230,6 +215,14 @@ const Navbar = () => {
                      border-b-2 border-transparent hover:border-red-600"
         >
           About
+        </Link>
+
+        <Link
+          to="/contact"
+          className="text-white hover:text-yellow-400 pb-1 
+                     border-b-2 border-transparent hover:border-red-600"
+        >
+          Contact Us
         </Link>
       </nav>
     </header>
