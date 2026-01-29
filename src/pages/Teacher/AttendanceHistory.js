@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import API from "../../api/axiosInstance";
 import { downloadCsv } from "../../utils/download";
+import AttendanceGrid from "../../components/AttendenceGrid";
 
 const AttendanceHistory = () => {
   const navigate = useNavigate();
@@ -257,79 +258,18 @@ useEffect(() => {
 
         {/* TABLE */}
         <div className="w-full overflow-x-auto rounded-lg border">
-          <table className="min-w-max w-full border-collapse">
-            <thead className="bg-red-800 text-white">
-              <tr>
-                <th className="px-4 py-3 font-semibold text-sm">Roll No</th>
-                <th className="px-4 py-3 font-semibold text-sm">Student Name</th>
-                <th className="px-4 py-3 font-semibold text-sm">Enrollment No</th>
-
-                {matrixDays.map((d) => (
-                  <th
-                    key={d}
-                    className="px-3 py-3 text-xs font-semibold text-center border-l"
-                  >
-                    {d}
-                  </th>
-                ))}
-
-                <th className="px-4 py-3 font-semibold text-sm">Present</th>
-                <th className="px-4 py-3 font-semibold text-sm">Absent</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {loadingMonthly ? (
-                <tr>
-                  <td
-                    colSpan={matrixDays.length + 5}
-                    className="text-center py-6 text-gray-600"
-                  >
-                    Loading attendance...
-                  </td>
-                </tr>
-              ) : matrixRows.length > 0 ? (
-                matrixRows.map((row, idx) => (
-                  <tr key={row.studentId} className="hover:bg-red-50">
-                    <td className="px-4 py-3">{idx + 1}</td>
-                    <td className="px-4 py-3">{row.name}</td>
-                    <td className="px-4 py-3">{row.enrollNo}</td>
-
-                    {(row.daily || []).map((st, i) => (
-                      <td
-                        key={i}
-                        className={`px-3 py-2 text-center font-semibold ${
-                          st === "Present"
-                            ? "text-green-700"
-                            : st === "Absent"
-                            ? "text-red-600"
-                            : "text-gray-500"
-                        }`}
-                      >
-                        {st === "Present"
-                          ? "P"
-                          : st === "Absent"
-                          ? "A"
-                          : "NA"}
-                      </td>
-                    ))}
-
-                    <td className="px-4 py-3 text-center">{row.present}</td>
-                    <td className="px-4 py-3 text-center">{row.absent}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan={matrixDays.length + 5}
-                    className="text-center py-6 text-gray-600"
-                  >
-                    No records found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+{loadingMonthly ? (
+  <div className="text-center py-6 text-gray-600">Loading attendance...</div>
+) : matrixRows.length ? (
+  <AttendanceGrid
+    days={matrixDays}
+    rows={matrixRows}
+    month={month}
+    year={year}
+  />
+) : (
+  <div className="text-center py-6 text-gray-600">No records found.</div>
+)}
         </div>
 
         {/* SUMMARY */}
