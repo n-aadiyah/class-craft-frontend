@@ -319,7 +319,7 @@ const LandingPage = () => {
       {[
         "https://www.youtube.com/embed/DcTSVSyJcBw",
         { src: "/videos/onam.mp4" },
-        { src: "/videos/Alumini meet.mp4" }
+        { src: "/videos/Alumini.mp4" }
       ].map((item, i) => {
         // Identify if the source is YouTube or a local file
         const isYouTube = typeof item === 'string' && item.includes('youtube.com');

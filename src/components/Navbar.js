@@ -61,7 +61,6 @@ const Navbar = () => {
       ? "text-yellow-400 font-bold border-b-2 border-red-600 pb-1"
       : "text-white hover:text-yellow-400 pb-1 border-b-2 border-transparent hover:border-red-600";
 
-
   return (
     <header
       className={`fixed top-0 left-0 right-0 w-full z-50 
@@ -121,6 +120,27 @@ const Navbar = () => {
               </div>
             )}
           </div>
+
+          {/* CENTER TITLE */}
+        {/* Mobile Short Title */}
+<h1
+  className="absolute left-1/2 -translate-x-1/2 
+             text-white font-serif font-extrabold drop-shadow-md
+             text-sm  sm:hidden"
+>
+  GCS
+</h1>
+
+{/* Full Title for Tablet & Desktop */}
+<h1
+  className="absolute left-1/2 -translate-x-1/2 
+             text-white font-serif font-extrabold drop-shadow-md
+             text-xs sm:text-sm md:text-xl lg:text-2xl whitespace-nowrap
+             hidden sm:block"
+>
+  GAYATHRI CENTRAL SCHOOL
+</h1>
+
 
           {/* CENTER TITLE */}
         {/* Mobile Short Title */}
@@ -211,6 +231,7 @@ const Navbar = () => {
         <Link
           to="/"
           className={isActive("/")}
+          className="text-yellow-400 font-bold border-b-2 border-red-600 pb-1"
         >
             Home
         </Link>
@@ -230,6 +251,19 @@ const Navbar = () => {
           to="/facilities"
         className={isActive("/facilities")}>
           Facilities 
+          to="/about"
+          className="text-white hover:text-yellow-400 pb-1 
+                     border-b-2 border-transparent hover:border-red-600"
+        >
+          About
+        </Link>
+
+        <Link
+          to="/contact"
+          className="text-white hover:text-yellow-400 pb-1 
+                     border-b-2 border-transparent hover:border-red-600"
+        >
+          Contact Us
         </Link>
       </nav>
     </header>
