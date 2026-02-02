@@ -1,6 +1,6 @@
 // src/components/Navbar.js
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate,useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { LayoutDashboard } from "lucide-react";
 import API from "../api/axiosInstance";
@@ -54,6 +54,13 @@ const Navbar = () => {
   };
 
   const avatarSrc = makeFullAvatarUrl(user?.avatarUrl || user?.avatar);
+  const location = useLocation();
+
+  const isActive = (path) =>
+    location.pathname === path
+      ? "text-yellow-400 font-bold border-b-2 border-red-600 pb-1"
+      : "text-white hover:text-yellow-400 pb-1 border-b-2 border-transparent hover:border-red-600";
+
 
   return (
     <header
@@ -203,26 +210,26 @@ const Navbar = () => {
       >
         <Link
           to="/"
-          className="text-yellow-400 font-bold border-b-2 border-red-600 pb-1"
+          className={isActive("/")}
         >
             Home
         </Link>
 
 
         <Link
-          to="/about"
-          className="text-white hover:text-yellow-400 pb-1 
-                     border-b-2 border-transparent hover:border-red-600"
-        >
+          to="/about" className={isActive("/about")}>
           About
         </Link>
 
         <Link
-          to="/contact"
-          className="text-white hover:text-yellow-400 pb-1 
-                     border-b-2 border-transparent hover:border-red-600"
-        >
+          to="/contact" className={isActive("/contact")}>
           Contact Us
+        </Link>
+
+        <Link
+          to="/facilities"
+        className={isActive("/facilities")}>
+          Facilities 
         </Link>
       </nav>
     </header>

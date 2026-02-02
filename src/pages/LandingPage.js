@@ -275,9 +275,9 @@ const LandingPage = () => {
                   "https://gayathrischool.com/wp-content/uploads/2022/09/gaya3-1.jpg",
                   "https://www.yayskool.com/images/school/gayathri-central-school-kottayam-713518106.png",
                   "https://content.jdmagicbox.com/comp/alappuzha/k2/0477px477.x477.170925055640.b8k2/catalogue/gayathri-central-school-bharanickavu-alappuzha-cbse-schools-xh8ebnesof.jpg",
-                  "https://content3.jdmagicbox.com/v2/comp/kottayam/r1/9999px481.x481.170603165953.x7r1/catalogue/gayathri-central-school-puliyannoor-kottayam-schools-8vwkck49ok.jpg",
+                  "/f5.jpg",
                   "https://gayathrischool.com/wp-content/uploads/2023/01/0f88d4b7-4483-4704-bbbe-251a1b184d5c.jpg",
-                  "https://cache.careers360.mobi/media/schools/social-media/media-gallery/9155/2019/7/29/Gayathri%20Central%20School-Classical%20dances.jpg",
+                  "/f2.jpg"
                 ].map((img, index) => (
                   <motion.img
                     key={index}
@@ -298,23 +298,19 @@ const LandingPage = () => {
     </section>
 {/* VIDEO SECTION WITH ANIMATED BACKGROUND */}
 <section className="relative py-20 px-6 overflow-hidden">
-  {/* Animated Bubble Background */}
+  {/* Animated Bubble Background - Keeping your existing code */}
   <div className="absolute inset-0 z-0 flex items-center justify-center">
     <div className="container relative">
       {[...Array(5)].map((_, i) => (
         <div key={i} className="bubble">
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
+          <span></span><span></span><span></span><span></span><span></span>
         </div>
       ))}
     </div>
   </div>
 
   {/* Foreground Content */}
- <div className="relative z-10">
+  <div className="relative z-10">
     <h2 className="text-center text-3xl font-bold text-red-800 dark:text-white mb-10 font-serif">
       Our Activities & Highlights
     </h2>
@@ -322,24 +318,44 @@ const LandingPage = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
       {[
         "https://www.youtube.com/embed/DcTSVSyJcBw",
-        "https://www.youtube.com/embed/DcTSVSyJcBw",
-        "https://www.youtube.com/embed/DcTSVSyJcBw",
-      ].map((src, i) => (
-        <div
-          key={i}
-          className="relative w-full pt-[56.25%] overflow-hidden rounded-xl shadow-lg"
-        >
-          <iframe
-            title={`video-${i}`}
-            src={src}
-            frameBorder="0"
-            allowFullScreen
-            referrerPolicy="strict-origin-when-cross-origin"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            className="absolute top-0 left-0 w-full h-full"
-          ></iframe>
-        </div>
-      ))}
+        { src: "/videos/onam.mp4" },
+        { src: "/videos/Alumini meet.mp4" }
+      ].map((item, i) => {
+        // Identify if the source is YouTube or a local file
+        const isYouTube = typeof item === 'string' && item.includes('youtube.com');
+        const videoSrc = isYouTube ? item : item.src;
+
+        return (
+          <div
+            key={i}
+            className="relative w-full pt-[56.25%] overflow-hidden rounded-xl shadow-lg bg-black"
+          >
+            {isYouTube ? (
+              /* YouTube logic remains the same */
+              <iframe
+                title={`video-${i}`}
+                src={videoSrc}
+                frameBorder="0"
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                className="absolute top-0 left-0 w-full h-full"
+              ></iframe>
+            ) : (
+              /* Local Video: Removed autoPlay. Added controls and playsInline */
+              <video
+                controls
+                playsInline
+                preload="metadata"
+                className="absolute top-0 left-0 w-full h-full object-cover"
+              >
+                <source src={videoSrc} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            )}
+          </div>
+        );
+      })}
     </div>
   </div>
 </section>

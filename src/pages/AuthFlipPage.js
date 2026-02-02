@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import "../App.css";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
+import ForgotPassword from "./Forgotpassword";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const AuthPage = () => {
 
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
@@ -148,6 +150,7 @@ const AuthPage = () => {
     }
   };
 
+
   return (
     <div className="relative flex items-center justify-center min-h-screen bg-black overflow-hidden text-white">
       {/* Neon Glow Orbs */}
@@ -187,6 +190,23 @@ const AuthPage = () => {
 
                   <input type="password" name="password" placeholder="Password"
                     className="input-auth" onChange={handleChange} required />
+
+                    {/* Forgot Password link added here */}
+      
+       <span 
+  className="text-xs text-gray-400 hover:text-red-500 cursor-pointer transition-colors font-serif flex justify-end mt-2"
+  onClick={() => setIsModalOpen(true)} // Opens the modal
+>
+  Forgot Password?
+</span>
+
+{/* Render the Modal at the bottom of your main div */}
+<ForgotPassword 
+  isOpen={isModalOpen} 
+  onClose={() => setIsModalOpen(false)} 
+  email={formData.email} 
+  setEmail={(val) => setFormData({...formData, email: val})}
+/>
 
                   {/* note: removed role selection from login to avoid role-mismatch 403 */}
                   <button
