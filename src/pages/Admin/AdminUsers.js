@@ -15,33 +15,27 @@ export default function AdminUsers() {
   /* =======================
      LOAD USERS
   ======================== */
-  useEffect(() => {
-    let mounted = true;
+  const loadUsers = async () => {
+  try {
+    setLoading(true);
+    setErr(null);
+    const res = await API.get("/admin/users");
+    setUsers(Array.isArray(res.data) ? res.data : []);
+  } catch (e) {
+    console.error("Failed to load users", e);
+    setErr(
+      e?.response?.data?.message ||
+        e?.message ||
+        "Failed to load users"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
-    const load = async () => {
-      try {
-        setLoading(true);
-        setErr(null);
-        const res = await API.get("/admin/users");
-        if (!mounted) return;
-        setUsers(Array.isArray(res.data) ? res.data : []);
-      } catch (e) {
-        console.error("Failed to load users", e);
-        setErr(
-          e?.response?.data?.message ||
-            e?.message ||
-            "Failed to load users"
-        );
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-
-    load();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+useEffect(() => {
+  loadUsers();
+}, []);
 
   /* =======================
      DERIVED STATS
@@ -70,39 +64,42 @@ export default function AdminUsers() {
     setSelectedUser(null);
     setAction(null);
   };
+  const isLastAdmin =
+  action === "remove" &&
+  stats.admins === 1;
+
+if (isLastAdmin) {
+  alert("You must keep at least one admin.");
+  return;
+}
+
 
   const confirmChange = async () => {
-    if (!selectedUser || !action) return;
+  if (!selectedUser || !action) return;
 
-    try {
-      setSaving(true);
+  try {
+    setSaving(true);
 
-      // BACKEND-ALIGNED ROLE VALUES
-      const newRole = action === "make" ? "admin" : "student";
+    const newRole = action === "make" ? "admin" : "student";
 
-      await API.patch(`/admin/users/${selectedUser._id}`, {
-        role: newRole,
-      });
+    await API.patch(`/admin/users/${selectedUser._id}`, {
+      role: newRole,
+    });
 
-      // optimistic UI update
-      setUsers(prev =>
-        prev.map(u =>
-          u._id === selectedUser._id
-            ? { ...u, role: newRole }
-            : u
-        )
-      );
+    // ✅ ALWAYS refetch users from backend
+    await loadUsers();
 
-      closeConfirm();
-    } catch (e) {
-      console.error("Role update failed", e);
-      alert(
-        e?.response?.data?.message ||
-          "Failed to update role"
-      );
-      setSaving(false);
-    }
-  };
+    closeConfirm();
+  } catch (e) {
+    console.error("Role update failed", e);
+    alert(
+      e?.response?.data?.message ||
+        "Failed to update role"
+    );
+  } finally {
+    setSaving(false);
+  }
+};
 
   /* =======================
      RENDER
