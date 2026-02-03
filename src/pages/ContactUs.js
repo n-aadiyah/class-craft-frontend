@@ -157,6 +157,74 @@ export default function ContactUs() {
 
         </div>
       </div>
+       <section>
+<div class="mt-16 bg-white dark:bg-background-dark p-8 rounded-lg">
+<h3 class="text-2xl font-bold text-red-700 dark:text-slate-50 mb-4 font-serif ">Subscribe to Us</h3>
+<p class="text-base font-normal leading-relaxed text-gray-500 dark:text-gray-300 mb-6 font-serif">Stay updated with our latest news and events. Join our newsletter!</p>
+<div class="flex flex-col sm:flex-row gap-4">
+<input class="flex-grow w-full h-12 px-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-accent text-base text-gray-800 dark:text-slate-50 placeholder-gray-500 dark:placeholder-gray-400" placeholder="Your email address" type="email"/>
+<button class="flex min-w-[84px] max-w-full sm:max-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-red-800 text-slate-50 text-base font-bold leading-normal tracking-[0.015em] hover:bg-red-600 font-serif">
+<span class="truncate">Send</span>
+</button>
+</div>
+</div>
+<footer className="bg-white dark:bg-background-dark border-t border-slate-200 dark:border-slate-800 px-9 py-2">
+  <div className="max-w-[1280px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+    <div className="flex flex-col items-start gap-3">
+      <div className="flex items-center gap-2 text-red-700 dark:text-slate-700">
+        <div className="size-8">
+          <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <g clipPath="url(#clip0_6_319)">
+              <path
+                d="M8.57829 8.57829C5.52816 11.6284 3.451 15.5145 2.60947 19.7452C1.76794 23.9758 2.19984 28.361 3.85056 32.3462C5.50128 36.3314 8.29667 39.7376 11.8832 42.134C15.4698 44.5305 19.6865 45.8096 24 45.8096C28.3135 45.8096 32.5302 44.5305 36.1168 42.134C39.7033 39.7375 42.4987 36.3314 44.1494 32.3462C45.8002 28.361 46.2321 23.9758 45.3905 19.7452C44.549 15.5145 42.4718 11.6284 39.4217 8.57829L24 24L8.57829 8.57829Z"
+                fill="currentColor"
+              ></path>
+            </g>
+            <defs>
+              <clipPath id="clip0_6_319">
+                <rect fill="white" height="48" width="48"></rect>
+              </clipPath>
+            </defs>
+          </svg>
+        </div>
+        <h2 className="text-xl font-bold leading-tight tracking-[-0.015em] font-serif">Our School</h2>
+      </div>
+      <p className="text-sm text-black dark:text-gray-400 mt-2 font-serif">
+        © 2025  Gayathri Central School. All rights reserved.
+      </p>
+    </div>
+
+    <div className="grid grid-cols-2 sm:grid-cols-3 col-span-1 md:col-span-3 gap-8">
+      <div>
+        <h3 className="text-base font-bold text-red-800 dark:text-slate-50 mb-4 font-serif">Our Campus</h3>
+        <ul className="space-y-3">
+          <li><a href="/academic" className="text-sm text-black dark:text-gray-300 hover:text-accent dark:hover:text-accent font-serif">Academic</a></li>
+          <li><a href="/leadership" className="text-sm text-black dark:text-gray-300 hover:text-accent dark:hover:text-accent font-serif">Our Leadership</a></li>
+          <li><a href="/careers" className="text-sm text-black dark:text-gray-300 hover:text-accent dark:hover:text-accent font-serif">Careers</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 className="text-base font-bold text-red-800 dark:text-slate-50 mb-4 font-serif">Our Courses</h3>
+        <ul className="space-y-3">
+          <li><a href="/courses/maths" className="text-sm text-black dark:text-gray-300 hover:text-accent dark:hover:text-accent font-serif">Maths</a></li>
+          <li><a href="/courses/science" className="text-sm text-black dark:text-gray-300 hover:text-accent dark:hover:text-accent font-serif">Science</a></li>
+          <li><a href="/courses/arts" className="text-sm text-black dark:text-gray-300 hover:text-accent dark:hover:text-accent font-serif">Arts</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 className="text-base font-bold text-red-800 dark:text-slate-50 mb-4 font-serif">Contact</h3>
+        <ul className="space-y-3">
+          <li><button className="text-sm text-black dark:text-black hover:text-accent dark:hover:text-accent">Help</button></li>
+          <li><button className="text-sm text-black dark:text-black hover:text-accent dark:hover:text-accent">Support</button></li>
+          <li><button className="text-sm text-black dark:text-black hover:text-accent dark:hover:text-accent">contact Us</button></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</footer>
+</section>
     </div>
   );
 }
