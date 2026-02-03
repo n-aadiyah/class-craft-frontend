@@ -223,49 +223,50 @@ const Navbar = () => {
       </div>
 
       {/* Bottom Navigation Row */}
-      <nav
-        className="flex justify-center items-center gap-5 sm:gap-6 
-                   py-2 text-xs sm:text-sm font-semibold 
-                   bg-black/10 backdrop-blur-sm border-t border-white/5"
-      >
-        <Link
-          to="/"
-          className={isActive("/")}
-          className="text-yellow-400 font-bold border-b-2 border-red-600 pb-1"
-        >
-            Home
-        </Link>
+    <nav
+  className="flex justify-center items-center gap-5 sm:gap-6 
+             py-2 text-xs sm:text-sm font-semibold 
+             bg-black/10 backdrop-blur-sm border-t border-white/5"
+>
+  {/* HOME */}
+  <Link
+    to="/"
+    className={`${isActive("/")} text-white pb-1 hover:text-yellow-400
+                border-b-2 border-transparent hover:border-red-600`}
+  >
+    Home
+  </Link>
+
+    {/* FACILITIES */}
+  <Link
+    to="/facilities"
+    className={`${isActive("/facilities")} text-white pb-1 hover:text-yellow-400
+                border-b-2 border-transparent hover:border-red-600`}
+  >
+    Facilities
+  </Link>
+
+  {/* ABOUT */}
+  <Link
+    to="/about"
+    className={`${isActive("/about")} text-white pb-1 hover:text-yellow-400
+                border-b-2 border-transparent hover:border-red-600`}
+  >
+    About
+  </Link>
+
+  {/* CONTACT */}
+  <Link
+    to="/contact"
+    className={`${isActive("/contact")} text-white pb-1 hover:text-yellow-400
+                border-b-2 border-transparent hover:border-red-600`}
+  >
+    Contact Us
+  </Link>
 
 
-        <Link
-          to="/about" className={isActive("/about")}>
-          About
-        </Link>
+</nav>
 
-        <Link
-          to="/contact" className={isActive("/contact")}>
-          Contact Us
-        </Link>
-
-        <Link
-          to="/facilities"
-        className={isActive("/facilities")}>
-          Facilities 
-          to="/about"
-          className="text-white hover:text-yellow-400 pb-1 
-                     border-b-2 border-transparent hover:border-red-600"
-        >
-          About
-        </Link>
-
-        <Link
-          to="/contact"
-          className="text-white hover:text-yellow-400 pb-1 
-                     border-b-2 border-transparent hover:border-red-600"
-        >
-          Contact Us
-        </Link>
-      </nav>
     </header>
   );
 };
