@@ -1,6 +1,6 @@
 // src/components/Navbar.js
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate,useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { LayoutDashboard } from "lucide-react";
 import API from "../api/axiosInstance";
@@ -54,6 +54,12 @@ const Navbar = () => {
   };
 
   const avatarSrc = makeFullAvatarUrl(user?.avatarUrl || user?.avatar);
+  const location = useLocation();
+
+  const isActive = (path) =>
+    location.pathname === path
+      ? "text-yellow-400 font-bold border-b-2 border-red-600 pb-1"
+      : "text-white hover:text-yellow-400 pb-1 border-b-2 border-transparent hover:border-red-600";
 
   return (
     <header
@@ -114,6 +120,27 @@ const Navbar = () => {
               </div>
             )}
           </div>
+
+          {/* CENTER TITLE */}
+        {/* Mobile Short Title */}
+<h1
+  className="absolute left-1/2 -translate-x-1/2 
+             text-white font-serif font-extrabold drop-shadow-md
+             text-sm  sm:hidden"
+>
+  GCS
+</h1>
+
+{/* Full Title for Tablet & Desktop */}
+<h1
+  className="absolute left-1/2 -translate-x-1/2 
+             text-white font-serif font-extrabold drop-shadow-md
+             text-xs sm:text-sm md:text-xl lg:text-2xl whitespace-nowrap
+             hidden sm:block"
+>
+  GAYATHRI CENTRAL SCHOOL
+</h1>
+
 
           {/* CENTER TITLE */}
         {/* Mobile Short Title */}
@@ -202,20 +229,40 @@ const Navbar = () => {
                    bg-black/10 backdrop-blur-sm border-t border-white/5"
       >
         <Link
-          to="/"
-          className="text-yellow-400 font-bold border-b-2 border-red-600 pb-1"
-        >
-            Home
-        </Link>
+  to="/"
+  className={`pb-1 ${
+    isActive("/")
+      ? "text-yellow-400 font-bold border-b-2 border-red-600"
+      : "text-white hover:text-yellow-400 border-b-2 border-transparent"
+  }`}
+>
+  Home
+</Link>
 
 
         <Link
-          to="/about"
-          className="text-white hover:text-yellow-400 pb-1 
-                     border-b-2 border-transparent hover:border-red-600"
-        >
-          About
+          to="/contact" className={isActive("/contact")}>
+          Contact Us
         </Link>
+
+       <Link
+  to="/facilities"
+  className={`text-white hover:text-yellow-400 pb-1 
+              border-b-2 border-transparent hover:border-red-600
+              ${isActive("/facilities")}`}
+>
+  Facilities
+</Link>
+
+<Link
+  to="/about"
+  className={`text-white hover:text-yellow-400 pb-1 
+              border-b-2 border-transparent hover:border-red-600
+              ${isActive("/about")}`}
+>
+  About
+</Link>
+
 
         <Link
           to="/contact"

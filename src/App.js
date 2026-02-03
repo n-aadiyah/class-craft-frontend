@@ -7,6 +7,8 @@ import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthFlipPage";
 import About from "./pages/About";
 import ContactUs from "./pages/ContactUs";
+import Facilities from "./pages/Facilities";
+import ForgotPassword from "./pages/Forgotpassword";
 
 /* Admin */
 import AdminDashboard from "./pages/Admin/AdminDashboard";
@@ -47,6 +49,8 @@ function App() {
         <Route path="/login" element={<AuthPage />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<ContactUs />} />
+        <Route path="/facilities" element={<Facilities />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* Admin */}
         <Route
