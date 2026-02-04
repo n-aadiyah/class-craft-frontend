@@ -64,7 +64,7 @@ export default function Facilities() {
     </motion.h2>
     <p className="text-xl text-red-600 font-serif mb-6 italic">A Holistic Ecosystem for Future-Ready Learning</p>
     <p className="text-gray-600 leading-relaxed text-lg max-w-4xl">
-      At Gayathri School, facilities are designed to support **experiential learning, innovation, emotional well-being, communication skills, social responsibility, and real-world readiness**. Our infrastructure goes beyond conventional classrooms to create an environment where students learn by doing, reflecting, creating, and contributing to society.
+      At Gayathri School, facilities are designed to support experiential learning, innovation, emotional well-being, communication skills, social responsibility, and real-world readiness. Our infrastructure goes beyond conventional classrooms to create an environment where students learn by doing, reflecting, creating, and contributing to society.
     </p>
   </div>
 
