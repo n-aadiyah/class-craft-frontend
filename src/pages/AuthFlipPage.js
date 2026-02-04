@@ -43,14 +43,13 @@ const AuthPage = () => {
     else navigate("/");
   };
 
-  // ------------------ LOGIN ------------------
+  /* ================= LOGIN ================= */
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      // IMPORTANT: do not send `role` here to avoid role-mismatch 403
       const res = await API.post("/auth/login", {
         email: formData.email,
         password: formData.password,
@@ -70,13 +69,11 @@ const AuthPage = () => {
         };
       }
 
-      // update auth state & storage
       setToken(token);
       setUser(user);
       localStorage.setItem("token", token);
       localStorage.setItem("role", user.role ?? "");
 
-      // Success toast
       toast.success("🎉 Login Successful!", {
         style: {
           background: "#b91c1c",
@@ -84,19 +81,15 @@ const AuthPage = () => {
           fontWeight: "bold",
           borderRadius: "10px",
           border: "2px solid #facc15",
-          padding: "12px",
-        },
-        iconTheme: {
-          primary: "#facc15",
-          secondary: "#b91c1c",
         },
       });
 
       routeByRole(user.role);
     } catch (err) {
-      console.error("Login failed:", err?.response ?? err);
-
-      const msg = err?.response?.data?.message || err?.message || "Login failed";
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Login failed";
       setError(msg);
 
       toast.error("Login Failed ❌", {
@@ -111,7 +104,7 @@ const AuthPage = () => {
     }
   };
 
-  // ------------------ REGISTER ------------------
+  /* ================= REGISTER ================= */
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
@@ -124,8 +117,6 @@ const AuthPage = () => {
         style: {
           background: "#b91c1c",
           color: "white",
-          fontWeight: "bold",
-          borderRadius: "10px",
           border: "2px solid #facc15",
         },
       });
@@ -135,7 +126,6 @@ const AuthPage = () => {
         setFormData({ ...formData, password: "" });
       }, 500);
     } catch (err) {
-      console.error("Register failed:", err?.response ?? err);
       setError(err?.response?.data?.message || "Registration failed");
 
       toast.error("Registration Failed ❌", {
@@ -150,29 +140,27 @@ const AuthPage = () => {
     }
   };
 
-
   return (
     <div className="relative flex items-center justify-center min-h-screen bg-black overflow-hidden text-white">
-      {/* Neon Glow Orbs */}
+      {/* Glow */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="w-75 h-75 bg-red-600/30 blur-3xl rounded-full absolute top-0 left-0 animate-pulse"></div>
-        <div className="w-50 h-50 bg-red-400/30 blur-3xl rounded-full absolute bottom-0 right-0 animate-ping"></div>
+        <div className="w-75 h-75 bg-red-600/30 blur-3xl rounded-full absolute top-0 left-0 animate-pulse" />
+        <div className="w-50 h-50 bg-red-400/30 blur-3xl rounded-full absolute bottom-0 right-0 animate-ping" />
       </div>
 
-      {/* 3D Flip Card */}
+      {/* Flip Card */}
       <div className="flip-container">
         <div className={`flipper ${isLogin ? "" : "flipped"}`}>
 
-          {/* LOGIN CARD */}
+          {/* LOGIN */}
           <div className="front-card">
             <div className="auth-card">
-              {/* left image */}
+
               <div className="hidden md:flex w-full md:w-1/2 justify-center mb-3">
                 <img src="/girl.png" alt="Character"
                   className="w-30 md:w-50 animate-glow-float" />
               </div>
 
-              {/* Right Form */}
               <div className="w-full md:w-1/2">
                 <h2 className="text-3xl font-extrabold text-center text-red-600 mb-2">
                   ⚡ Login ⚡
@@ -191,37 +179,37 @@ const AuthPage = () => {
                   <input type="password" name="password" placeholder="Password"
                     className="input-auth" onChange={handleChange} required />
 
-                    {/* Forgot Password link added here */}
-      
-       <span 
-  className="text-xs text-gray-400 hover:text-red-500 cursor-pointer transition-colors font-serif flex justify-end mt-2"
-  onClick={() => setIsModalOpen(true)} // Opens the modal
->
-  Forgot Password?
-</span>
-
-{/* Render the Modal at the bottom of your main div */}
-<ForgotPassword 
-  isOpen={isModalOpen} 
-  onClose={() => setIsModalOpen(false)} 
-  email={formData.email} 
-  setEmail={(val) => setFormData({...formData, email: val})}
-/>
-
-                  {/* note: removed role selection from login to avoid role-mismatch 403 */}
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="btn-auth"
+                  <span
+                    className="text-xs text-gray-400 hover:text-red-500 cursor-pointer flex justify-end mt-2"
+                    onClick={() => setIsModalOpen(true)}
                   >
+                    Forgot Password?
+                  </span>
+
+                  <button type="submit" disabled={loading} className="btn-auth">
                     {loading ? "Signing In..." : "Enter the Learning World"}
                   </button>
                 </form>
 
+                {/* ✅ MODAL OUTSIDE FORM */}
+                <ForgotPassword
+                  isOpen={isModalOpen}
+                  onClose={() => setIsModalOpen(false)}
+                  email={formData.email}
+                  setEmail={(val) =>
+                    setFormData({ ...formData, email: val })
+                  }
+                />
+
                 <p className="text-center text-gray-400 mt-4 text-sm">
                   Don’t have an account?{" "}
-                  <span className="link-auth"
-                    onClick={() => { setIsLogin(false); setError(""); }}>
+                  <span
+                    className="link-auth"
+                    onClick={() => {
+                      setIsLogin(false);
+                      setError("");
+                    }}
+                  >
                     Create one 💫
                   </span>
                 </p>
@@ -229,7 +217,7 @@ const AuthPage = () => {
             </div>
           </div>
 
-          {/* REGISTER CARD */}
+          {/* REGISTER */}
           <div className="back-card">
             <div className="auth-card">
 
@@ -276,7 +264,11 @@ const AuthPage = () => {
                   Already have an account?{" "}
                   <span
                     className="link-auth"
-                    onClick={() => { setIsLogin(true); setError(""); }}>
+                    onClick={() => {
+                      setIsLogin(true);
+                      setError("");
+                    }}
+                  >
                     Login here 💫
                   </span>
                 </p>
@@ -286,47 +278,6 @@ const AuthPage = () => {
 
         </div>
       </div>
-
-      {/* Styles Inject */}
-      <style>{`
-        .input-auth {
-          width: 100%;
-          padding: 0.5rem 0.75rem;
-          border-radius: 0.5rem;
-          background: #111;
-          border: 1px solid #ff2a2a;
-          color: white;
-          font-size: 0.875rem;
-        }
-        .input-auth:focus {
-          outline: none;
-          border-color: #facc15;
-          box-shadow: 0 0 5px #facc15;
-        }
-        .btn-auth {
-          width: 100%;
-          background: #b91c1c;
-          color: white;
-          font-weight: bold;
-          padding: 0.5rem;
-          border-radius: 0.5rem;
-          text-transform: uppercase;
-          border: 2px solid #facc15;
-          transition: 0.3s;
-        }
-        .btn-auth:hover {
-          transform: scale(1.05);
-          box-shadow: 0 0 12px #ff3b3b;
-        }
-        .link-auth {
-          color: #facc15;
-          font-weight: bold;
-          cursor: pointer;
-        }
-        .link-auth:hover {
-          color: white;
-        }
-      `}</style>
     </div>
   );
 };
