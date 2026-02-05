@@ -37,6 +37,7 @@ import StudentLayout from "./layout/Studentlayout";
 
 /* Auth */
 import ProtectedRoute from "./components/ProtectedRoute";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   return (
@@ -51,6 +52,7 @@ function App() {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/facilities" element={<Facilities />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+<Route path="/reset-password/:token" element={<ResetPassword />} />
 
         {/* Admin */}
         <Route
