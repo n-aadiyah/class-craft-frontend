@@ -185,10 +185,14 @@ const AuthPage = () => {
                   >
                     Forgot Password?
                   </span>
+              <button
+               type="submit"
+             disabled={loading}
+            className="btn-auth w-full"
+             >
+             {loading ? "Signing In..." : "Enter the Learning World"}
+             </button>
 
-                  <button type="submit" disabled={loading} className="btn-auth">
-                    {loading ? "Signing In..." : "Enter the Learning World"}
-                  </button>
                 </form>
 
                 {/* ✅ MODAL OUTSIDE FORM */}

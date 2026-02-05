@@ -193,3 +193,7 @@
     display: none;
   }
 }
+.btn-auth {
+  width: 100%;
+  display: block;
+}
