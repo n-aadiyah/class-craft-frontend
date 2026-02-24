@@ -5,7 +5,7 @@ import API from "../../api/axiosInstance";
 import { BookOpen, Plus, Eye, Trash2, X, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const grades = ["1","2","3","4","5","6", "7", "8", "9", "10", "11", "12"];
+const grades = ["LKG","UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 
 const ManageClasses = () => {
   // NOTE: API should have baseURL set (eg: http://localhost:5000/api) and attach Authorization header
